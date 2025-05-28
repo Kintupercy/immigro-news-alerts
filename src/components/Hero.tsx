@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,7 +161,7 @@ const Hero = () => {
       <div className="relative z-10 flex-1 flex items-center justify-center pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-navy-900 mb-6 leading-tight">
-            Stay Informed on all
+            <span className="font-bold">Stay Informed on all</span>
             <br />
             <span className="text-navy-800 font-bold">US Immigration Law</span>
           </h1>
@@ -201,10 +200,10 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* University Trust Ticker */}
-      <div className="relative z-10 bg-navy-800/90 backdrop-blur-sm py-6 border-t border-navy-700/20">
+      {/* University Trust Ticker with dark blue banner */}
+      <div className="relative z-10 bg-navy-800 py-6">
         <div className="text-center mb-4">
-          <p className="text-amber-100 text-sm font-medium">
+          <p className="text-cream-100 text-sm font-medium">
             Trusted by students at these institutions
           </p>
         </div>
