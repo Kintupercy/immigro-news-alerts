@@ -1,5 +1,4 @@
 
-import AlertBanner from "@/components/AlertBanner";
 import Categories from "@/components/Categories";
 import Features from "@/components/Features";
 import Header from "@/components/Header";
@@ -12,7 +11,6 @@ import { UserPlus, LogIn } from "lucide-react";
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <AlertBanner />
       <Header />
       
       {/* Call-to-Action for Authentication */}
