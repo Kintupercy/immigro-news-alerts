@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Clock, Search, ExternalLink } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 
 interface NewsArticle {
@@ -34,6 +33,7 @@ const NewsFeed = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
@@ -89,6 +89,35 @@ const NewsFeed = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshNews = async () => {
+    try {
+      setRefreshing(true);
+      
+      const { data, error } = await supabase.functions.invoke('fetch-immigration-news', {
+        body: { category: selectedCategory }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "News updated!",
+        description: `Added ${data.articlesAdded} new articles.`,
+      });
+
+      // Refresh the articles list
+      await fetchArticles();
+    } catch (error) {
+      console.error('Error refreshing news:', error);
+      toast({
+        title: "Error refreshing news",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -205,7 +234,18 @@ const NewsFeed = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Immigration News & Alerts</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-3xl font-bold">Immigration News & Alerts</h1>
+          <Button 
+            onClick={refreshNews} 
+            disabled={refreshing}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Updating...' : 'Refresh News'}
+          </Button>
+        </div>
         <p className="text-muted-foreground">
           Stay updated with the latest US immigration law changes and policy updates
         </p>
@@ -260,7 +300,11 @@ const NewsFeed = () => {
             {filteredArticles.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">No articles found matching your criteria.</p>
+                  <p className="text-muted-foreground mb-4">No articles found matching your criteria.</p>
+                  <Button onClick={refreshNews} disabled={refreshing}>
+                    <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    Fetch Latest News
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
