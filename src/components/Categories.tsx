@@ -1,5 +1,6 @@
 
 import { Link } from 'react-router-dom';
+import { Check } from 'lucide-react';
 
 const Categories = () => {
   const categories = [
@@ -31,35 +32,21 @@ const Categories = () => {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-center gap-12">
-          {/* Image on the left */}
-          <div className="lg:w-1/3">
-            <img 
-              src="/lovable-uploads/e56de69a-958a-488d-9a50-fb6ccd85af65.png" 
-              alt="Immigration documents with American flag and gavel"
-              className="w-full h-auto rounded-lg shadow-lg"
-            />
-          </div>
-
-          {/* Categories grid on the right */}
-          <div className="lg:w-2/3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {categories.map((category, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200"
-                >
-                  <div className="flex items-center">
-                    <span className="text-2xl mr-3">{category.emoji}</span>
-                    <div className="w-3 h-3 bg-emerald-500 rounded-full mr-4 flex-shrink-0"></div>
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {category.name}
-                    </h3>
-                  </div>
-                </div>
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((category, index) => (
+            <div
+              key={index}
+              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200"
+            >
+              <div className="flex items-center">
+                <span className="text-2xl mr-3">{category.emoji}</span>
+                <Check className="w-4 h-4 text-emerald-500 mr-4 flex-shrink-0" />
+                <h3 className="text-lg font-medium text-gray-900">
+                  {category.name}
+                </h3>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
 
         <div className="text-center mt-12">
