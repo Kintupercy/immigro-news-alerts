@@ -24,6 +24,29 @@ interface NewsItem {
   tags: string[];
 }
 
+// Approved sources - strictly no YouTube or video content
+const approvedDomains = [
+  "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
+  "reuters.com", "apnews.com", "cnn.com", "bbc.com", 
+  "nytimes.com", "washingtonpost.com", "npr.org", 
+  "abcnews.go.com", "nbcnews.com", "cbsnews.com",
+  "politico.com", "axios.com", "bloomberg.com"
+];
+
+function isValidSource(url: string): boolean {
+  if (!url) return false;
+  
+  // Explicitly reject video content
+  if (url.includes('youtube.com') || url.includes('youtu.be') || 
+      url.includes('vimeo.com') || url.includes('tiktok.com') ||
+      url.includes('instagram.com') || url.includes('facebook.com')) {
+    return false;
+  }
+  
+  // Only allow approved domains
+  return approvedDomains.some(domain => url.toLowerCase().includes(domain));
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -51,24 +74,29 @@ serve(async (req) => {
 
     // Process each category
     for (const category of categories as Category[]) {
-      console.log(`Fetching news for category: ${category.name}`);
+      console.log(`Fetching verified news for category: ${category.name}`);
 
-      const prompt = `Provide the latest news and legal developments in U.S. immigration law related to ${category.name}. 
+      const prompt = `Provide ONLY the latest verified news and legal developments in U.S. immigration law related to ${category.name} from the past 24-48 hours. 
+
+STRICT SOURCE REQUIREMENTS:
+- Official sources: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
+- Verified news: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
+- NO YouTube, social media, or video content
+- Every article MUST include a valid source URL
 
 Requirements:
-- Focus on news from the past 24-48 hours
-- Include only factual, verified information from authoritative sources
-- Provide 3-5 distinct news items
-- For each item, include: headline, detailed summary (2-3 sentences), source URL if available
-- Mark items as urgent if they involve immediate policy changes, deadlines, or breaking developments
-- Include relevant tags for categorization
+- Focus on factual, verified information only
+- Provide 2-4 distinct news items with source URLs
+- Include: headline, detailed summary, source URL
+- Mark as urgent only for immediate policy changes or breaking developments
+- Include relevant tags
 
-Format the response as a JSON array with objects containing:
+Format as JSON array:
 {
   "title": "News headline",
   "content": "Detailed content (3-4 paragraphs)",
   "summary": "Brief summary (2-3 sentences)",
-  "source_url": "URL to original source (if available)",
+  "source_url": "URL to original verified source",
   "is_urgent": boolean,
   "tags": ["tag1", "tag2", "tag3"]
 }`;
@@ -85,7 +113,7 @@ Format the response as a JSON array with objects containing:
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information about U.S. immigration developments. Always return valid JSON format.'
+                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only. Never include YouTube, video content, or social media. Always return valid JSON format with source URLs from approved domains.'
               },
               {
                 role: 'user',
@@ -93,10 +121,10 @@ Format the response as a JSON array with objects containing:
               }
             ],
             max_tokens: 4000,
-            temperature: 0.2,
+            temperature: 0.1,
             top_p: 0.9,
             return_citations: true,
-            search_domain_filter: ["uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", "reuters.com", "apnews.com", "cnn.com", "bbc.com", "nytimes.com", "washingtonpost.com"]
+            search_domain_filter: approvedDomains
           }),
         });
 
@@ -113,27 +141,30 @@ Format the response as a JSON array with objects containing:
           continue;
         }
 
-        // Try to parse JSON from the response
+        // Parse JSON from response
         let newsItems: NewsItem[] = [];
         try {
-          // Extract JSON from the response (in case it's wrapped in text)
           const jsonMatch = content.match(/\[[\s\S]*\]/);
           if (jsonMatch) {
             newsItems = JSON.parse(jsonMatch[0]);
           } else {
-            // If no JSON array found, try to parse the entire content
             newsItems = JSON.parse(content);
           }
         } catch (parseError) {
           console.error(`Failed to parse JSON for ${category.name}:`, parseError);
-          console.log('Raw content:', content);
           continue;
         }
 
-        // Insert news items into database
+        // Insert verified news items
         for (const item of newsItems) {
           try {
-            // Check for duplicates based on title and category
+            // Validate source URL
+            if (!item.source_url || !isValidSource(item.source_url)) {
+              console.log(`Skipping article with invalid source: ${item.source_url || 'no source'}`);
+              continue;
+            }
+
+            // Check for duplicates
             const { data: existing } = await supabaseClient
               .from('immigration_news')
               .select('id')
@@ -153,7 +184,7 @@ Format the response as a JSON array with objects containing:
                 content: item.content,
                 summary: item.summary,
                 category: category.slug,
-                source_url: item.source_url || null,
+                source_url: item.source_url,
                 is_urgent: item.is_urgent || false,
                 tags: item.tags || [],
                 status: 'published',
@@ -164,14 +195,14 @@ Format the response as a JSON array with objects containing:
               console.error(`Error inserting article: ${insertError.message}`);
             } else {
               totalArticlesAdded++;
-              console.log(`Added article: ${item.title}`);
+              console.log(`Added verified article: ${item.title}`);
             }
           } catch (insertError) {
             console.error(`Error processing article ${item.title}:`, insertError);
           }
         }
 
-        // Add a small delay between API calls to respect rate limits
+        // Delay between API calls
         await new Promise(resolve => setTimeout(resolve, 2000));
 
       } catch (apiError) {
@@ -183,7 +214,8 @@ Format the response as a JSON array with objects containing:
       JSON.stringify({ 
         success: true, 
         articlesAdded: totalArticlesAdded,
-        categoriesProcessed: categories.length 
+        categoriesProcessed: categories.length,
+        message: `Added ${totalArticlesAdded} verified articles from approved sources only`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

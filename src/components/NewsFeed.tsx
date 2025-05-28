@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield } from "lucide-react";
 import { format } from "date-fns";
 
 interface NewsArticle {
@@ -42,7 +43,6 @@ const NewsFeed = () => {
   useEffect(() => {
     fetchCategories();
     fetchArticles();
-    // Auto-refresh news if no articles or if articles are older than 1 hour
     checkAndRefreshNews();
   }, []);
 
@@ -55,10 +55,10 @@ const NewsFeed = () => {
         .limit(1);
 
       const hasRecentNews = recentArticles && recentArticles.length > 0 && 
-        new Date(recentArticles[0].created_at).getTime() > Date.now() - (60 * 60 * 1000); // 1 hour
+        new Date(recentArticles[0].created_at).getTime() > Date.now() - (60 * 60 * 1000);
 
       if (!hasRecentNews) {
-        console.log('No recent news found, fetching latest from Perplexity...');
+        console.log('No recent news found, fetching latest from verified sources...');
         await refreshNews();
       }
     } catch (error) {
@@ -92,6 +92,7 @@ const NewsFeed = () => {
         .from('immigration_news')
         .select('*')
         .eq('status', 'published')
+        .not('source_url', 'is', null)
         .order('published_at', { ascending: false });
 
       if (selectedCategory !== 'all') {
@@ -101,7 +102,15 @@ const NewsFeed = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setArticles(data || []);
+      
+      // Additional client-side filtering to ensure no YouTube content
+      const filteredData = (data || []).filter(article => 
+        article.source_url && 
+        !article.source_url.includes('youtube.com') &&
+        !article.source_url.includes('youtu.be')
+      );
+      
+      setArticles(filteredData);
     } catch (error) {
       console.error('Error fetching articles:', error);
       toast({
@@ -120,7 +129,7 @@ const NewsFeed = () => {
       
       toast({
         title: "Fetching latest news...",
-        description: "Getting the most recent immigration updates from official sources.",
+        description: "Getting verified immigration updates from official sources.",
       });
 
       const { data, error } = await supabase.functions.invoke('fetch-immigration-news', {
@@ -131,10 +140,9 @@ const NewsFeed = () => {
 
       toast({
         title: "News updated!",
-        description: `Successfully fetched ${data.articlesAdded} new articles from official sources.`,
+        description: `Successfully fetched ${data.articlesAdded} new verified articles.`,
       });
 
-      // Refresh the articles list
       await fetchArticles();
     } catch (error) {
       console.error('Error refreshing news:', error);
@@ -161,8 +169,26 @@ const NewsFeed = () => {
   const urgentArticles = filteredArticles.filter(article => article.is_urgent);
   const regularArticles = filteredArticles.filter(article => !article.is_urgent);
 
+  const getSourceDomain = (url: string | null) => {
+    if (!url) return 'Unknown';
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      return domain;
+    } catch {
+      return 'Unknown';
+    }
+  };
+
+  const isOfficialSource = (url: string | null) => {
+    if (!url) return false;
+    const officialDomains = ['uscis.gov', 'dhs.gov', 'state.gov', 'ice.gov', 'cbp.gov'];
+    return officialDomains.some(domain => url.includes(domain));
+  };
+
   const ArticleCard = ({ article }: { article: NewsArticle }) => {
     const isExpanded = expandedArticle === article.id;
+    const sourceDomain = getSourceDomain(article.source_url);
+    const isOfficial = isOfficialSource(article.source_url);
     
     return (
       <Card className={`mb-4 ${article.is_urgent ? 'border-red-200 bg-red-50' : ''}`}>
@@ -184,6 +210,16 @@ const NewsFeed = () => {
             <Badge variant={article.is_urgent ? "destructive" : "secondary"}>
               {categories.find(cat => cat.slug === article.category)?.name || article.category}
             </Badge>
+            
+            {/* Source verification badge */}
+            <Badge 
+              variant={isOfficial ? "default" : "outline"} 
+              className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
+            >
+              {isOfficial && <Shield className="w-3 h-3 mr-1" />}
+              {sourceDomain}
+            </Badge>
+            
             {article.tags?.map((tag, index) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {tag}
@@ -205,7 +241,7 @@ const NewsFeed = () => {
             </div>
           )}
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -216,9 +252,10 @@ const NewsFeed = () => {
             
             {article.source_url && (
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
                 asChild
+                className="bg-navy-800 hover:bg-navy-700"
               >
                 <a 
                   href={article.source_url} 
@@ -227,7 +264,7 @@ const NewsFeed = () => {
                   className="flex items-center gap-1"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Source
+                  View Original Source
                 </a>
               </Button>
             )}
@@ -260,12 +297,15 @@ const NewsFeed = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header Section with Navy Blue Background and Category Filters */}
+      {/* Header Section */}
       <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">IMMIGRATION UPDATES</h1>
-            <p className="text-cream-200 text-sm uppercase tracking-wide">CURATED NEWS ON U.S. IMMIGRATION LAW</p>
+            <h1 className="text-3xl font-bold mb-2">VERIFIED IMMIGRATION UPDATES</h1>
+            <p className="text-cream-200 text-sm uppercase tracking-wide">
+              <Shield className="inline w-4 h-4 mr-1" />
+              SOURCED FROM OFFICIAL GOVERNMENT & TRUSTED NEWS OUTLETS
+            </p>
           </div>
           <Button 
             onClick={refreshNews} 
@@ -309,13 +349,13 @@ const NewsFeed = () => {
         </div>
       </div>
 
-      {/* Search and Filter Controls */}
+      {/* Search Controls */}
       <div className="mb-6 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Search news and alerts..."
+              placeholder="Search verified news and alerts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -358,12 +398,13 @@ const NewsFeed = () => {
             {filteredArticles.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
+                  <Shield className="w-12 h-12 mx-auto mb-4 text-navy-400" />
                   <p className="text-muted-foreground mb-4">
-                    {refreshing ? 'Fetching latest immigration news from Perplexity...' : 'No articles found. Click refresh to fetch the latest news.'}
+                    {refreshing ? 'Fetching latest verified immigration news...' : 'No verified articles found. Click refresh to fetch the latest news from official sources.'}
                   </p>
                   <Button onClick={refreshNews} disabled={refreshing}>
                     <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                    Fetch Latest from Perplexity
+                    Fetch Latest Verified News
                   </Button>
                 </CardContent>
               </Card>
