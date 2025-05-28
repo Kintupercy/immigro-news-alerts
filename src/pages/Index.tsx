@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import LatestNews from "@/components/LatestNews";
 import TrustedBy from "@/components/TrustedBy";
+import Pricing from "@/components/Pricing";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserPlus, LogIn } from "lucide-react";
@@ -44,6 +45,7 @@ const Index = () => {
       <LatestNews />
       <Categories />
       <TrustedBy />
+      <Pricing />
     </div>
   );
 };
