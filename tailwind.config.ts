@@ -65,6 +65,31 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom navy and cream colors
+				navy: {
+					50: '#f8fafc',
+					100: '#f1f5f9',
+					200: '#e2e8f0',
+					300: '#cbd5e1',
+					400: '#94a3b8',
+					500: '#64748b',
+					600: '#475569',
+					700: '#334155',
+					800: '#1e293b',
+					900: '#0f172a'
+				},
+				cream: {
+					50: '#fefcf3',
+					100: '#fdf8e6',
+					200: '#fbf0cc',
+					300: '#f7e5a6',
+					400: '#f1d474',
+					500: '#ebc649',
+					600: '#ddb532',
+					700: '#c19a28',
+					800: '#9d7c26',
+					900: '#816724'
 				}
 			},
 			borderRadius: {
