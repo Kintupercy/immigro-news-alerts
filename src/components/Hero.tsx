@@ -31,7 +31,7 @@ const Hero = () => {
         .insert([{ email }]);
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') {
           toast({
             title: "Already subscribed",
             description: "This email is already subscribed to our alerts.",
@@ -71,35 +71,35 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-between overflow-hidden">
-      {/* Background with cream gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-        {/* Curved overlay effects */}
+      {/* Extended Background with cream gradient and enhanced faded effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-stone-50 via-stone-100 to-amber-50">
+        {/* Enhanced curved overlay effects */}
         <div className="absolute inset-0">
           <svg
-            className="absolute top-0 w-full h-64"
-            viewBox="0 0 1200 120"
+            className="absolute top-0 w-full h-80"
+            viewBox="0 0 1200 200"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M0 0L50 10C100 20 200 40 300 50C400 60 500 60 600 55C700 50 800 40 900 35C1000 30 1100 30 1150 30L1200 30V0H1150C1100 0 1000 0 900 0C800 0 700 0 600 0C500 0 400 0 300 0C200 0 100 0 50 0H0Z"
-              fill="rgba(0, 0, 0, 0.05)"
+              d="M0 0L50 15C100 30 200 60 300 75C400 90 500 90 600 82.5C700 75 800 60 900 52.5C1000 45 1100 45 1150 45L1200 45V0H1150C1100 0 1000 0 900 0C800 0 700 0 600 0C500 0 400 0 300 0C200 0 100 0 50 0H0Z"
+              fill="rgba(120, 113, 108, 0.08)"
             />
           </svg>
           <svg
-            className="absolute bottom-0 w-full h-64"
-            viewBox="0 0 1200 120"
+            className="absolute bottom-0 w-full h-80"
+            viewBox="0 0 1200 200"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M0 120L50 110C100 100 200 80 300 70C400 60 500 60 600 65C700 70 800 80 900 85C1000 90 1100 90 1150 90L1200 90V120H1150C1100 120 1000 120 900 120C800 120 700 120 600 120C500 120 400 120 300 120C200 120 100 120 50 120H0Z"
-              fill="rgba(0, 0, 0, 0.05)"
+              d="M0 200L50 185C100 170 200 140 300 125C400 110 500 110 600 117.5C700 125 800 140 900 147.5C1000 155 1100 155 1150 155L1200 155V200H1150C1100 200 1000 200 900 200C800 200 700 200 600 200C500 200 400 200 300 200C200 200 100 200 50 200H0Z"
+              fill="rgba(120, 113, 108, 0.08)"
             />
           </svg>
         </div>
-        {/* Flowing wave effects */}
-        <div className="absolute top-1/3 left-0 w-full h-96">
+        {/* Enhanced flowing wave effects */}
+        <div className="absolute top-1/4 left-0 w-full h-96">
           <svg
             className="w-full h-full"
             viewBox="0 0 1200 400"
@@ -108,14 +108,27 @@ const Hero = () => {
           >
             <path
               d="M0 200C300 100 600 300 1200 200V400H0V200Z"
-              fill="rgba(0, 0, 0, 0.03)"
+              fill="rgba(120, 113, 108, 0.06)"
+            />
+          </svg>
+        </div>
+        <div className="absolute top-1/2 left-0 w-full h-96">
+          <svg
+            className="w-full h-full"
+            viewBox="0 0 1200 400"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 150C400 50 800 250 1200 150V400H0V150Z"
+              fill="rgba(168, 162, 158, 0.04)"
             />
           </svg>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex-1 flex items-center justify-center">
+      <div className="relative z-10 flex-1 flex items-center justify-center pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-slate-800 mb-6 leading-tight">
             Stay Informed on all

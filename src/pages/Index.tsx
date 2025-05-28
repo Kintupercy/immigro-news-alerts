@@ -1,14 +1,16 @@
 
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import AlertBanner from "@/components/AlertBanner";
+import RSSFeed from "@/components/RSSFeed";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <AlertBanner />
       <Hero />
+      <div className="py-16 bg-stone-50">
+        <RSSFeed />
+      </div>
     </div>
   );
 };
