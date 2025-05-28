@@ -22,7 +22,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <span className="text-2xl font-bold text-white">⚖️ Stay Updated on Immigration Law and Alerts</span>
+              <span className="text-2xl font-bold text-white">⚖️ Immigro</span>
             </div>
           </div>
 
