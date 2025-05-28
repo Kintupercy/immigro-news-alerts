@@ -20,8 +20,8 @@ const Pricing = () => {
       popular: false
     },
     {
-      name: "Pro",
-      price: "$9",
+      name: "Pro Monthly",
+      price: "$4.99",
       period: "per month",
       description: "For individuals who need comprehensive coverage",
       features: [
@@ -36,19 +36,21 @@ const Pricing = () => {
       popular: true
     },
     {
-      name: "Enterprise",
-      price: "Custom",
-      period: "pricing",
-      description: "For organizations and immigration law firms",
+      name: "Pro Annual",
+      price: "$29.99",
+      period: "per year",
+      originalPrice: "$59.88",
+      description: "Best value - Save 50% with annual billing",
       features: [
-        "Everything in Pro",
-        "Team management",
-        "API access",
-        "Custom categories",
-        "White-label options",
-        "Dedicated support"
+        "Real-time alerts",
+        "All 13+ immigration categories",
+        "SMS + Email notifications",
+        "Full news archive",
+        "Expert analysis",
+        "Priority support",
+        "50% savings vs monthly"
       ],
-      buttonText: "Contact Sales",
+      buttonText: "Start Annual Trial",
       popular: false
     }
   ];
@@ -88,6 +90,11 @@ const Pricing = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-4">
+                  {plan.originalPrice && (
+                    <div className="text-sm text-gray-500 line-through">
+                      {plan.originalPrice} per year
+                    </div>
+                  )}
                   <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                   <span className="text-gray-600 ml-2">{plan.period}</span>
                 </div>
