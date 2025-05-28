@@ -15,8 +15,7 @@ const Categories = () => {
     { name: "Investor & Entrepreneur Visas", emoji: "💰" },
     { name: "Religious Worker Visas", emoji: "⛪" },
     { name: "Specialty Occupations & NAFTA/USMCA", emoji: "🔧" },
-    { name: "Undocumented & Mixed-Status Families", emoji: "📋" },
-    { name: "General Immigration Law & Policy", emoji: "⚖️" }
+    { name: "Undocumented & Mixed-Status Families", emoji: "📋" }
   ];
 
   return (

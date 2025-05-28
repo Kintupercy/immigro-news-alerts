@@ -3,6 +3,7 @@ import Categories from "@/components/Categories";
 import Features from "@/components/Features";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import LatestNews from "@/components/LatestNews";
 import TrustedBy from "@/components/TrustedBy";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -40,6 +41,7 @@ const Index = () => {
       
       <Hero />
       <Features />
+      <LatestNews />
       <Categories />
       <TrustedBy />
     </div>
