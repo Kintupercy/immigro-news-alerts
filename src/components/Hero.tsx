@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,7 +204,7 @@ const Hero = () => {
       <div className="relative z-10 bg-navy-800 py-6">
         <div className="text-center mb-4">
           <p className="text-cream-100 text-sm font-medium">
-            Trusted by students at these institutions
+            Trusted by international students at these institutions
           </p>
         </div>
         
