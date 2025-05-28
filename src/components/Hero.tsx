@@ -1,17 +1,61 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Hero = () => {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Subscribe with email:", email);
-    // TODO: Integrate with backend when ready
-    setEmail("");
+    
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .insert([{ email }]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Already subscribed",
+            description: "This email is already subscribed to our alerts.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Successfully subscribed!",
+          description: "You'll receive updates on US immigration law changes.",
+        });
+        setEmail("");
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast({
+        title: "Subscription failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const universities = [
@@ -92,15 +136,17 @@ const Hero = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
                 className="pl-12 py-3 text-base bg-gray-900/90 border-gray-700 text-white placeholder-gray-400 focus:border-white focus:ring-white rounded-full"
               />
             </div>
             <Button
               type="submit"
               size="lg"
-              className="px-8 py-3 text-base bg-white text-gray-900 hover:bg-gray-100 font-medium transition-all duration-200 rounded-full"
+              disabled={isLoading}
+              className="px-8 py-3 text-base bg-white text-gray-900 hover:bg-gray-100 font-medium transition-all duration-200 rounded-full disabled:opacity-50"
             >
-              Subscribe
+              {isLoading ? "Subscribing..." : "Subscribe"}
             </Button>
           </form>
 
