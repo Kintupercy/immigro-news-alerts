@@ -42,7 +42,29 @@ const NewsFeed = () => {
   useEffect(() => {
     fetchCategories();
     fetchArticles();
+    // Auto-refresh news if no articles or if articles are older than 1 hour
+    checkAndRefreshNews();
   }, []);
+
+  const checkAndRefreshNews = async () => {
+    try {
+      const { data: recentArticles } = await supabase
+        .from('immigration_news')
+        .select('created_at')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const hasRecentNews = recentArticles && recentArticles.length > 0 && 
+        new Date(recentArticles[0].created_at).getTime() > Date.now() - (60 * 60 * 1000); // 1 hour
+
+      if (!hasRecentNews) {
+        console.log('No recent news found, fetching latest from Perplexity...');
+        await refreshNews();
+      }
+    } catch (error) {
+      console.error('Error checking for recent news:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -96,6 +118,11 @@ const NewsFeed = () => {
     try {
       setRefreshing(true);
       
+      toast({
+        title: "Fetching latest news...",
+        description: "Getting the most recent immigration updates from official sources.",
+      });
+
       const { data, error } = await supabase.functions.invoke('fetch-immigration-news', {
         body: { category: selectedCategory }
       });
@@ -104,7 +131,7 @@ const NewsFeed = () => {
 
       toast({
         title: "News updated!",
-        description: `Added ${data.articlesAdded} new articles.`,
+        description: `Successfully fetched ${data.articlesAdded} new articles from official sources.`,
       });
 
       // Refresh the articles list
@@ -243,11 +270,11 @@ const NewsFeed = () => {
             size="sm"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Updating...' : 'Refresh News'}
+            {refreshing ? 'Fetching Latest...' : 'Refresh from Perplexity'}
           </Button>
         </div>
         <p className="text-muted-foreground">
-          Stay updated with the latest US immigration law changes and policy updates
+          Latest US immigration law changes and policy updates from official sources
         </p>
       </div>
 
@@ -300,10 +327,12 @@ const NewsFeed = () => {
             {filteredArticles.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">No articles found matching your criteria.</p>
+                  <p className="text-muted-foreground mb-4">
+                    {refreshing ? 'Fetching latest immigration news from Perplexity...' : 'No articles found. Click refresh to fetch the latest news.'}
+                  </p>
                   <Button onClick={refreshNews} disabled={refreshing}>
                     <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                    Fetch Latest News
+                    Fetch Latest from Perplexity
                   </Button>
                 </CardContent>
               </Card>
