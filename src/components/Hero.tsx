@@ -14,8 +14,23 @@ const Hero = () => {
     setEmail("");
   };
 
+  const universities = [
+    "Harvard University",
+    "Stanford University", 
+    "MIT",
+    "UC Berkeley",
+    "NYU",
+    "Columbia University",
+    "Yale University",
+    "UCLA",
+    "University of Chicago",
+    "Carnegie Mellon",
+    "Cornell University",
+    "Princeton University"
+  ];
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col justify-between overflow-hidden">
       {/* Background with exact gradient from image */}
       <div className="absolute inset-0 bg-gradient-to-br from-teal-400 via-emerald-500 to-green-600">
         {/* Curved overlay effects similar to the image */}
@@ -59,44 +74,99 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-white mb-6 leading-tight">
-          Stay Informed on all
-          <br />
-          <span className="text-amber-400 font-bold">US Immigration Law</span>
-        </h1>
-        
-        <p className="text-lg md:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-          Get 24/7 alerts and news on all US Immigration policy and law changes
-        </p>
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 flex items-center justify-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-white mb-6 leading-tight">
+            Stay Informed on all
+            <br />
+            <span className="text-amber-400 font-bold">US Immigration Law</span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+            Get 24/7 alerts and news on all US Immigration policy and law changes
+          </p>
 
-        {/* Email subscription form with dark styling like the image */}
-        <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-          <div className="relative flex-1">
-            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <Input
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="pl-12 py-3 text-base bg-gray-900/90 border-gray-700 text-white placeholder-gray-400 focus:border-white focus:ring-white rounded-full"
-            />
-          </div>
-          <Button
-            type="submit"
-            size="lg"
-            className="px-8 py-3 text-base bg-white text-gray-900 hover:bg-gray-100 font-medium transition-all duration-200 rounded-full"
-          >
-            Subscribe
-          </Button>
-        </form>
+          {/* Email subscription form with dark styling like the image */}
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+            <div className="relative flex-1">
+              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Input
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="pl-12 py-3 text-base bg-gray-900/90 border-gray-700 text-white placeholder-gray-400 focus:border-white focus:ring-white rounded-full"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="lg"
+              className="px-8 py-3 text-base bg-white text-gray-900 hover:bg-gray-100 font-medium transition-all duration-200 rounded-full"
+            >
+              Subscribe
+            </Button>
+          </form>
 
-        <p className="text-sm text-white/60 mt-6">
-          Join 10,000+ staying updated on US immigration law changes
-        </p>
+          <p className="text-sm text-white/60 mt-6">
+            Join 10,000+ staying updated on US immigration law changes
+          </p>
+        </div>
       </div>
+
+      {/* University Trust Ticker */}
+      <div className="relative z-10 bg-black/20 backdrop-blur-sm py-6 border-t border-white/10">
+        <div className="text-center mb-4">
+          <p className="text-white/70 text-sm font-medium">
+            Trusted by students at these institutions
+          </p>
+        </div>
+        
+        <div className="overflow-hidden whitespace-nowrap">
+          <div className="inline-flex animate-[scroll_30s_linear_infinite]">
+            {/* First set of universities */}
+            {universities.map((university, index) => (
+              <div
+                key={`first-${index}`}
+                className="inline-flex items-center mx-8 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20"
+              >
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-white text-xs font-bold">🎓</span>
+                </div>
+                <span className="text-white/90 text-sm font-medium whitespace-nowrap">
+                  {university}
+                </span>
+              </div>
+            ))}
+            {/* Duplicate set for seamless loop */}
+            {universities.map((university, index) => (
+              <div
+                key={`second-${index}`}
+                className="inline-flex items-center mx-8 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20"
+              >
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-white text-xs font-bold">🎓</span>
+                </div>
+                <span className="text-white/90 text-sm font-medium whitespace-nowrap">
+                  {university}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
     </section>
   );
 };
