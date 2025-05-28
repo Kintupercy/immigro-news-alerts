@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +99,82 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .rotateY-12 {
+    transform: rotateY(12deg);
+  }
+  
+  .rotateX-5 {
+    transform: rotateX(5deg);
+  }
+}
+
+/* 3D Card animations */
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotateX(2deg) rotateY(1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotateX(0deg) rotateY(2deg);
+  }
+  75% {
+    transform: translateY(-3px) rotateX(-1deg) rotateY(1deg);
+  }
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Auto-scroll indicator */
+@keyframes autoScrollIndicator {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.auto-scroll-active::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  width: 4px;
+  height: 40px;
+  background: linear-gradient(to bottom, #10b981, #059669);
+  border-radius: 2px;
+  animation: autoScrollIndicator 2s infinite;
+  z-index: 50;
 }
