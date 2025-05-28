@@ -33,6 +33,75 @@ export type Database = {
         }
         Relationships: []
       }
+      immigration_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      immigration_news: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_urgent: boolean
+          published_at: string
+          source_url: string | null
+          status: string
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          is_urgent?: boolean
+          published_at?: string
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_urgent?: boolean
+          published_at?: string
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
