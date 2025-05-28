@@ -1,5 +1,4 @@
 
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,7 +62,8 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-white mb-6 leading-tight">
-          Stay Informed on all{" "}
+          Stay Informed on all
+          <br />
           <span className="text-amber-400 font-bold">US Immigration Law</span>
         </h1>
         
@@ -103,4 +103,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
