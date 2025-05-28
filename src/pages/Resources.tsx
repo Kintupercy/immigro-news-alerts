@@ -1,0 +1,77 @@
+
+import Header from "@/components/Header";
+import { Users, Clock, Star } from "lucide-react";
+
+const Resources = () => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <div className="pt-24 pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="mb-8">
+            <Clock className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Legal Resources Coming Soon
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              We're building partnerships with trusted immigration lawyers to provide you with the best legal guidance.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              What to Expect
+            </h2>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <Users className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Vetted Lawyers
+                </h3>
+                <p className="text-gray-600">
+                  Carefully selected immigration attorneys with proven track records
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <Star className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Specialized Expertise
+                </h3>
+                <p className="text-gray-600">
+                  Lawyers specializing in different immigration categories and situations
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <Clock className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Quick Matching
+                </h3>
+                <p className="text-gray-600">
+                  Fast connections to the right lawyer for your specific needs
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-emerald-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Get Notified When We Launch
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Be the first to know when our legal resources become available.
+            </p>
+            <button className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors">
+              Join the Waitlist
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Resources;

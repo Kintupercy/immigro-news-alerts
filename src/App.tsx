@@ -11,6 +11,8 @@ import Index from "./pages/Index";
 import News from "./pages/News";
 import Signup from "./pages/Signup";
 import Auth from "./pages/Auth";
+import Resources from "./pages/Resources";
+import About from "./pages/About";
 import AuthenticatedApp from "./components/AuthenticatedApp";
 import NotFound from "./pages/NotFound";
 
@@ -62,6 +64,8 @@ const App = () => {
               element={user ? <AuthenticatedApp /> : <Index />} 
             />
             <Route path="/news" element={<News />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/about" element={<About />} />
             <Route path="/signup" element={<Signup />} />
             <Route 
               path="/auth" 

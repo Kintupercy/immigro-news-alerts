@@ -9,12 +9,18 @@ const Header = () => {
 
   const navItems = [
     { name: "News", href: "/news" },
-    { name: "Research", href: "#research" },
-    { name: "Tools", href: "#tools" },
-    { name: "Resources", href: "#resources" },
-    { name: "Categories", href: "#categories" },
-    { name: "About", href: "#about" },
+    { name: "Categories", href: "#categories", isScroll: true },
+    { name: "Resources", href: "/resources" },
+    { name: "About", href: "/about" },
   ];
+
+  const handleScrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-stone-50/95 backdrop-blur-sm border-b border-stone-200/50">
@@ -31,7 +37,15 @@ const Header = () => {
           <nav className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               {navItems.map((item) => (
-                item.href.startsWith('/') ? (
+                item.isScroll ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleScrollToSection('categories')}
+                    className="text-slate-800 hover:text-slate-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  >
+                    {item.name}
+                  </button>
+                ) : item.href.startsWith('/') ? (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -85,7 +99,15 @@ const Header = () => {
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-stone-100/95 backdrop-blur-sm rounded-lg mt-2 mb-4">
               {navItems.map((item) => (
-                item.href.startsWith('/') ? (
+                item.isScroll ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleScrollToSection('categories')}
+                    className="text-slate-800 hover:text-slate-600 block px-3 py-2 text-base font-medium transition-colors duration-200 w-full text-left"
+                  >
+                    {item.name}
+                  </button>
+                ) : item.href.startsWith('/') ? (
                   <Link
                     key={item.name}
                     to={item.href}
