@@ -15,18 +15,13 @@ const Hero = () => {
   };
 
   const universities = [
-    "Harvard University",
-    "Stanford University", 
-    "MIT",
-    "UC Berkeley",
-    "NYU",
-    "Columbia University",
-    "Yale University",
-    "UCLA",
-    "University of Chicago",
-    "Carnegie Mellon",
-    "Cornell University",
-    "Princeton University"
+    { name: "Harvard University", logo: "/lovable-uploads/e45200f2-c4b5-48f4-88d4-4ce3b18bd012.png" },
+    { name: "Cornell University", logo: "/lovable-uploads/cf72dc3c-7e9d-4a5c-9d01-477501a41c2e.png" },
+    { name: "University of Illinois", logo: "/lovable-uploads/3859436f-d29a-443e-991f-fe3ae3961d36.png" },
+    { name: "UC Davis", logo: "/lovable-uploads/1f23da35-19d2-47d0-a4e0-1644b8e94fc4.png" },
+    { name: "Loyola University Chicago", logo: "/lovable-uploads/02db7caf-1095-48fc-abc7-6c31981610ae.png" },
+    { name: "Washington University", logo: "/lovable-uploads/204eaa9f-fc04-428b-b92c-a47c379fa80a.png" },
+    { name: "NYU", logo: "/lovable-uploads/9d48cc04-99c8-4171-92ad-a2328340a76b.png" }
   ];
 
   return (
@@ -131,11 +126,15 @@ const Hero = () => {
                 key={`first-${index}`}
                 className="inline-flex items-center mx-8 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20"
               >
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-white text-xs font-bold">🎓</span>
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 p-1">
+                  <img 
+                    src={university.logo} 
+                    alt={university.name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <span className="text-white/90 text-sm font-medium whitespace-nowrap">
-                  {university}
+                  {university.name}
                 </span>
               </div>
             ))}
@@ -145,11 +144,15 @@ const Hero = () => {
                 key={`second-${index}`}
                 className="inline-flex items-center mx-8 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20"
               >
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-white text-xs font-bold">🎓</span>
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 p-1">
+                  <img 
+                    src={university.logo} 
+                    alt={university.name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <span className="text-white/90 text-sm font-medium whitespace-nowrap">
-                  {university}
+                  {university.name}
                 </span>
               </div>
             ))}
@@ -157,7 +160,7 @@ const Hero = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes scroll {
           0% {
             transform: translateX(0);
