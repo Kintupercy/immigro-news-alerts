@@ -102,6 +102,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          notification_preferences: Json | null
+          onboarding_completed: boolean | null
+          phone_number: string | null
+          preferred_categories: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          phone_number?: string | null
+          preferred_categories?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          phone_number?: string | null
+          preferred_categories?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -11,6 +11,7 @@ import Header from "@/components/Header";
 import NewsFeed from "@/components/NewsFeed";
 import PersonalizedNewsFeed from "@/components/PersonalizedNewsFeed";
 import UserProfile from "@/components/UserProfile";
+import OnboardingWrapper from "@/components/OnboardingWrapper";
 
 const AuthenticatedApp = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -74,7 +75,7 @@ const AuthenticatedApp = () => {
     return null; // This will be handled by the main App component
   }
 
-  return (
+  const MainApp = () => (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
@@ -130,6 +131,12 @@ const AuthenticatedApp = () => {
         </Tabs>
       </div>
     </div>
+  );
+
+  return (
+    <OnboardingWrapper user={user}>
+      <MainApp />
+    </OnboardingWrapper>
   );
 };
 
