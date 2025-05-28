@@ -1,9 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, ExternalLink } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 interface NewsItem {
   id: string;
@@ -137,58 +143,68 @@ const LatestNews = () => {
           </p>
         </div>
 
-        <ScrollArea className="w-full">
-          <div className="flex space-x-6 pb-4">
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
             {news.map((item) => (
-              <Card key={item.id} className="flex-shrink-0 w-80 hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant={item.is_urgent ? "destructive" : "secondary"}>
-                      {item.category}
-                    </Badge>
-                    {item.is_urgent && (
-                      <Badge variant="destructive" className="text-xs">
-                        URGENT
+              <CarouselItem key={item.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={item.is_urgent ? "destructive" : "secondary"}>
+                        {item.category}
                       </Badge>
-                    )}
-                  </div>
-                  <CardTitle className="text-lg leading-tight line-clamp-2">
-                    {item.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                    {item.summary}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {formatDate(item.published_at)}
+                      {item.is_urgent && (
+                        <Badge variant="destructive" className="text-xs">
+                          URGENT
+                        </Badge>
+                      )}
                     </div>
-                    {item.source_url && (
-                      <a
-                        href={item.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-emerald-600 hover:text-emerald-700"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Source
-                      </a>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {item.tags.slice(0, 2).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    <CardTitle className="text-lg leading-tight line-clamp-2">
+                      {item.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                      {item.summary}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {formatDate(item.published_at)}
+                      </div>
+                      {item.source_url && (
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-emerald-600 hover:text-emerald-700"
+                        >
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                          Source
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {item.tags.slice(0, 2).map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
             ))}
-          </div>
-        </ScrollArea>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </section>
   );
