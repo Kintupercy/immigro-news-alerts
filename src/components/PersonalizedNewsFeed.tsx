@@ -61,11 +61,11 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     try {
       setLoading(true);
       
-      // Use raw SQL query approach for the RPC call since types aren't available
-      const { data, error } = await supabase.rpc('get_personalized_news' as any, {
+      // Use type assertion to work around missing RPC types
+      const { data, error } = await (supabase as any).rpc('get_personalized_news', {
         user_id_param: user.id,
         limit_param: 20
-      } as any);
+      });
 
       if (error) throw error;
       setArticles(data || []);
@@ -83,7 +83,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
 
   const markAsRead = async (articleId: string) => {
     try {
-      // Use direct insert approach since the table types aren't available
+      // Use direct fetch approach since the table types aren't available
       const session = await supabase.auth.getSession();
       const response = await fetch('https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/news_reading_history', {
         method: 'POST',
