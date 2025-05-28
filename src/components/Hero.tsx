@@ -63,9 +63,8 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-white mb-6 leading-tight">
-          Stay Informed on All US
-          <br />
-          <span className="text-amber-400 font-bold">Immigration Law</span>
+          Stay Informed on all{" "}
+          <span className="text-amber-400 font-bold">US Immigration Law</span>
         </h1>
         
         <p className="text-lg md:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
