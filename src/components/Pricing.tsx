@@ -39,8 +39,8 @@ const Pricing = () => {
       name: "Pro Annual",
       price: "$29.99",
       period: "per year",
-      originalPrice: "$59.88",
-      description: "Best value - Save 50% with annual billing",
+      originalPrice: "$49.98",
+      description: "Best value - Save 40% with annual billing",
       features: [
         "Real-time alerts",
         "All 13+ immigration categories",
@@ -48,7 +48,7 @@ const Pricing = () => {
         "Full news archive",
         "Expert analysis",
         "Priority support",
-        "50% savings vs monthly"
+        "40% savings vs monthly"
       ],
       buttonText: "Start Annual Trial",
       popular: false
