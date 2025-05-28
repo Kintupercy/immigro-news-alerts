@@ -1,4 +1,6 @@
 
+import { Link } from 'react-router-dom';
+
 const Categories = () => {
   const categories = [
     "Green Card / Permanent Residency",
@@ -46,9 +48,11 @@ const Categories = () => {
         </div>
 
         <div className="text-center mt-12">
-          <button className="bg-emerald-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors duration-200 transform hover:scale-105">
-            Get Started - Choose Your Categories
-          </button>
+          <Link to="/signup">
+            <button className="bg-emerald-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors duration-200 transform hover:scale-105">
+              Get Started - Choose Your Categories
+            </button>
+          </Link>
         </div>
       </div>
     </section>
