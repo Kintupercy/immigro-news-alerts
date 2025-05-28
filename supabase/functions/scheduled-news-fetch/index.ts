@@ -53,6 +53,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting scheduled news fetch function');
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -76,32 +78,31 @@ serve(async (req) => {
     for (const category of categories as Category[]) {
       console.log(`Fetching verified news for category: ${category.name}`);
 
-      const prompt = `Provide ONLY the latest verified news and legal developments in U.S. immigration law related to ${category.name} from the past 24-48 hours. 
+      const prompt = `Find the latest verified U.S. immigration law news related to ${category.name} from the past 24-48 hours.
 
-STRICT SOURCE REQUIREMENTS:
-- Official sources: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-- Verified news: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
-- NO YouTube, social media, or video content
-- Every article MUST include a valid source URL
+Search ONLY these approved sources:
+- Official government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
+- Trusted news outlets: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
 
 Requirements:
+- Provide 2-4 distinct news items with valid source URLs
 - Focus on factual, verified information only
-- Provide 2-4 distinct news items with source URLs
-- Include: headline, detailed summary, source URL
+- Include: headline, detailed summary, original source URL
 - Mark as urgent only for immediate policy changes or breaking developments
 - Include relevant tags
+- NO YouTube, social media, or video content
 
-Format as JSON array:
-{
-  "title": "News headline",
-  "content": "Detailed content (3-4 paragraphs)",
-  "summary": "Brief summary (2-3 sentences)",
-  "source_url": "URL to original verified source",
-  "is_urgent": boolean,
-  "tags": ["tag1", "tag2", "tag3"]
-}`;
+Format each article as:
+Title: [Clear headline]
+Summary: [Brief 2-3 sentence summary]
+Content: [Detailed content 3-4 paragraphs]
+Source: [Full URL to original verified source]
+Urgent: [true/false]
+Tags: [relevant tags separated by commas]`;
 
       try {
+        console.log(`Making Perplexity API request for: ${category.name}`);
+        
         const response = await fetch('https://api.perplexity.ai/chat/completions', {
           method: 'POST',
           headers: {
@@ -113,7 +114,7 @@ Format as JSON array:
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only. Never include YouTube, video content, or social media. Always return valid JSON format with source URLs from approved domains.'
+                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only. Never include YouTube, video content, or social media. Always return information with source URLs from approved domains.'
               },
               {
                 role: 'user',
@@ -123,13 +124,13 @@ Format as JSON array:
             max_tokens: 4000,
             temperature: 0.1,
             top_p: 0.9,
-            return_citations: true,
-            search_domain_filter: approvedDomains
+            return_citations: true
           }),
         });
 
         if (!response.ok) {
-          console.error(`Perplexity API error for ${category.name}: ${response.status}`);
+          const errorText = await response.text();
+          console.error(`Perplexity API error for ${category.name}: ${response.status} - ${errorText}`);
           continue;
         }
 
@@ -141,19 +142,10 @@ Format as JSON array:
           continue;
         }
 
-        // Parse JSON from response
-        let newsItems: NewsItem[] = [];
-        try {
-          const jsonMatch = content.match(/\[[\s\S]*\]/);
-          if (jsonMatch) {
-            newsItems = JSON.parse(jsonMatch[0]);
-          } else {
-            newsItems = JSON.parse(content);
-          }
-        } catch (parseError) {
-          console.error(`Failed to parse JSON for ${category.name}:`, parseError);
-          continue;
-        }
+        console.log(`Processing content for ${category.name}:`, content.substring(0, 200));
+
+        // Parse the content to extract news items
+        const newsItems = parseNewsContent(content, category.slug);
 
         // Insert verified news items
         for (const item of newsItems) {
@@ -202,8 +194,8 @@ Format as JSON array:
           }
         }
 
-        // Delay between API calls
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Delay between API calls to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
       } catch (apiError) {
         console.error(`Error fetching news for ${category.name}:`, apiError);
@@ -234,3 +226,89 @@ Format as JSON array:
     );
   }
 });
+
+function parseNewsContent(content: string, categorySlug: string): NewsItem[] {
+  const articles: NewsItem[] = [];
+  const lines = content.split('\n').filter(line => line.trim());
+  
+  let currentArticle: Partial<NewsItem> = {};
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    if (!trimmedLine || trimmedLine.match(/^[-=*]+$/)) continue;
+    
+    // Look for titles
+    if (trimmedLine.toLowerCase().startsWith('title:') || 
+        (trimmedLine.includes('**') && trimmedLine.length < 200)) {
+      
+      // Save previous article if valid
+      if (currentArticle.title && currentArticle.source_url && isValidSource(currentArticle.source_url)) {
+        articles.push({
+          title: currentArticle.title,
+          content: currentArticle.content || currentArticle.summary || '',
+          summary: currentArticle.summary || '',
+          source_url: currentArticle.source_url,
+          is_urgent: currentArticle.is_urgent || false,
+          tags: currentArticle.tags || [categorySlug]
+        });
+      }
+      
+      // Start new article
+      currentArticle = {
+        title: trimmedLine.replace(/^title:\s*/i, '').replace(/[*#]/g, '').trim(),
+        tags: [categorySlug]
+      };
+    } 
+    else if (currentArticle.title) {
+      // Parse other fields
+      if (trimmedLine.toLowerCase().startsWith('summary:')) {
+        currentArticle.summary = trimmedLine.replace(/^summary:\s*/i, '').trim();
+      }
+      else if (trimmedLine.toLowerCase().startsWith('content:')) {
+        currentArticle.content = trimmedLine.replace(/^content:\s*/i, '').trim();
+      }
+      else if (trimmedLine.toLowerCase().startsWith('source:') || trimmedLine.startsWith('http')) {
+        const urlMatch = trimmedLine.match(/(https?:\/\/[^\s]+)/);
+        if (urlMatch && isValidSource(urlMatch[1])) {
+          currentArticle.source_url = urlMatch[1];
+        }
+      }
+      else if (trimmedLine.toLowerCase().startsWith('urgent:')) {
+        currentArticle.is_urgent = trimmedLine.toLowerCase().includes('true');
+      }
+      else if (trimmedLine.toLowerCase().startsWith('tags:')) {
+        const tagsText = trimmedLine.replace(/^tags:\s*/i, '').trim();
+        currentArticle.tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
+        if (!currentArticle.tags.includes(categorySlug)) {
+          currentArticle.tags.push(categorySlug);
+        }
+      }
+      // Add to content if it's substantial text
+      else if (trimmedLine.length > 30 && !trimmedLine.includes(':')) {
+        if (!currentArticle.content) {
+          currentArticle.content = trimmedLine;
+        } else {
+          currentArticle.content += ' ' + trimmedLine;
+        }
+        if (!currentArticle.summary) {
+          currentArticle.summary = trimmedLine;
+        }
+      }
+    }
+  }
+  
+  // Don't forget the last article
+  if (currentArticle.title && currentArticle.source_url && isValidSource(currentArticle.source_url)) {
+    articles.push({
+      title: currentArticle.title,
+      content: currentArticle.content || currentArticle.summary || '',
+      summary: currentArticle.summary || '',
+      source_url: currentArticle.source_url,
+      is_urgent: currentArticle.is_urgent || false,
+      tags: currentArticle.tags || [categorySlug]
+    });
+  }
+  
+  return articles;
+}

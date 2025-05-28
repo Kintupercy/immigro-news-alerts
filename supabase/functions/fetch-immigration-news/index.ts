@@ -50,24 +50,26 @@ function isValidSource(url: string): boolean {
 }
 
 async function fetchNewsFromPerplexity(categoryName: string) {
-  const prompt = `Search ONLY official government sources and major reputable news outlets for the latest immigration law news related to ${categoryName} from the past 48 hours. 
+  const prompt = `Find the latest immigration law news related to ${categoryName} from the past 48 hours. 
 
-REQUIRED SOURCES ONLY:
-- Official: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-- News: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
+Search ONLY these trusted sources:
+- Official government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
+- Major news outlets: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
 
-STRICT REQUIREMENTS:
-1. Every article MUST include a valid source URL from approved sources
-2. NO YouTube, video content, or social media links
-3. Focus on policy changes, official announcements, court decisions
-4. Provide headline, 2-3 sentence summary, and source URL for each item
-5. Mark as urgent only if it involves immediate deadlines or breaking policy changes
+Requirements:
+- Provide 2-3 recent news articles with valid source URLs
+- Focus on policy changes, official announcements, court decisions
+- Include clear headline, brief summary, and original source URL
+- Mark urgency only for immediate deadlines or breaking changes
+- NO YouTube, video content, or social media
 
-Format each news item clearly with:
-- Title: [Clear headline]
-- Summary: [2-3 sentences]
-- Source: [Full URL to original article]
-- Urgency: [true/false based on immediacy]`;
+Format each article as:
+Title: [Clear headline]
+Summary: [2-3 sentence summary]
+Source: [Full URL from approved source]
+Urgent: [true/false]`;
+
+  console.log(`Making Perplexity API request for: ${categoryName}`);
 
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
@@ -80,7 +82,7 @@ Format each news item clearly with:
       messages: [
         {
           role: 'system',
-          content: 'You are an immigration law news aggregator. Search ONLY official government sources and major trusted news outlets. Every article must have a valid source URL. Never include YouTube, video content, or unverified sources. Focus on factual reporting from approved domains only.'
+          content: 'You are an immigration law news researcher. Search only official government sources and major trusted news outlets. Never include YouTube, video content, or unverified sources. Always provide valid source URLs from approved domains.'
         },
         {
           role: 'user',
@@ -89,21 +91,23 @@ Format each news item clearly with:
       ],
       temperature: 0.1,
       top_p: 0.9,
-      max_tokens: 3000,
+      max_tokens: 2000,
       return_images: false,
       return_related_questions: false,
       search_recency_filter: 'day',
-      search_domain_filter: approvedDomains,
       frequency_penalty: 1,
       presence_penalty: 0
     }),
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Perplexity API error for ${categoryName}: ${response.status} - ${errorText}`);
     throw new Error(`Perplexity API error: ${response.status}`);
   }
 
   const data = await response.json();
+  console.log(`Perplexity response for ${categoryName}:`, data.choices[0]?.message?.content?.substring(0, 200));
   return data.choices[0].message.content;
 }
 
@@ -151,7 +155,7 @@ function parseNewsContent(content: string, categorySlug: string) {
         }
       }
       // Look for urgency
-      else if (trimmedLine.toLowerCase().startsWith('urgency:')) {
+      else if (trimmedLine.toLowerCase().startsWith('urgent:')) {
         currentArticle.is_urgent = trimmedLine.toLowerCase().includes('true');
       }
       // Add to content if it's substantial
@@ -185,6 +189,12 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting fetch-immigration-news function');
+    
+    if (!perplexityApiKey) {
+      throw new Error('PERPLEXITY_API_KEY not found in environment variables');
+    }
+
     const { category } = await req.json();
     
     let categoriesToFetch = immigrationCategories;
@@ -242,8 +252,8 @@ serve(async (req) => {
           }
         }
 
-        // Add delay between requests
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Add delay between requests to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 3000));
       } catch (error) {
         console.error(`Error fetching news for category ${cat.slug}:`, error);
       }
