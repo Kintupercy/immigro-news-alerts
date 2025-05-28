@@ -260,22 +260,53 @@ const NewsFeed = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold">Immigration News & Alerts</h1>
+      {/* Header Section with Navy Blue Background and Category Filters */}
+      <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">IMMIGRATION UPDATES</h1>
+            <p className="text-cream-200 text-sm uppercase tracking-wide">CURATED NEWS ON U.S. IMMIGRATION LAW</p>
+          </div>
           <Button 
             onClick={refreshNews} 
             disabled={refreshing}
             variant="outline"
             size="sm"
+            className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Fetching Latest...' : 'Refresh from Perplexity'}
+            {refreshing ? 'Fetching Latest...' : 'Refresh'}
           </Button>
         </div>
-        <p className="text-muted-foreground">
-          Latest US immigration law changes and policy updates from official sources
-        </p>
+
+        {/* Category Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={selectedCategory === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategory('all')}
+            className={selectedCategory === 'all' 
+              ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+              : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+            }
+          >
+            All Categories
+          </Button>
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.slug ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCategory(category.slug)}
+              className={selectedCategory === category.slug 
+                ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+              }
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Search and Filter Controls */}
