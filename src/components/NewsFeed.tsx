@@ -43,28 +43,7 @@ const NewsFeed = () => {
   useEffect(() => {
     fetchCategories();
     fetchArticles();
-    checkAndRefreshNews();
   }, []);
-
-  const checkAndRefreshNews = async () => {
-    try {
-      const { data: recentArticles } = await supabase
-        .from('immigration_news')
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      const hasRecentNews = recentArticles && recentArticles.length > 0 && 
-        new Date(recentArticles[0].created_at).getTime() > Date.now() - (60 * 60 * 1000);
-
-      if (!hasRecentNews) {
-        console.log('No recent news found, fetching latest from verified sources...');
-        await refreshNews();
-      }
-    } catch (error) {
-      console.error('Error checking for recent news:', error);
-    }
-  };
 
   const fetchCategories = async () => {
     try {
@@ -111,6 +90,12 @@ const NewsFeed = () => {
       );
       
       setArticles(filteredData);
+
+      // If no articles found, automatically fetch new ones
+      if (filteredData.length === 0) {
+        console.log('No articles found, fetching fresh news...');
+        await refreshNews(false);
+      }
     } catch (error) {
       console.error('Error fetching articles:', error);
       toast({
@@ -123,7 +108,7 @@ const NewsFeed = () => {
     }
   };
 
-  const refreshNews = async () => {
+  const refreshNews = async (forceRefresh: boolean = true) => {
     try {
       setRefreshing(true);
       
@@ -133,17 +118,26 @@ const NewsFeed = () => {
       });
 
       const { data, error } = await supabase.functions.invoke('fetch-immigration-news', {
-        body: { category: selectedCategory }
+        body: { 
+          category: selectedCategory,
+          forceRefresh: forceRefresh
+        }
       });
 
       if (error) throw error;
 
-      toast({
-        title: "News updated!",
-        description: `Successfully fetched ${data.articlesAdded} new verified articles.`,
-      });
-
-      await fetchArticles();
+      if (data.articlesAdded > 0) {
+        toast({
+          title: "News updated!",
+          description: `Successfully fetched ${data.articlesAdded} new verified articles.`,
+        });
+        await fetchArticles();
+      } else {
+        toast({
+          title: "No new articles",
+          description: data.message || "All articles are up to date.",
+        });
+      }
     } catch (error) {
       console.error('Error refreshing news:', error);
       toast({
@@ -211,7 +205,6 @@ const NewsFeed = () => {
               {categories.find(cat => cat.slug === article.category)?.name || article.category}
             </Badge>
             
-            {/* Source verification badge */}
             <Badge 
               variant={isOfficial ? "default" : "outline"} 
               className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
@@ -308,7 +301,7 @@ const NewsFeed = () => {
             </p>
           </div>
           <Button 
-            onClick={refreshNews} 
+            onClick={() => refreshNews(true)} 
             disabled={refreshing}
             variant="outline"
             size="sm"
@@ -402,7 +395,7 @@ const NewsFeed = () => {
                   <p className="text-muted-foreground mb-4">
                     {refreshing ? 'Fetching latest verified immigration news...' : 'No verified articles found. Click refresh to fetch the latest news from official sources.'}
                   </p>
-                  <Button onClick={refreshNews} disabled={refreshing}>
+                  <Button onClick={() => refreshNews(true)} disabled={refreshing}>
                     <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                     Fetch Latest Verified News
                   </Button>

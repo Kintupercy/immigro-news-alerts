@@ -50,24 +50,23 @@ function isValidSource(url: string): boolean {
 }
 
 async function fetchNewsFromPerplexity(categoryName: string) {
-  const prompt = `Find the latest immigration law news related to ${categoryName} from the past 48 hours. 
+  const prompt = `Find 2-3 recent U.S. immigration news articles about ${categoryName} from the past 24-48 hours.
 
-Search ONLY these trusted sources:
-- Official government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-- Major news outlets: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
+ONLY search these verified sources:
+- Government: uscis.gov, dhs.gov, state.gov, ice.gov, cbp.gov
+- News: reuters.com, apnews.com, cnn.com, bbc.com, nytimes.com, washingtonpost.com, npr.org, nbcnews.com, cbsnews.com, politico.com
+
+For each article, provide:
+TITLE: [Article headline]
+SUMMARY: [2-3 sentences about the news]
+CONTENT: [Brief description of what happened]
+SOURCE: [Complete URL from approved source]
+URGENT: [true only for immediate deadlines/breaking news, otherwise false]
 
 Requirements:
-- Provide 2-3 recent news articles with valid source URLs
-- Focus on policy changes, official announcements, court decisions
-- Include clear headline, brief summary, and original source URL
-- Mark urgency only for immediate deadlines or breaking changes
-- NO YouTube, video content, or social media
-
-Format each article as:
-Title: [Clear headline]
-Summary: [2-3 sentence summary]
-Source: [Full URL from approved source]
-Urgent: [true/false]`;
+- Must include valid source URLs from approved domains
+- NO YouTube, social media, or video content
+- Focus on policy changes, official announcements, court decisions`;
 
   console.log(`Making Perplexity API request for: ${categoryName}`);
 
@@ -82,7 +81,7 @@ Urgent: [true/false]`;
       messages: [
         {
           role: 'system',
-          content: 'You are an immigration law news researcher. Search only official government sources and major trusted news outlets. Never include YouTube, video content, or unverified sources. Always provide valid source URLs from approved domains.'
+          content: 'You are an immigration law news researcher. Only search official government sources and major trusted news outlets. Never include YouTube or video content. Always provide source URLs from approved domains.'
         },
         {
           role: 'user',
@@ -90,13 +89,7 @@ Urgent: [true/false]`;
         }
       ],
       temperature: 0.1,
-      top_p: 0.9,
-      max_tokens: 2000,
-      return_images: false,
-      return_related_questions: false,
-      search_recency_filter: 'day',
-      frequency_penalty: 1,
-      presence_penalty: 0
+      max_tokens: 2000
     }),
   });
 
@@ -107,80 +100,56 @@ Urgent: [true/false]`;
   }
 
   const data = await response.json();
-  console.log(`Perplexity response for ${categoryName}:`, data.choices[0]?.message?.content?.substring(0, 200));
-  return data.choices[0].message.content;
+  const content = data.choices[0]?.message?.content;
+  console.log(`Perplexity response for ${categoryName}:`, content?.substring(0, 300));
+  return content;
 }
 
 function parseNewsContent(content: string, categorySlug: string) {
   const articles = [];
-  const lines = content.split('\n').filter(line => line.trim());
+  const sections = content.split(/(?=TITLE:|Title:)/i).filter(section => section.trim());
   
-  let currentArticle: any = null;
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim();
+  for (const section of sections) {
+    const lines = section.split('\n').map(line => line.trim()).filter(line => line);
     
-    if (!trimmedLine || trimmedLine.match(/^[-=*]+$/)) continue;
+    let article: any = {
+      category: categorySlug,
+      tags: [categorySlug],
+      is_urgent: false,
+      status: 'published'
+    };
     
-    // Look for titles
-    if (trimmedLine.toLowerCase().startsWith('title:') || 
-        (trimmedLine.includes('**') && trimmedLine.length < 200)) {
-      
-      if (currentArticle && currentArticle.title && currentArticle.source_url && isValidSource(currentArticle.source_url)) {
-        articles.push(currentArticle);
-      }
-      
-      currentArticle = {
-        title: trimmedLine.replace(/^title:\s*/i, '').replace(/[*#]/g, '').trim(),
-        content: '',
-        summary: '',
-        category: categorySlug,
-        source_url: null,
-        is_urgent: false,
-        tags: [categorySlug],
-        status: 'published'
-      };
-    } 
-    else if (currentArticle) {
-      // Look for summary
-      if (trimmedLine.toLowerCase().startsWith('summary:')) {
-        currentArticle.summary = trimmedLine.replace(/^summary:\s*/i, '').trim();
-        currentArticle.content = currentArticle.summary;
-      }
-      // Look for source URLs
-      else if (trimmedLine.toLowerCase().startsWith('source:') || trimmedLine.startsWith('http')) {
-        const urlMatch = trimmedLine.match(/(https?:\/\/[^\s]+)/);
+    for (const line of lines) {
+      if (line.toLowerCase().startsWith('title:') || line.toLowerCase().startsWith('title ')) {
+        article.title = line.replace(/^title:?\s*/i, '').replace(/[*#]/g, '').trim();
+      } else if (line.toLowerCase().startsWith('summary:')) {
+        article.summary = line.replace(/^summary:\s*/i, '').trim();
+      } else if (line.toLowerCase().startsWith('content:')) {
+        article.content = line.replace(/^content:\s*/i, '').trim();
+      } else if (line.toLowerCase().startsWith('source:') || line.startsWith('http')) {
+        const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
         if (urlMatch && isValidSource(urlMatch[1])) {
-          currentArticle.source_url = urlMatch[1];
+          article.source_url = urlMatch[1];
         }
+      } else if (line.toLowerCase().startsWith('urgent:')) {
+        article.is_urgent = line.toLowerCase().includes('true');
       }
-      // Look for urgency
-      else if (trimmedLine.toLowerCase().startsWith('urgent:')) {
-        currentArticle.is_urgent = trimmedLine.toLowerCase().includes('true');
-      }
-      // Add to content if it's substantial
-      else if (trimmedLine.length > 30 && !currentArticle.summary) {
-        currentArticle.content += trimmedLine + ' ';
-        if (!currentArticle.summary) {
-          currentArticle.summary = trimmedLine;
-        }
-      }
+    }
+    
+    // Set content as summary if content is missing
+    if (!article.content && article.summary) {
+      article.content = article.summary;
+    }
+    
+    // Only add articles with required fields and valid sources
+    if (article.title && article.title.length > 10 && 
+        article.source_url && isValidSource(article.source_url) &&
+        (article.summary || article.content)) {
+      articles.push(article);
     }
   }
   
-  // Don't forget the last article
-  if (currentArticle && currentArticle.title && currentArticle.source_url && isValidSource(currentArticle.source_url)) {
-    articles.push(currentArticle);
-  }
-  
-  // Filter out articles without valid sources
-  return articles.filter(article => 
-    article.title && 
-    article.title.length > 10 && 
-    article.source_url &&
-    isValidSource(article.source_url) &&
-    (article.summary || article.content)
-  );
+  return articles;
 }
 
 serve(async (req) => {
@@ -195,7 +164,27 @@ serve(async (req) => {
       throw new Error('PERPLEXITY_API_KEY not found in environment variables');
     }
 
-    const { category } = await req.json();
+    const { category, forceRefresh } = await req.json();
+    
+    // Check if we have recent news (within last 12 hours) unless forcing refresh
+    if (!forceRefresh) {
+      const { data: recentNews } = await supabase
+        .from('immigration_news')
+        .select('created_at')
+        .gte('created_at', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
+        .limit(1);
+
+      if (recentNews && recentNews.length > 0) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            articlesAdded: 0,
+            message: 'Recent news already exists, skipping fetch. Use refresh to force update.'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
     
     let categoriesToFetch = immigrationCategories;
     if (category && category !== 'all') {
@@ -215,12 +204,6 @@ serve(async (req) => {
         console.log(`Parsed ${parsedArticles.length} verified articles for ${cat.name}`);
         
         for (const article of parsedArticles) {
-          // Double-check source validity before inserting
-          if (!isValidSource(article.source_url)) {
-            console.log(`Skipping article with invalid source: ${article.source_url}`);
-            continue;
-          }
-
           // Check for duplicates
           const { data: existing } = await supabase
             .from('immigration_news')
@@ -253,7 +236,7 @@ serve(async (req) => {
         }
 
         // Add delay between requests to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (error) {
         console.error(`Error fetching news for category ${cat.slug}:`, error);
       }
