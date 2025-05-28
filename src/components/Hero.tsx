@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,9 +71,9 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-between overflow-hidden">
-      {/* Background with exact gradient from image */}
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-400 via-emerald-500 to-green-600">
-        {/* Curved overlay effects similar to the image */}
+      {/* Background with cream gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+        {/* Curved overlay effects */}
         <div className="absolute inset-0">
           <svg
             className="absolute top-0 w-full h-64"
@@ -82,7 +83,7 @@ const Hero = () => {
           >
             <path
               d="M0 0L50 10C100 20 200 40 300 50C400 60 500 60 600 55C700 50 800 40 900 35C1000 30 1100 30 1150 30L1200 30V0H1150C1100 0 1000 0 900 0C800 0 700 0 600 0C500 0 400 0 300 0C200 0 100 0 50 0H0Z"
-              fill="rgba(0, 0, 0, 0.1)"
+              fill="rgba(0, 0, 0, 0.05)"
             />
           </svg>
           <svg
@@ -93,7 +94,7 @@ const Hero = () => {
           >
             <path
               d="M0 120L50 110C100 100 200 80 300 70C400 60 500 60 600 65C700 70 800 80 900 85C1000 90 1100 90 1150 90L1200 90V120H1150C1100 120 1000 120 900 120C800 120 700 120 600 120C500 120 400 120 300 120C200 120 100 120 50 120H0Z"
-              fill="rgba(0, 0, 0, 0.1)"
+              fill="rgba(0, 0, 0, 0.05)"
             />
           </svg>
         </div>
@@ -107,7 +108,7 @@ const Hero = () => {
           >
             <path
               d="M0 200C300 100 600 300 1200 200V400H0V200Z"
-              fill="rgba(0, 0, 0, 0.05)"
+              fill="rgba(0, 0, 0, 0.03)"
             />
           </svg>
         </div>
@@ -116,20 +117,20 @@ const Hero = () => {
       {/* Main Content */}
       <div className="relative z-10 flex-1 flex items-center justify-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-white mb-6 leading-tight">
+          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-slate-800 mb-6 leading-tight">
             Stay Informed on all
             <br />
-            <span className="text-amber-400 font-bold">US Immigration Law</span>
+            <span className="text-slate-700 font-bold">US Immigration Law</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
             Get 24/7 alerts and news on all US Immigration policy and law changes
           </p>
 
-          {/* Email subscription form with dark styling like the image */}
+          {/* Email subscription form */}
           <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
             <div className="relative flex-1">
-              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
               <Input
                 type="email"
                 placeholder="Email address"
@@ -137,29 +138,29 @@ const Hero = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="pl-12 py-3 text-base bg-gray-900/90 border-gray-700 text-white placeholder-gray-400 focus:border-white focus:ring-white rounded-full"
+                className="pl-12 py-3 text-base bg-white border-slate-300 text-slate-800 placeholder-slate-400 focus:border-slate-700 focus:ring-slate-700 rounded-full"
               />
             </div>
             <Button
               type="submit"
               size="lg"
               disabled={isLoading}
-              className="px-8 py-3 text-base bg-white text-gray-900 hover:bg-gray-100 font-medium transition-all duration-200 rounded-full disabled:opacity-50"
+              className="px-8 py-3 text-base bg-slate-800 text-white hover:bg-slate-700 font-medium transition-all duration-200 rounded-full disabled:opacity-50"
             >
               {isLoading ? "Subscribing..." : "Subscribe"}
             </Button>
           </form>
 
-          <p className="text-sm text-white/60 mt-6">
+          <p className="text-sm text-slate-500 mt-6">
             Join 10,000+ staying updated on US immigration law changes
           </p>
         </div>
       </div>
 
       {/* University Trust Ticker */}
-      <div className="relative z-10 bg-black/20 backdrop-blur-sm py-6 border-t border-white/10">
+      <div className="relative z-10 bg-slate-800/90 backdrop-blur-sm py-6 border-t border-slate-700/20">
         <div className="text-center mb-4">
-          <p className="text-white/70 text-sm font-medium">
+          <p className="text-amber-100 text-sm font-medium">
             Trusted by students at these institutions
           </p>
         </div>
