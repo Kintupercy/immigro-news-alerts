@@ -160,13 +160,13 @@ const Hero = () => {
       {/* Main Content */}
       <div className="relative z-10 flex-1 flex items-center justify-center pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-navy-900 mb-6 leading-tight">
+          <h1 className="font-playfair text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-medium text-navy-900 mb-8 leading-tight">
             <span className="font-bold">Stay Informed on all</span>
             <br />
             <span className="text-navy-800 font-bold">US Immigration Law</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-navy-600 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="text-xl md:text-2xl lg:text-3xl text-navy-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
             Get 24/7 alerts and news on all US Immigration policy and law changes
           </p>
 
