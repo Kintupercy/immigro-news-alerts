@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -50,18 +49,6 @@ const UserProfile = ({ user }: UserProfileProps) => {
 
   const fetchProfile = async () => {
     try {
-      // Use a custom query since user_profiles is not in the types
-      const { data, error } = await supabase
-        .from('immigration_news')
-        .select('*')
-        .limit(0);
-
-      // This will fail but we can catch and work around it
-      if (error) {
-        console.log('Expected error for type checking');
-      }
-
-      // Try to fetch user profile using a raw query approach
       const profileData = await fetchUserProfileData();
       if (profileData) {
         setProfile(profileData);
@@ -83,11 +70,11 @@ const UserProfile = ({ user }: UserProfileProps) => {
 
   const fetchUserProfileData = async (): Promise<UserProfile | null> => {
     try {
-      // This is a workaround - in a real app you'd use the proper types
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/user_profiles?user_id=eq.${user.id}&select=*`, {
+      const session = await supabase.auth.getSession();
+      const response = await fetch(`https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/user_profiles?user_id=eq.${user.id}&select=*`, {
         headers: {
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5YnBnb3Jia2lhaXRpbXhpcWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NDkzNTgsImV4cCI6MjA2NDAyNTM1OH0.zLJ37ZRmFDj4hpiohHOZZonAzBiv8ASNDw7TVghF0N0',
+          'Authorization': `Bearer ${session.data.session?.access_token}`
         }
       });
       
@@ -120,11 +107,12 @@ const UserProfile = ({ user }: UserProfileProps) => {
       };
 
       // Use raw fetch to create profile
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/user_profiles`, {
+      const session = await supabase.auth.getSession();
+      const response = await fetch('https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/user_profiles', {
         method: 'POST',
         headers: {
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5YnBnb3Jia2lhaXRpbXhpcWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NDkzNTgsImV4cCI6MjA2NDAyNTM1OH0.zLJ37ZRmFDj4hpiohHOZZonAzBiv8ASNDw7TVghF0N0',
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -165,11 +153,12 @@ const UserProfile = ({ user }: UserProfileProps) => {
     setSaving(true);
     try {
       // Use raw fetch to update profile
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/user_profiles?user_id=eq.${user.id}`, {
+      const session = await supabase.auth.getSession();
+      const response = await fetch(`https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/user_profiles?user_id=eq.${user.id}`, {
         method: 'PATCH',
         headers: {
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5YnBnb3Jia2lhaXRpbXhpcWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NDkzNTgsImV4cCI6MjA2NDAyNTM1OH0.zLJ37ZRmFDj4hpiohHOZZonAzBiv8ASNDw7TVghF0N0',
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

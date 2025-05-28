@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -62,11 +61,11 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     try {
       setLoading(true);
       
-      // Call the personalized news function
-      const { data, error } = await supabase.rpc('get_personalized_news', {
+      // Use raw SQL query approach for the RPC call since types aren't available
+      const { data, error } = await supabase.rpc('get_personalized_news' as any, {
         user_id_param: user.id,
         limit_param: 20
-      });
+      } as any);
 
       if (error) throw error;
       setArticles(data || []);
@@ -84,19 +83,25 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
 
   const markAsRead = async (articleId: string) => {
     try {
-      // Use raw SQL query to insert into news_reading_history
-      const { error } = await supabase.rpc('sql', {
-        query: `
-          INSERT INTO news_reading_history (user_id, article_id, read_at)
-          VALUES ($1, $2, NOW())
-          ON CONFLICT (user_id, article_id) DO NOTHING
-        `,
-        args: [user.id, articleId]
+      // Use direct insert approach since the table types aren't available
+      const session = await supabase.auth.getSession();
+      const response = await fetch('https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/news_reading_history', {
+        method: 'POST',
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5YnBnb3Jia2lhaXRpbXhpcWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NDkzNTgsImV4cCI6MjA2NDAyNTM1OH0.zLJ37ZRmFDj4hpiohHOZZonAzBiv8ASNDw7TVghF0N0',
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=ignore-duplicates'
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          article_id: articleId,
+          read_at: new Date().toISOString()
+        })
       });
 
-      if (error) {
-        console.error('Error marking as read:', error);
-        // Fallback: just update local state
+      if (!response.ok) {
+        console.error('Error marking as read:', await response.text());
       }
 
       // Update local state
