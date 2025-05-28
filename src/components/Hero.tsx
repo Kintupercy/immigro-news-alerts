@@ -68,8 +68,7 @@ const Hero = () => {
         </h1>
         
         <p className="text-lg md:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-          Join with us to stay updated with the latest news and trends in the ever-evolving 
-          world of U.S. immigration law.
+          Get 24/7 alerts and news on all US Immigration policy and law changes
         </p>
 
         {/* Email subscription form with dark styling like the image */}
@@ -95,7 +94,7 @@ const Hero = () => {
         </form>
 
         <p className="text-sm text-white/60 mt-6">
-          Join thousands staying updated on immigration law changes
+          Join 10,000+ staying updated on US immigration law changes
         </p>
       </div>
     </section>
