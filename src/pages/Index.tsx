@@ -7,6 +7,7 @@ import Hero from "@/components/Hero";
 import LatestNews from "@/components/LatestNews";
 import Pricing from "@/components/Pricing";
 import NewsletterSubscription from "@/components/NewsletterSubscription";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserPlus, LogIn } from "lucide-react";
@@ -97,6 +98,7 @@ const Index = () => {
       <Categories />
       <Pricing />
       <NewsletterSubscription />
+      <Footer />
     </div>
   );
 };
