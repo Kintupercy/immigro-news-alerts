@@ -1,127 +1,231 @@
-
 import { useState } from "react";
-import { Menu, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Menu, X, Globe } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import LanguageToggle from "./LanguageToggle";
+import UrgentNewsAlert from "./UrgentNewsAlert";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
-  const navItems = [
-    { name: "News", href: "/news" },
-    { name: "Categories", href: "#categories", isScroll: true },
-    { name: "Resources", href: "/resources" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ];
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
 
-  const handleScrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     setIsMenuOpen(false);
   };
 
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-stone-50/95 backdrop-blur-sm border-b border-stone-200/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Link to="/" className="text-2xl font-bold text-slate-800">⚖️ Immigro</Link>
-            </div>
-          </div>
+    <>
+      {/* Add the urgent news alert system */}
+      <UrgentNewsAlert />
+      
+      <header className="bg-navy-800 text-cream-50 sticky top-0 z-50 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <Globe className="h-8 w-8 text-cream-300" />
+              <span className="font-playfair text-2xl font-bold">Immigro</span>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              {navItems.map((item) => (
-                item.isScroll ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleScrollToSection('categories')}
-                    className="text-slate-800 hover:text-slate-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
-                  >
-                    {item.name}
-                  </button>
-                ) : item.href.startsWith('/') ? (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="text-slate-800 hover:text-slate-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
-                  >
-                    {item.name}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-slate-800 hover:text-slate-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
-                  >
-                    {item.name}
-                  </a>
-                )
-              ))}
-            </div>
-          </nav>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link 
+                to="/" 
+                className={`transition-colors duration-200 ${
+                  isActive('/') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/news" 
+                className={`transition-colors duration-200 ${
+                  isActive('/news') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                News
+              </Link>
+              <Link 
+                to="/resources" 
+                className={`transition-colors duration-200 ${
+                  isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Resources
+              </Link>
+              <Link 
+                to="/about" 
+                className={`transition-colors duration-200 ${
+                  isActive('/about') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                className={`transition-colors duration-200 ${
+                  isActive('/contact') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Contact
+              </Link>
+              
+              <LanguageToggle />
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-slate-800 hover:text-slate-600 hover:bg-stone-100"
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-cream-300">Welcome back!</span>
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="outline" 
+                    size="sm"
+                    className="border-cream-300 text-cream-300 hover:bg-cream-300 hover:text-navy-800"
+                  >
+                    Sign Out
+                  </Button>
+                </div>
               ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-stone-100/95 backdrop-blur-sm rounded-lg mt-2 mb-4">
-              {navItems.map((item) => (
-                item.isScroll ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleScrollToSection('categories')}
-                    className="text-slate-800 hover:text-slate-600 block px-3 py-2 text-base font-medium transition-colors duration-200 w-full text-left"
-                  >
-                    {item.name}
-                  </button>
-                ) : item.href.startsWith('/') ? (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="text-slate-800 hover:text-slate-600 block px-3 py-2 text-base font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
+                <div className="flex items-center space-x-4">
+                  <Link to="/auth">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-cream-300 hover:bg-cream-700/20 hover:text-cream-100"
+                    >
+                      Sign In
+                    </Button>
                   </Link>
-                ) : (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-slate-800 hover:text-slate-600 block px-3 py-2 text-base font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
-                )
-              ))}
+                  <Link to="/signup">
+                    <Button 
+                      size="sm"
+                      className="bg-cream-300 text-navy-800 hover:bg-cream-200"
+                    >
+                      Get Started
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </nav>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-cream-300 hover:text-cream-100 transition-colors duration-200"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </header>
+
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 bg-navy-900 rounded-lg mt-2">
+                <Link 
+                  to="/" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive('/') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                  }`}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/news" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive('/news') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                  }`}
+                >
+                  News
+                </Link>
+                <Link 
+                  to="/resources" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive('/resources') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                  }`}
+                >
+                  Resources
+                </Link>
+                <Link 
+                  to="/about" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive('/about') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                  }`}
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/contact" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive('/contact') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                  }`}
+                >
+                  Contact
+                </Link>
+                
+                <div className="px-3 py-2">
+                  <LanguageToggle />
+                </div>
+
+                {user ? (
+                  <div className="px-3 py-2 space-y-2">
+                    <p className="text-cream-300 text-sm">Welcome back!</p>
+                    <Button 
+                      onClick={handleSignOut}
+                      variant="outline" 
+                      size="sm"
+                      className="w-full border-cream-300 text-cream-300 hover:bg-cream-300 hover:text-navy-800"
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="px-3 py-2 space-y-2">
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="w-full text-cream-300 hover:bg-cream-700/20 hover:text-cream-100"
+                      >
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <Button 
+                        size="sm"
+                        className="w-full bg-cream-300 text-navy-800 hover:bg-cream-200"
+                      >
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+    </>
   );
 };
 
