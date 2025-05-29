@@ -1,6 +1,6 @@
 
 // Simple translation utility - in production, you'd use a service like Google Translate API
-const translations: Record<string, Record<string, string>> = {
+const translations: Record<string, string> = {
   // Common UI translations
   'Latest Immigration News': 'Últimas Noticias de Inmigración',
   'All Categories': 'Todas las Categorías',

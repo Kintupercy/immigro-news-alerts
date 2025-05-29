@@ -3,6 +3,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
+interface NotificationPreferences {
+  sms?: boolean;
+  push?: boolean;
+  email?: boolean;
+  urgent_only?: boolean;
+}
+
 export const useProMembership = (user: User | null) => {
   const [isProMember, setIsProMember] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -26,7 +33,8 @@ export const useProMembership = (user: User | null) => {
 
         // Simple simulation: if user has SMS notifications enabled, consider them Pro
         // In production, you'd have a proper subscription/billing table
-        const hasSmsEnabled = profile?.notification_preferences?.sms === true;
+        const notificationPrefs = profile?.notification_preferences as NotificationPreferences | null;
+        const hasSmsEnabled = notificationPrefs?.sms === true;
         setIsProMember(hasSmsEnabled || false);
       } catch (error) {
         console.error('Error checking Pro membership:', error);
