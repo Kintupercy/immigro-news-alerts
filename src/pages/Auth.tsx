@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate, Link } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
-import { Loader2, Mail, Lock, User as UserIcon, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Lock, User as UserIcon, AlertCircle, CheckCircle } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +20,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -37,7 +38,10 @@ const Auth = () => {
       (event, session) => {
         if (session?.user) {
           setUser(session.user);
-          navigate("/");
+          // Only redirect if email is confirmed or if it's a password recovery
+          if (session.user.email_confirmed_at || event === 'PASSWORD_RECOVERY') {
+            navigate("/");
+          }
         } else {
           setUser(null);
         }
@@ -83,7 +87,7 @@ const Auth = () => {
     setErrors({});
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -104,10 +108,19 @@ const Auth = () => {
         return;
       }
 
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account before signing in.",
-      });
+      // Check if user needs to verify email
+      if (data.user && !data.user.email_confirmed_at) {
+        setSignupSuccess(true);
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email to verify your account before signing in.",
+        });
+      } else {
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to Immigro!",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error creating account",
@@ -127,7 +140,7 @@ const Auth = () => {
     setErrors({});
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -143,6 +156,12 @@ const Auth = () => {
         } else {
           throw error;
         }
+        return;
+      }
+
+      // Check if email is verified
+      if (data.user && !data.user.email_confirmed_at) {
+        setErrors({ email: 'Please verify your email before signing in. Check your inbox for a verification link.' });
         return;
       }
 
@@ -163,6 +182,48 @@ const Auth = () => {
 
   if (user) {
     return null; // Will redirect to home
+  }
+
+  // Show success message after signup
+  if (signupSuccess) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center p-4 relative"
+        style={{
+          backgroundImage: `url('/lovable-uploads/6e3f182b-7db9-4db3-b92b-86082c8dccfc.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
+        
+        <Card className="w-full max-w-md relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
+            <CardTitle className="text-2xl font-bold text-navy-800">
+              Check Your Email
+            </CardTitle>
+            <p className="text-muted-foreground">
+              We've sent a verification link to <strong>{email}</strong>
+            </p>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Please click the verification link in your email to activate your account. 
+              You'll be able to sign in once your email is verified.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => setSignupSuccess(false)}
+              className="w-full"
+            >
+              Back to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

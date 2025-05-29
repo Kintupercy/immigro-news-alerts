@@ -27,7 +27,7 @@ const EmailVerification = () => {
       }
 
       try {
-        const { error } = await supabase.auth.verifyOtp({
+        const { data, error } = await supabase.auth.verifyOtp({
           token_hash,
           type: 'email'
         });
@@ -43,6 +43,7 @@ const EmailVerification = () => {
         // Redirect to dashboard after a short delay
         setTimeout(() => navigate('/'), 2000);
       } catch (error: any) {
+        console.error('Email verification error:', error);
         setError(error.message);
         toast({
           title: "Verification failed",
@@ -58,8 +59,18 @@ const EmailVerification = () => {
   }, [searchParams, navigate, toast]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Card className="w-full max-w-md">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url('/lovable-uploads/6e3f182b-7db9-4db3-b92b-86082c8dccfc.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
+      
+      <Card className="w-full max-w-md relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-navy-800">
             Email Verification

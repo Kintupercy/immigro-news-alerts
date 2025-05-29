@@ -11,6 +11,7 @@ import NewsFeed from "@/components/NewsFeed";
 import PersonalizedNewsFeed from "@/components/PersonalizedNewsFeed";
 import UserProfile from "@/components/UserProfile";
 import OnboardingWrapper from "@/components/OnboardingWrapper";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 
 const AuthenticatedApp = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -97,6 +98,9 @@ const AuthenticatedApp = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Email Verification Banner */}
+        <EmailVerificationBanner user={user} />
+        
         <Tabs defaultValue="personalized" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="personalized" className="flex items-center gap-2">
