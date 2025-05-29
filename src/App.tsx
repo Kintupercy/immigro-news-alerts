@@ -13,6 +13,7 @@ import Signup from "./pages/Signup";
 import Auth from "./pages/Auth";
 import Resources from "./pages/Resources";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import EmailVerification from "./pages/EmailVerification";
@@ -70,6 +71,7 @@ const App = () => {
             <Route path="/news" element={<News />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/signup" element={<Signup />} />

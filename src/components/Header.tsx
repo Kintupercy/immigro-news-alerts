@@ -12,6 +12,7 @@ const Header = () => {
     { name: "Categories", href: "#categories", isScroll: true },
     { name: "Resources", href: "/resources" },
     { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ];
 
   const handleScrollToSection = (sectionId: string) => {
