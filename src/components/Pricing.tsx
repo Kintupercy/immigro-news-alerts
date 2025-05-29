@@ -14,7 +14,8 @@ const Pricing = () => {
         "Weekly news digest",
         "3 immigration categories",
         "Email notifications",
-        "Basic news archive"
+        "Basic news archive",
+        "English only"
       ],
       buttonText: "Get Started",
       popular: false
@@ -29,6 +30,7 @@ const Pricing = () => {
         "All 13+ immigration categories",
         "Email notifications",
         "SMS notifications",
+        "Spanish translation",
         "Full news archive",
         "Priority support"
       ],
@@ -46,6 +48,7 @@ const Pricing = () => {
         "All 13+ immigration categories",
         "Email notifications",
         "SMS notifications",
+        "Spanish translation",
         "Full news archive",
         "Priority support",
         "30% savings vs monthly"
