@@ -1,8 +1,72 @@
+
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Users, Clock, Star } from "lucide-react";
+import { Users, Clock, Star, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Resources = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleWaitlistSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .insert([{ 
+          email,
+          preferences: {
+            waitlist: 'legal-resources',
+            subscribedAt: new Date().toISOString()
+          }
+        }]);
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already subscribed",
+            description: "This email is already on our waitlist.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Successfully joined the waitlist!",
+          description: "We'll notify you when our legal resources become available.",
+        });
+        setEmail("");
+      }
+    } catch (error) {
+      console.error('Waitlist signup error:', error);
+      toast({
+        title: "Signup failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -61,12 +125,31 @@ const Resources = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Get Notified When We Launch
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-6">
               Be the first to know when our legal resources become available.
             </p>
-            <button className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors">
-              Join the Waitlist
-            </button>
+            
+            <form onSubmit={handleWaitlistSignup} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+              <div className="relative flex-1">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-12 py-3 text-base bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="px-8 py-3 text-base bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-colors rounded-lg disabled:opacity-50"
+              >
+                {isLoading ? "Joining..." : "Join the Waitlist"}
+              </Button>
+            </form>
           </div>
         </div>
       </div>
