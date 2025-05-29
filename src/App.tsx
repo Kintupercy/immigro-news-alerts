@@ -80,6 +80,10 @@ const App = () => {
               element={user ? <Navigate to="/" replace /> : <Auth />} 
             />
             
+            {/* Email verification and password reset routes */}
+            <Route path="/email-verification" element={<EmailVerification />} />
+            <Route path="/password-reset" element={<PasswordReset />} />
+            
             {/* Protected routes */}
             <Route 
               path="/dashboard" 
