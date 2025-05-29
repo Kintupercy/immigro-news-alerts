@@ -14,11 +14,6 @@ const Header = () => {
     { name: "About", href: "/about" },
   ];
 
-  const legalItems = [
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
-  ];
-
   const handleScrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -71,31 +66,20 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* Search and Mobile menu button */}
-          <div className="flex items-center space-x-4">
+          {/* Mobile menu button */}
+          <div className="md:hidden">
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-slate-800 hover:text-slate-600 hover:bg-stone-100"
             >
-              <Search className="h-5 w-5" />
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
-            
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-slate-800 hover:text-slate-600 hover:bg-stone-100"
-              >
-                {isMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -132,40 +116,9 @@ const Header = () => {
                   </a>
                 )
               ))}
-              
-              {/* Legal links in mobile menu */}
-              <div className="border-t border-stone-200 pt-2 mt-2">
-                {legalItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="text-slate-600 hover:text-slate-800 block px-3 py-2 text-sm font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
             </div>
           </div>
         )}
-      </div>
-      
-      {/* Footer-style legal links for desktop */}
-      <div className="hidden md:block border-t border-stone-200/50 bg-stone-50/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center space-x-6 py-2">
-            {legalItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-xs text-slate-600 hover:text-slate-800 transition-colors duration-200"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-        </div>
       </div>
     </header>
   );

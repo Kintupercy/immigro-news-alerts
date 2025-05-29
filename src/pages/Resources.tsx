@@ -1,5 +1,5 @@
-
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Users, Clock, Star } from "lucide-react";
 
 const Resources = () => {
@@ -70,6 +70,8 @@ const Resources = () => {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };
