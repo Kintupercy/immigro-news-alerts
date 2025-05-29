@@ -64,7 +64,7 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
       return;
     }
 
-    if (currentStep === 2 && notificationPreferences.sms && !phoneNumber) {
+    if (currentStep === 2 && notificationPreferences.sms && !phoneNumber.trim()) {
       toast({
         title: "Phone number required",
         description: "Please enter your phone number for SMS notifications.",
@@ -80,29 +80,86 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
     setLoading(true);
     
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          phone_number: phoneNumber,
-          preferred_categories: selectedCategories,
-          notification_preferences: notificationPreferences,
-          onboarding_completed: true
-        })
-        .eq('user_id', user.id);
+      console.log('Starting onboarding completion for user:', user.id);
+      console.log('Selected categories:', selectedCategories);
+      console.log('Phone number:', phoneNumber);
+      console.log('Notification preferences:', notificationPreferences);
 
-      if (error) throw error;
+      // Clean phone number - remove formatting for storage
+      const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+      
+      // Prepare the update data
+      const updateData = {
+        phone_number: cleanPhoneNumber || null,
+        preferred_categories: selectedCategories,
+        notification_preferences: notificationPreferences,
+        onboarding_completed: true,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('Update data:', updateData);
+
+      // Check if profile exists first
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('Error checking existing profile:', fetchError);
+        throw fetchError;
+      }
+
+      let result;
+      if (existingProfile) {
+        // Update existing profile
+        console.log('Updating existing profile');
+        result = await supabase
+          .from('user_profiles')
+          .update(updateData)
+          .eq('user_id', user.id);
+      } else {
+        // Create new profile
+        console.log('Creating new profile');
+        result = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: user.id,
+            first_name: user.user_metadata?.first_name || null,
+            last_name: user.user_metadata?.last_name || null,
+            ...updateData
+          });
+      }
+
+      console.log('Database operation result:', result);
+
+      if (result.error) {
+        console.error('Database error:', result.error);
+        throw result.error;
+      }
+
+      console.log('Onboarding completed successfully');
 
       toast({
         title: "Welcome to Immigro!",
         description: "Your preferences have been saved. You'll start receiving personalized immigration news."
       });
 
+      // Call onComplete after successful database update
       onComplete();
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error('Error completing onboarding:', error);
+      
+      let errorMessage = "Please try again.";
+      if (error?.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
       toast({
         title: "Error saving preferences",
-        description: "Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -111,12 +168,20 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
   };
 
   const formatPhoneNumber = (value: string) => {
+    // Remove all non-digits
     const cleaned = value.replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-    if (match) {
-      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    
+    // Don't format if empty
+    if (!cleaned) return '';
+    
+    // Format as (XXX) XXX-XXXX
+    if (cleaned.length <= 3) {
+      return cleaned;
+    } else if (cleaned.length <= 6) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+    } else {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
     }
-    return value;
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -333,13 +398,14 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
               <Button
                 variant="outline"
                 onClick={() => setCurrentStep(prev => prev - 1)}
+                disabled={loading}
               >
                 Back
               </Button>
             )}
             
             {currentStep < totalSteps ? (
-              <Button onClick={handleNextStep} className="ml-auto">
+              <Button onClick={handleNextStep} className="ml-auto" disabled={loading}>
                 Continue
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
