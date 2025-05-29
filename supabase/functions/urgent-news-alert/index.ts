@@ -43,27 +43,49 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing urgent news alert for: ${urgentNews.title}`);
 
-    // Get all email subscribers
-    const { data: emailSubscribers, error: subscribersError } = await supabase
-      .from('email_subscriptions')
-      .select('email');
+    // Get users who have email notifications enabled and are interested in this category
+    const { data: userProfiles, error: profilesError } = await supabase
+      .from('user_profiles')
+      .select('user_id, first_name, notification_preferences, preferred_categories')
+      .contains('preferred_categories', [urgentNews.category])
+      .eq('onboarding_completed', true);
 
-    if (subscribersError) {
-      throw new Error('Error fetching email subscribers: ' + subscribersError.message);
+    if (profilesError) {
+      throw new Error('Error fetching user profiles: ' + profilesError.message);
     }
 
-    if (!emailSubscribers || emailSubscribers.length === 0) {
-      return new Response(JSON.stringify({ message: 'No email subscribers found' }), {
+    if (!userProfiles || userProfiles.length === 0) {
+      return new Response(JSON.stringify({ message: 'No users found for this category' }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    console.log(`Found ${emailSubscribers.length} email subscribers`);
+    // Filter users who have email notifications enabled
+    const emailEnabledUsers = userProfiles.filter(profile => {
+      const preferences = profile.notification_preferences;
+      return preferences && preferences.email === true;
+    });
 
-    // Send urgent alert emails to all subscribers
-    const emailPromises = emailSubscribers.map(async (subscriber) => {
+    if (emailEnabledUsers.length === 0) {
+      return new Response(JSON.stringify({ message: 'No users with email notifications enabled' }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`Found ${emailEnabledUsers.length} users with email notifications enabled`);
+
+    // Get email addresses for these users
+    const emailPromises = emailEnabledUsers.map(async (profile) => {
       try {
+        const { data: user, error: userError } = await supabase.auth.admin.getUserById(profile.user_id);
+        
+        if (userError || !user) {
+          console.error(`Error fetching user ${profile.user_id}:`, userError);
+          return null;
+        }
+
         const response = await fetch(`${supabaseUrl}/functions/v1/send-urgent-alert-email`, {
           method: 'POST',
           headers: {
@@ -71,36 +93,39 @@ const handler = async (req: Request): Promise<Response> => {
             'Authorization': `Bearer ${supabaseServiceKey}`,
           },
           body: JSON.stringify({
-            to: subscriber.email,
+            to: user.user.email,
             newsTitle: urgentNews.title,
             newsContent: urgentNews.content,
             newsSummary: urgentNews.summary,
             newsCategory: urgentNews.category,
             sourceUrl: urgentNews.source_url,
+            firstName: profile.first_name,
           }),
         });
 
         if (response.ok) {
-          console.log(`Urgent alert sent to: ${subscriber.email}`);
-          return { email: subscriber.email, status: 'sent' };
+          console.log(`Urgent alert sent to: ${user.user.email}`);
+          return { email: user.user.email, status: 'sent' };
         } else {
-          console.error(`Failed to send urgent alert to: ${subscriber.email}`);
-          return { email: subscriber.email, status: 'failed' };
+          console.error(`Failed to send urgent alert to: ${user.user.email}`);
+          return { email: user.user.email, status: 'failed' };
         }
       } catch (error) {
-        console.error(`Error sending urgent alert to ${subscriber.email}:`, error);
-        return { email: subscriber.email, status: 'error' };
+        console.error(`Error sending urgent alert to user ${profile.user_id}:`, error);
+        return { email: 'unknown', status: 'error' };
       }
     });
 
     const results = await Promise.all(emailPromises);
-    const sentCount = results.filter(r => r.status === 'sent').length;
+    const validResults = results.filter(result => result !== null);
+    const sentCount = validResults.filter(r => r.status === 'sent').length;
 
-    console.log(`Urgent news alerts processed: ${sentCount}/${results.length} sent successfully`);
+    console.log(`Urgent news alerts processed: ${sentCount}/${validResults.length} sent successfully`);
 
     return new Response(JSON.stringify({ 
-      message: `Urgent news alerts sent to ${sentCount} subscribers`,
-      totalSubscribers: results.length,
+      message: `Urgent news alerts sent to ${sentCount} users with email notifications`,
+      totalUsersInCategory: userProfiles.length,
+      usersWithEmailEnabled: emailEnabledUsers.length,
       sentCount,
       newsTitle: urgentNews.title
     }), {

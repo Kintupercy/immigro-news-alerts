@@ -17,6 +17,7 @@ interface UrgentAlertEmailRequest {
   newsSummary: string;
   newsCategory: string;
   sourceUrl?: string;
+  firstName?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -25,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, newsTitle, newsContent, newsSummary, newsCategory, sourceUrl }: UrgentAlertEmailRequest = await req.json();
+    const { to, newsTitle, newsContent, newsSummary, newsCategory, sourceUrl, firstName }: UrgentAlertEmailRequest = await req.json();
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -59,6 +60,8 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div class="content">
+            ${firstName ? `<p>Hi ${firstName},</p>` : '<p>Hello,</p>'}
+            
             <span class="category-badge">${newsCategory.toUpperCase()}</span>
             
             <h2 class="news-title">${newsTitle}</h2>
@@ -79,8 +82,8 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <div class="footer">
-              <p>You're receiving this urgent alert because you subscribed to Immigro immigration news alerts.</p>
-              <p>Want to change your preferences? <a href="https://xybpgorbkiaitimxiqej.supabase.co/profile">Update your settings</a></p>
+              <p>You're receiving this urgent alert because you subscribed to Immigro immigration news alerts and selected email notifications during onboarding.</p>
+              <p>Want to change your notification preferences? <a href="https://xybpgorbkiaitimxiqej.supabase.co/profile">Update your settings</a></p>
               <p>© 2024 Immigro. All rights reserved.</p>
             </div>
           </div>

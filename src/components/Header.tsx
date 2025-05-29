@@ -1,10 +1,10 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Globe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import LanguageToggle from "./LanguageToggle";
 import UrgentNewsAlert from "./UrgentNewsAlert";
 
 const Header = () => {
@@ -84,8 +84,6 @@ const Header = () => {
               >
                 Contact
               </Link>
-              
-              <LanguageToggle />
 
               {user ? (
                 <div className="flex items-center space-x-4">
@@ -182,10 +180,6 @@ const Header = () => {
                 >
                   Contact
                 </Link>
-                
-                <div className="px-3 py-2">
-                  <LanguageToggle />
-                </div>
 
                 {user ? (
                   <div className="px-3 py-2 space-y-2">
