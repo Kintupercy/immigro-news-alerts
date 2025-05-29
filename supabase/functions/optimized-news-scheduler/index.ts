@@ -44,11 +44,11 @@ function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
   return true;
 }
 
-// Prioritizing NBC, FOX, NPR for immigration news coverage
+// Prioritizing NBC, FOX, NPR, CNN for immigration news coverage
 const approvedDomains = [
   "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "nbcnews.com", "foxnews.com", "npr.org",
-  "cnn.com", "nytimes.com", "cnbc.com",
+  "nbcnews.com", "foxnews.com", "npr.org", "cnn.com",
+  "nytimes.com", "cnbc.com",
   "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
   "abcnews.go.com", "cbsnews.com",
   "politico.com", "axios.com", "bloomberg.com", "wsj.com",
@@ -137,10 +137,11 @@ PRIORITIZE THESE MAJOR SOURCES:
 - NBCNews.com (NBC News immigration section)
 - FoxNews.com (Fox News immigration coverage)  
 - NPR.org (NPR immigration reporting)
+- CNN.com (CNN immigration news)
 
 ADDITIONAL SOURCES:
 Government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-News: CNN, NYTimes, CNBC, Reuters, AP, BBC, Washington Post
+News: NYTimes, CNBC, Reuters, AP, BBC, Washington Post
 Legal: Immigration.com, Nolo.com, ILRC.org
 
 Requirements:
@@ -156,7 +157,7 @@ Format:
 Title: [immigration-focused headline]
 Summary: [brief immigration impact summary]
 Content: [detailed immigration content]
-Source: [verified NBC/FOX/NPR or other approved URL]
+Source: [verified NBC/FOX/NPR/CNN or other approved URL]
 Urgent: [true/false]
 Tags: [immigration, comma-separated tags]`;
 
@@ -171,7 +172,7 @@ Tags: [immigration, comma-separated tags]`;
               messages: [
                 {
                   role: 'system',
-                  content: 'Expert U.S. immigration news researcher. Provide verified immigration-specific info from NBC News, Fox News, NPR, and other approved sources only. Focus exclusively on immigration law, visas, green cards, citizenship, deportation, asylum, border policy. Never include general political news unless directly related to immigration law changes.'
+                  content: 'Expert U.S. immigration news researcher. Provide verified immigration-specific info from NBC News, Fox News, NPR, CNN, and other approved sources only. Focus exclusively on immigration law, visas, green cards, citizenship, deportation, asylum, border policy. Never include general political news unless directly related to immigration law changes.'
                 },
                 {
                   role: 'user',
@@ -259,7 +260,7 @@ Tags: [immigration, comma-separated tags]`;
         success: true, 
         articlesAdded: totalArticlesAdded,
         categoriesProcessed: categories.length,
-        message: `Optimized immigration news fetch: Added ${totalArticlesAdded} verified immigration articles from NBC, Fox News, NPR and other trusted sources`
+        message: `Optimized immigration news fetch: Added ${totalArticlesAdded} verified immigration articles from NBC, Fox News, NPR, CNN and other trusted sources`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

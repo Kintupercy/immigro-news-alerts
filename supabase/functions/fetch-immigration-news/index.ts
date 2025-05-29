@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -22,11 +23,11 @@ const immigrationCategories = [
   { slug: 'refugees-asylees', name: 'Refugees/asylees/DACA/TPS holders' },
 ];
 
-// Focused on NBC, FOX, NPR plus other trusted sources for immigration news
+// Prioritizing NBC, FOX, NPR, CNN plus other trusted sources for immigration news
 const approvedDomains = [
   "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "nbcnews.com", "foxnews.com", "npr.org", 
-  "cnn.com", "nytimes.com", "cnbc.com",
+  "nbcnews.com", "foxnews.com", "npr.org", "cnn.com",
+  "nytimes.com", "cnbc.com",
   "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
   "abcnews.go.com", "cbsnews.com",
   "politico.com", "axios.com", "bloomberg.com", "wsj.com"
@@ -53,9 +54,10 @@ REQUIRED SOURCES - Prioritize these major outlets:
 - NBCNews.com (NBC News immigration coverage)
 - FoxNews.com (Fox News immigration section) 
 - NPR.org (NPR immigration reporting)
+- CNN.com (CNN immigration news)
 
 ADDITIONAL TRUSTED SOURCES:
-- CNN.com, NYTimes.com, CNBC.com, Reuters.com, AP News
+- NYTimes.com, CNBC.com, Reuters.com, AP News
 - Washington Post, ABC News, CBS News, Politico, Bloomberg
 - USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
 
@@ -75,7 +77,7 @@ Return exactly 4-5 IMMIGRATION-SPECIFIC news articles in this JSON format:
 
 Requirements:
 - MUST be about U.S. immigration law, visas, green cards, citizenship, deportation, asylum, or border policy
-- Include valid URLs from NBC News, Fox News, NPR, or other specified sources
+- Include valid URLs from NBC News, Fox News, NPR, CNN, or other specified sources
 - Focus on policy changes, court decisions, enforcement updates, application changes
 - Mark urgent only for breaking immigration policy news or immediate deadlines
 - NO general politics unless directly related to immigration law
@@ -96,7 +98,7 @@ Requirements:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert U.S. immigration news researcher. Focus ONLY on immigration law, visa updates, policy changes, court decisions, and enforcement actions. Always return valid JSON with verified source URLs from NBC News, Fox News, NPR, or other approved immigration news sources. Never include general political news unless directly related to immigration law.'
+            content: 'You are an expert U.S. immigration news researcher. Focus ONLY on immigration law, visa updates, policy changes, court decisions, and enforcement actions. Always return valid JSON with verified source URLs from NBC News, Fox News, NPR, CNN, or other approved immigration news sources. Never include general political news unless directly related to immigration law.'
           },
           {
             role: 'user',
