@@ -4,10 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { LogOut, User as UserIcon, Newspaper, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
 import NewsFeed from "@/components/NewsFeed";
 import PersonalizedNewsFeed from "@/components/PersonalizedNewsFeed";
 import UserProfile from "@/components/UserProfile";
@@ -77,18 +76,15 @@ const AuthenticatedApp = () => {
 
   const MainApp = () => (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      {/* User Navigation */}
-      <div className="bg-white border-b">
+      {/* Simplified Header with just logo and sign out */}
+      <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <UserIcon className="w-5 h-5" />
-                <span className="font-medium">
-                  Welcome back, {user.user_metadata?.first_name || user.email}
-                </span>
+              <h1 className="text-2xl font-bold text-slate-800">⚖️ Immigro</h1>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <UserIcon className="w-4 h-4" />
+                <span>Welcome back, {user.user_metadata?.first_name || user.email}</span>
               </div>
             </div>
             <Button variant="ghost" onClick={handleSignOut} className="flex items-center gap-2">
