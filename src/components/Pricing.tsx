@@ -1,3 +1,4 @@
+
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -26,9 +27,9 @@ const Pricing = () => {
       features: [
         "Real-time alerts",
         "All 13+ immigration categories",
-        "SMS + Email notifications",
+        "Email notifications",
+        "SMS notifications",
         "Full news archive",
-        "Expert analysis",
         "Priority support"
       ],
       buttonText: "Start Pro Trial",
@@ -43,9 +44,9 @@ const Pricing = () => {
       features: [
         "Real-time alerts",
         "All 13+ immigration categories",
-        "SMS + Email notifications",
+        "Email notifications",
+        "SMS notifications",
         "Full news archive",
-        "Expert analysis",
         "Priority support",
         "30% savings vs monthly"
       ],
