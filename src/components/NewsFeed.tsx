@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Youtube } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield } from "lucide-react";
 import { format } from "date-fns";
+import { cache } from "@/utils/cache";
+import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface NewsArticle {
   id: string;
@@ -47,13 +49,22 @@ const NewsFeed = () => {
 
   const fetchCategories = async () => {
     try {
-      const { data, error } = await supabase
-        .from('immigration_categories')
-        .select('*')
-        .order('name');
+      const cacheKey = 'immigration_categories';
+      const categories = await cache.getOrFetch(
+        cacheKey,
+        async () => {
+          const { data, error } = await supabase
+            .from('immigration_categories')
+            .select('*')
+            .order('name');
 
-      if (error) throw error;
-      setCategories(data || []);
+          if (error) throw error;
+          return data || [];
+        },
+        30 // Cache for 30 minutes
+      );
+      
+      setCategories(categories);
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast({
@@ -67,32 +78,52 @@ const NewsFeed = () => {
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('immigration_news')
-        .select('*')
-        .eq('status', 'published')
-        .not('source_url', 'is', null)
-        .order('published_at', { ascending: false });
-
-      if (selectedCategory !== 'all') {
-        query = query.eq('category', selectedCategory);
+      
+      // Check rate limit
+      if (!rateLimiter.isAllowed('news-fetch', RATE_LIMITS.NEWS_FETCH)) {
+        toast({
+          title: "Rate limit exceeded",
+          description: "Please wait before fetching more news.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const { data, error } = await query;
+      const cacheKey = `news_${selectedCategory}`;
+      const articles = await cache.getOrFetch(
+        cacheKey,
+        async () => {
+          let query = supabase
+            .from('immigration_news')
+            .select('*')
+            .eq('status', 'published')
+            .not('source_url', 'is', null)
+            .order('published_at', { ascending: false });
 
-      if (error) throw error;
-      
-      // Additional client-side filtering to ensure no YouTube content
-      const filteredData = (data || []).filter(article => 
-        article.source_url && 
-        !article.source_url.includes('youtube.com') &&
-        !article.source_url.includes('youtu.be')
+          if (selectedCategory !== 'all') {
+            query = query.eq('category', selectedCategory);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          
+          // Filter out any problematic content
+          const filteredData = (data || []).filter(article => 
+            article.source_url && 
+            !article.source_url.includes('youtube.com') &&
+            !article.source_url.includes('youtu.be')
+          );
+          
+          return filteredData;
+        },
+        5 // Cache for 5 minutes
       );
       
-      setArticles(filteredData);
+      setArticles(articles);
 
-      // If no articles found, automatically fetch new ones
-      if (filteredData.length === 0) {
+      // If no articles found and not cached, fetch fresh news
+      if (articles.length === 0) {
         console.log('No articles found, fetching fresh news...');
         await refreshNews(false);
       }
@@ -111,6 +142,21 @@ const NewsFeed = () => {
   const refreshNews = async (forceRefresh: boolean = true) => {
     try {
       setRefreshing(true);
+      
+      // Check rate limit for refresh
+      if (!rateLimiter.isAllowed('news-refresh', RATE_LIMITS.API_CALLS)) {
+        toast({
+          title: "Too many refresh attempts",
+          description: "Please wait before refreshing again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Clear cache to force fresh data
+      if (forceRefresh) {
+        cache.delete(`news_${selectedCategory}`);
+      }
       
       toast({
         title: "Fetching latest news...",
@@ -131,6 +177,8 @@ const NewsFeed = () => {
           title: "News updated!",
           description: `Successfully fetched ${data.articlesAdded} new verified articles.`,
         });
+        // Clear cache and refetch
+        cache.delete(`news_${selectedCategory}`);
         await fetchArticles();
       } else {
         toast({
@@ -151,6 +199,8 @@ const NewsFeed = () => {
   };
 
   useEffect(() => {
+    // Clear cache and fetch when category changes
+    cache.delete(`news_${selectedCategory}`);
     fetchArticles();
   }, [selectedCategory]);
 
@@ -179,16 +229,10 @@ const NewsFeed = () => {
     return officialDomains.some(domain => url.includes(domain));
   };
 
-  const isYouTubeUrl = (url: string | null) => {
-    if (!url) return false;
-    return url.includes('youtube.com') || url.includes('youtu.be');
-  };
-
   const ArticleCard = ({ article }: { article: NewsArticle }) => {
     const isExpanded = expandedArticle === article.id;
     const sourceDomain = getSourceDomain(article.source_url);
     const isOfficial = isOfficialSource(article.source_url);
-    const isYouTube = isYouTubeUrl(article.source_url);
     
     return (
       <Card className={`mb-4 ${article.is_urgent ? 'border-red-200 bg-red-50' : ''}`}>
@@ -213,10 +257,9 @@ const NewsFeed = () => {
             
             <Badge 
               variant={isOfficial ? "default" : "outline"} 
-              className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : isYouTube ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}
+              className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
             >
               {isOfficial && <Shield className="w-3 h-3 mr-1" />}
-              {isYouTube && <Youtube className="w-3 h-3 mr-1" />}
               {sourceDomain}
             </Badge>
             
@@ -255,7 +298,7 @@ const NewsFeed = () => {
                 variant="default"
                 size="sm"
                 asChild
-                className={isYouTube ? "bg-red-600 hover:bg-red-700" : "bg-navy-800 hover:bg-navy-700"}
+                className="bg-navy-800 hover:bg-navy-700"
               >
                 <a 
                   href={article.source_url} 
@@ -263,7 +306,7 @@ const NewsFeed = () => {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1"
                 >
-                  {isYouTube ? <Youtube className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+                  <ExternalLink className="w-4 h-4" />
                   Source
                 </a>
               </Button>
@@ -277,20 +320,7 @@ const NewsFeed = () => {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <LoadingSpinner size="lg" text="Loading verified news..." className="py-12" />
       </div>
     );
   }
@@ -304,7 +334,7 @@ const NewsFeed = () => {
             <h1 className="text-3xl font-bold mb-2">VERIFIED IMMIGRATION UPDATES</h1>
             <p className="text-cream-200 text-sm uppercase tracking-wide">
               <Shield className="inline w-4 h-4 mr-1" />
-              SOURCED FROM OFFICIAL GOVERNMENT & TRUSTED NEWS OUTLETS
+              CACHED & OPTIMIZED FOR FAST ACCESS
             </p>
           </div>
           <Button 

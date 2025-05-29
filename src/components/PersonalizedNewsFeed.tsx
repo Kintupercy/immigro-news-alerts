@@ -19,7 +19,7 @@ interface NewsArticle {
   category: string;
   published_at: string;
   is_urgent: boolean;
-  source_name: string;
+  summary: string;
 }
 
 interface PersonalizedNewsFeedProps {
@@ -41,29 +41,33 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
       // Get user preferences
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('preferences')
+        .select('preferred_categories')
         .eq('user_id', user.id)
         .single();
 
-      const preferences = profile?.preferences || [];
+      const preferences = profile?.preferred_categories || [];
       
-      if (preferences.length === 0) {
-        return [];
-      }
-
-      // Fetch news based on preferences
-      const { data: news, error } = await supabase
-        .from('news_articles')
+      // If no preferences, return recent articles from all categories
+      let query = supabase
+        .from('immigration_news')
         .select('*')
-        .in('category', preferences)
+        .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(20);
+
+      // Filter by preferences if they exist
+      if (preferences.length > 0) {
+        query = query.in('category', preferences);
+      }
+
+      const { data: news, error } = await query;
 
       if (error) throw error;
       return news as NewsArticle[];
     },
     retry: 2,
     refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   const handleRefresh = async () => {
@@ -212,11 +216,11 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
             </CardHeader>
             <CardContent className="pt-0">
               <p className="text-muted-foreground mb-4 leading-relaxed break-words">
-                {article.content}
+                {article.summary || article.content.substring(0, 200) + '...'}
               </p>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span className="text-sm font-medium text-navy-600 break-all">
-                  {article.source_name}
+                  Source Article
                 </span>
                 <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                   <a 
