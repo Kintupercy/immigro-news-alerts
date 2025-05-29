@@ -125,8 +125,20 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url('/lovable-uploads/5cb46a58-9c2c-4d5a-87d5-f03985e8aa30.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Fade overlay */}
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
+      
+      {/* Content */}
+      <Card className="w-full max-w-2xl relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-navy-800">
             Welcome to Immigro!
