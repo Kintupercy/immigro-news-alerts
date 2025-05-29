@@ -15,6 +15,8 @@ import Resources from "./pages/Resources";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import EmailVerification from "./pages/EmailVerification";
+import PasswordReset from "./pages/PasswordReset";
 import AuthenticatedApp from "./components/AuthenticatedApp";
 import NotFound from "./pages/NotFound";
 
