@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Youtube } from "lucide-react";
 import { format } from "date-fns";
 
 interface NewsArticle {
@@ -179,10 +179,16 @@ const NewsFeed = () => {
     return officialDomains.some(domain => url.includes(domain));
   };
 
+  const isYouTubeUrl = (url: string | null) => {
+    if (!url) return false;
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  };
+
   const ArticleCard = ({ article }: { article: NewsArticle }) => {
     const isExpanded = expandedArticle === article.id;
     const sourceDomain = getSourceDomain(article.source_url);
     const isOfficial = isOfficialSource(article.source_url);
+    const isYouTube = isYouTubeUrl(article.source_url);
     
     return (
       <Card className={`mb-4 ${article.is_urgent ? 'border-red-200 bg-red-50' : ''}`}>
@@ -207,9 +213,10 @@ const NewsFeed = () => {
             
             <Badge 
               variant={isOfficial ? "default" : "outline"} 
-              className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
+              className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : isYouTube ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}
             >
               {isOfficial && <Shield className="w-3 h-3 mr-1" />}
+              {isYouTube && <Youtube className="w-3 h-3 mr-1" />}
               {sourceDomain}
             </Badge>
             
@@ -248,7 +255,7 @@ const NewsFeed = () => {
                 variant="default"
                 size="sm"
                 asChild
-                className="bg-navy-800 hover:bg-navy-700"
+                className={isYouTube ? "bg-red-600 hover:bg-red-700" : "bg-navy-800 hover:bg-navy-700"}
               >
                 <a 
                   href={article.source_url} 
@@ -256,8 +263,8 @@ const NewsFeed = () => {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1"
                 >
-                  <ExternalLink className="w-4 h-4" />
-                  View Original Source
+                  {isYouTube ? <Youtube className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+                  Source
                 </a>
               </Button>
             )}
