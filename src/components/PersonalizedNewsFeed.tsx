@@ -264,9 +264,10 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
             
             {article.source_url && (
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
                 asChild
+                className="bg-navy-800 hover:bg-navy-700"
               >
                 <a 
                   href={article.source_url} 
@@ -275,7 +276,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
                   className="flex items-center gap-1"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Source
+                  Read Full Article
                 </a>
               </Button>
             )}

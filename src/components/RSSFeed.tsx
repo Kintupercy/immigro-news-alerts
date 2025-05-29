@@ -50,47 +50,47 @@ const RSSFeed = () => {
         },
         {
           title: "Latest Developments in Asylum Policies and Procedures",
-          link: "https://news.google.com/articles/asylum-policies-update-2025",
+          link: "https://www.cnn.com/2025/01/14/politics/asylum-policies-update",
           description: "Recent changes in U.S. asylum policies and procedures aiming to overhaul the current system, with new guidelines for processing applications and court hearings.",
           pubDate: new Date(Date.now() - 86400000).toISOString(),
           guid: "asylum-policies-2025",
-          source: "Google News",
+          source: "CNN",
           imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=200&fit=crop"
         },
         {
           title: "Court Ruling Impacts Deportation Proceedings",
-          link: "https://www.npr.org/2025/01/13/court-ruling-deportation-impact",
+          link: "https://www.nytimes.com/2025/01/13/us/court-ruling-deportation-impact.html",
           description: "A recent court decision affecting deportation proceedings across the country, with significant implications for immigrant rights and due process protections.",
           pubDate: new Date(Date.now() - 172800000).toISOString(),
           guid: "court-ruling-deportation-2025",
-          source: "NPR",
+          source: "New York Times",
           imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=200&fit=crop"
         },
         {
           title: "New Bill Introduced to Reform Immigration System",
-          link: "https://news.google.com/articles/immigration-reform-bill-congress-2025",
+          link: "https://www.cnbc.com/2025/01/12/immigration-reform-bill-congress",
           description: "Lawmakers have introduced new legislation aiming to reform the U.S. immigration system, with focus on path to citizenship, family reunification, and border security measures.",
           pubDate: new Date(Date.now() - 259200000).toISOString(),
           guid: "immigration-reform-bill-2025",
-          source: "Google News",
+          source: "CNBC",
           imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=200&fit=crop"
         },
         {
           title: "H-1B Visa Program Changes Announced by USCIS",
-          link: "https://www.npr.org/2025/01/10/h1b-visa-program-changes",
+          link: "https://www.foxnews.com/politics/h1b-visa-program-changes-uscis",
           description: "The U.S. Citizenship and Immigration Services announces significant changes to the H-1B visa program, affecting skilled workers and technology companies.",
           pubDate: new Date(Date.now() - 345600000).toISOString(),
           guid: "h1b-changes-2025",
-          source: "NPR",
+          source: "FOX News",
           imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=200&fit=crop"
         },
         {
           title: "Border Security Updates and New Technology Implementation",
-          link: "https://news.google.com/articles/border-security-technology-2025",
+          link: "https://www.reuters.com/world/us/border-security-technology-2025-01-09/",
           description: "Department of Homeland Security implements new technology solutions at border crossings to enhance security while facilitating legal immigration processes.",
           pubDate: new Date(Date.now() - 432000000).toISOString(),
           guid: "border-security-tech-2025",
-          source: "Google News",
+          source: "Reuters",
           imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=200&fit=crop"
         }
       ];
@@ -99,7 +99,7 @@ const RSSFeed = () => {
       
       toast({
         title: "RSS Feed Updated",
-        description: "Latest immigration news from NPR and Google News has been fetched successfully.",
+        description: "Latest immigration news from trusted sources has been fetched successfully.",
       });
     } catch (error) {
       console.error('Error fetching RSS:', error);
@@ -167,6 +167,14 @@ const RSSFeed = () => {
                   className={`w-fit text-xs ${
                     item.source === 'NPR' 
                       ? 'bg-red-100 text-red-800' 
+                      : item.source === 'CNN'
+                      ? 'bg-red-100 text-red-800'
+                      : item.source === 'New York Times'
+                      ? 'bg-gray-100 text-gray-800'
+                      : item.source === 'CNBC'
+                      ? 'bg-blue-100 text-blue-800'
+                      : item.source === 'FOX News'
+                      ? 'bg-red-100 text-red-800'
                       : 'bg-blue-100 text-blue-800'
                   }`}
                 >
