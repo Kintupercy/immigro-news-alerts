@@ -13,6 +13,8 @@ import Signup from "./pages/Signup";
 import Auth from "./pages/Auth";
 import Resources from "./pages/Resources";
 import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import AuthenticatedApp from "./components/AuthenticatedApp";
 import NotFound from "./pages/NotFound";
 
@@ -66,6 +68,8 @@ const App = () => {
             <Route path="/news" element={<News />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/signup" element={<Signup />} />
             <Route 
               path="/auth" 
