@@ -44,12 +44,13 @@ function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
   return true;
 }
 
-// Expanded approved sources for better content diversity
+// Prioritizing NBC, FOX, NPR for immigration news coverage
 const approvedDomains = [
   "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "cnn.com", "npr.org", "nytimes.com", "cnbc.com", "foxnews.com",
+  "nbcnews.com", "foxnews.com", "npr.org",
+  "cnn.com", "nytimes.com", "cnbc.com",
   "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
-  "abcnews.go.com", "nbcnews.com", "cbsnews.com",
+  "abcnews.go.com", "cbsnews.com",
   "politico.com", "axios.com", "bloomberg.com", "wsj.com",
   "immigration.com", "nolo.com", "ilrc.org"
 ];
@@ -85,7 +86,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Starting optimized news fetch function');
+    console.log('Starting optimized immigration news fetch function');
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -114,7 +115,7 @@ serve(async (req) => {
       
       await Promise.all(batch.map(async (category: Category) => {
         try {
-          console.log(`Processing category: ${category.name}`);
+          console.log(`Processing immigration category: ${category.name}`);
 
           // Check if we have recent articles for this category (within 2 hours)
           const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
@@ -126,32 +127,38 @@ serve(async (req) => {
             .limit(1);
 
           if (recentArticles && recentArticles.length > 0) {
-            console.log(`Recent articles found for ${category.name}, skipping...`);
+            console.log(`Recent immigration articles found for ${category.name}, skipping...`);
             return;
           }
 
-          const prompt = `Find the latest verified U.S. immigration news for ${category.name} from the past 12-24 hours.
+          const prompt = `Find the latest verified U.S. IMMIGRATION news specifically for ${category.name} from the past 12-24 hours. Focus ONLY on immigration law changes, visa updates, policy decisions, deportation news, asylum cases, and citizenship matters.
 
-REQUIRED SOURCES ONLY:
+PRIORITIZE THESE MAJOR SOURCES:
+- NBCNews.com (NBC News immigration section)
+- FoxNews.com (Fox News immigration coverage)  
+- NPR.org (NPR immigration reporting)
+
+ADDITIONAL SOURCES:
 Government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-News: CNN, NPR, NYTimes, CNBC, FOX, Reuters, AP, BBC, Washington Post
+News: CNN, NYTimes, CNBC, Reuters, AP, BBC, Washington Post
 Legal: Immigration.com, Nolo.com, ILRC.org
 
 Requirements:
-- Provide 2-3 distinct recent news items
-- Include factual, verified information only
+- Provide 2-3 distinct IMMIGRATION-SPECIFIC recent news items
+- Include factual, verified information about immigration law/policy only
 - Format: Title, Summary (2-3 sentences), Content (3-4 paragraphs), Source URL
-- Mark urgent only for immediate policy changes
-- Include relevant tags
+- Mark urgent only for immediate immigration policy changes
+- Include relevant immigration tags
+- NO general politics unless directly about immigration law
 - NO video, social media, or unverified sources
 
 Format:
-Title: [headline]
-Summary: [brief summary]
-Content: [detailed content]
-Source: [verified URL]
+Title: [immigration-focused headline]
+Summary: [brief immigration impact summary]
+Content: [detailed immigration content]
+Source: [verified NBC/FOX/NPR or other approved URL]
 Urgent: [true/false]
-Tags: [comma-separated tags]`;
+Tags: [immigration, comma-separated tags]`;
 
           const response = await fetch('https://api.perplexity.ai/chat/completions', {
             method: 'POST',
@@ -164,7 +171,7 @@ Tags: [comma-separated tags]`;
               messages: [
                 {
                   role: 'system',
-                  content: 'Expert immigration researcher. Provide verified info from approved sources only. Never include video/social content. Always return source URLs from approved domains.'
+                  content: 'Expert U.S. immigration news researcher. Provide verified immigration-specific info from NBC News, Fox News, NPR, and other approved sources only. Focus exclusively on immigration law, visas, green cards, citizenship, deportation, asylum, border policy. Never include general political news unless directly related to immigration law changes.'
                 },
                 {
                   role: 'user',
@@ -179,7 +186,7 @@ Tags: [comma-separated tags]`;
           });
 
           if (!response.ok) {
-            console.error(`API error for ${category.name}: ${response.status}`);
+            console.error(`API error for immigration category ${category.name}: ${response.status}`);
             return;
           }
 
@@ -187,17 +194,17 @@ Tags: [comma-separated tags]`;
           const content = data.choices[0]?.message?.content;
 
           if (!content) {
-            console.error(`No content for ${category.name}`);
+            console.error(`No immigration content for ${category.name}`);
             return;
           }
 
           const newsItems = parseNewsContent(content, category.slug);
 
-          // Insert valid news items
+          // Insert valid immigration news items
           for (const item of newsItems) {
             try {
               if (!item.source_url || !isValidSource(item.source_url)) {
-                console.log(`Invalid source: ${item.source_url}`);
+                console.log(`Invalid immigration source: ${item.source_url}`);
                 continue;
               }
 
@@ -209,7 +216,7 @@ Tags: [comma-separated tags]`;
                 .limit(1);
 
               if (existing && existing.length > 0) {
-                console.log(`Duplicate: ${item.title}`);
+                console.log(`Duplicate immigration article: ${item.title}`);
                 continue;
               }
 
@@ -222,22 +229,22 @@ Tags: [comma-separated tags]`;
                   category: category.slug,
                   source_url: item.source_url,
                   is_urgent: item.is_urgent || false,
-                  tags: item.tags || [category.slug],
+                  tags: [...(item.tags || []), 'immigration'],
                   status: 'published',
                   published_at: new Date().toISOString()
                 });
 
               if (!insertError) {
                 totalArticlesAdded++;
-                console.log(`Added: ${item.title}`);
+                console.log(`Added immigration article: ${item.title}`);
               }
             } catch (error) {
-              console.error(`Error inserting article:`, error);
+              console.error(`Error inserting immigration article:`, error);
             }
           }
 
         } catch (error) {
-          console.error(`Error processing ${category.name}:`, error);
+          console.error(`Error processing immigration category ${category.name}:`, error);
         }
       }));
 
@@ -252,7 +259,7 @@ Tags: [comma-separated tags]`;
         success: true, 
         articlesAdded: totalArticlesAdded,
         categoriesProcessed: categories.length,
-        message: `Optimized fetch: Added ${totalArticlesAdded} verified articles`
+        message: `Optimized immigration news fetch: Added ${totalArticlesAdded} verified immigration articles from NBC, Fox News, NPR and other trusted sources`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -261,7 +268,7 @@ Tags: [comma-separated tags]`;
     );
 
   } catch (error) {
-    console.error('Error in optimized news fetch:', error);
+    console.error('Error in optimized immigration news fetch:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
@@ -294,14 +301,14 @@ function parseNewsContent(content: string, categorySlug: string): NewsItem[] {
           summary: currentArticle.summary || '',
           source_url: currentArticle.source_url,
           is_urgent: currentArticle.is_urgent || false,
-          tags: currentArticle.tags || [categorySlug]
+          tags: [...(currentArticle.tags || []), categorySlug, 'immigration']
         });
       }
       
       // Start new article
       currentArticle = {
         title: trimmedLine.replace(/^title:\s*/i, '').replace(/[*#]/g, '').trim(),
-        tags: [categorySlug]
+        tags: [categorySlug, 'immigration']
       };
     } 
     else if (currentArticle.title) {
@@ -322,10 +329,7 @@ function parseNewsContent(content: string, categorySlug: string): NewsItem[] {
       }
       else if (trimmedLine.toLowerCase().startsWith('tags:')) {
         const tagsText = trimmedLine.replace(/^tags:\s*/i, '').trim();
-        currentArticle.tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
-        if (!currentArticle.tags.includes(categorySlug)) {
-          currentArticle.tags.push(categorySlug);
-        }
+        currentArticle.tags = [...tagsText.split(',').map(tag => tag.trim()).filter(tag => tag), categorySlug, 'immigration'];
       }
       else if (trimmedLine.length > 30 && !trimmedLine.includes(':')) {
         if (!currentArticle.content) {
@@ -348,7 +352,7 @@ function parseNewsContent(content: string, categorySlug: string): NewsItem[] {
       summary: currentArticle.summary || '',
       source_url: currentArticle.source_url,
       is_urgent: currentArticle.is_urgent || false,
-      tags: currentArticle.tags || [categorySlug]
+      tags: [...(currentArticle.tags || []), categorySlug, 'immigration']
     });
   }
   

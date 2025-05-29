@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -23,12 +22,13 @@ const immigrationCategories = [
   { slug: 'refugees-asylees', name: 'Refugees/asylees/DACA/TPS holders' },
 ];
 
-// Expanded list of approved sources including major news outlets
+// Focused on NBC, FOX, NPR plus other trusted sources for immigration news
 const approvedDomains = [
   "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "cnn.com", "npr.org", "nytimes.com", "cnbc.com", "foxnews.com",
+  "nbcnews.com", "foxnews.com", "npr.org", 
+  "cnn.com", "nytimes.com", "cnbc.com",
   "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
-  "abcnews.go.com", "nbcnews.com", "cbsnews.com",
+  "abcnews.go.com", "cbsnews.com",
   "politico.com", "axios.com", "bloomberg.com", "wsj.com"
 ];
 
@@ -47,39 +47,42 @@ function isValidSource(url: string): boolean {
 }
 
 async function fetchNewsFromPerplexity(categoryName: string) {
-  const prompt = `Find recent U.S. immigration news about ${categoryName} from the past 48 hours from these specific sources:
+  const prompt = `Find recent U.S. IMMIGRATION news specifically about ${categoryName} from the past 48 hours. Focus ONLY on immigration law, policy changes, visa updates, deportation news, asylum cases, and citizenship matters.
 
-OFFICIAL GOVERNMENT SOURCES:
+REQUIRED SOURCES - Prioritize these major outlets:
+- NBCNews.com (NBC News immigration coverage)
+- FoxNews.com (Fox News immigration section) 
+- NPR.org (NPR immigration reporting)
+
+ADDITIONAL TRUSTED SOURCES:
+- CNN.com, NYTimes.com, CNBC.com, Reuters.com, AP News
+- Washington Post, ABC News, CBS News, Politico, Bloomberg
 - USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
 
-MAJOR NEWS OUTLETS:
-- CNN.com, NPR.org, NYTimes.com, CNBC.com, FoxNews.com
-- Reuters.com, AP News, BBC.com, Washington Post
-- NBC News, ABC News, CBS News, Politico, Bloomberg
-
-Return exactly 4-5 news articles in this JSON format:
+Return exactly 4-5 IMMIGRATION-SPECIFIC news articles in this JSON format:
 {
   "articles": [
     {
-      "title": "Exact headline here",
-      "summary": "Brief 2-3 sentence summary",
-      "content": "Detailed content paragraph with key information and context",
-      "source_url": "https://full-url-to-article.com",
+      "title": "Immigration-focused headline here",
+      "summary": "Brief 2-3 sentence summary about immigration impact",
+      "content": "Detailed content about immigration policy/law changes with context",
+      "source_url": "https://full-url-to-immigration-article.com",
       "is_urgent": false,
-      "tags": ["relevant", "tags"]
+      "tags": ["immigration", "relevant", "tags"]
     }
   ]
 }
 
 Requirements:
-- MUST include valid URLs from the specified sources above
+- MUST be about U.S. immigration law, visas, green cards, citizenship, deportation, asylum, or border policy
+- Include valid URLs from NBC News, Fox News, NPR, or other specified sources
 - Focus on policy changes, court decisions, enforcement updates, application changes
-- Mark urgent only for breaking news or immediate deadlines
-- Include diverse perspectives from different news outlets
-- Ensure each article has a legitimate source URL
-- NO YouTube, social media, or video content`;
+- Mark urgent only for breaking immigration policy news or immediate deadlines
+- NO general politics unless directly related to immigration law
+- NO YouTube, social media, or video content
+- Each article MUST have immigration relevance`;
 
-  console.log(`Making Perplexity API request for: ${categoryName}`);
+  console.log(`Making Perplexity API request for immigration news: ${categoryName}`);
 
   try {
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -93,7 +96,7 @@ Requirements:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert immigration news researcher. Always return valid JSON format with verified source URLs from approved domains (CNN, NPR, NYTimes, CNBC, FOX, Reuters, AP, government sites). Never include YouTube or social media content. Each article MUST have a real, working source URL.'
+            content: 'You are an expert U.S. immigration news researcher. Focus ONLY on immigration law, visa updates, policy changes, court decisions, and enforcement actions. Always return valid JSON with verified source URLs from NBC News, Fox News, NPR, or other approved immigration news sources. Never include general political news unless directly related to immigration law.'
           },
           {
             role: 'user',
@@ -114,16 +117,16 @@ Requirements:
 
     const data = await response.json();
     const content = data.choices[0]?.message?.content;
-    console.log(`Perplexity response for ${categoryName}:`, content);
+    console.log(`Perplexity immigration news response for ${categoryName}:`, content);
     return content;
   } catch (error) {
-    console.error(`Error fetching from Perplexity for ${categoryName}:`, error);
+    console.error(`Error fetching immigration news from Perplexity for ${categoryName}:`, error);
     throw error;
   }
 }
 
 function parseNewsContent(content: string, categorySlug: string) {
-  console.log(`Parsing content for ${categorySlug}:`, content.substring(0, 200));
+  console.log(`Parsing immigration content for ${categorySlug}:`, content.substring(0, 200));
   
   const articles = [];
   
@@ -133,7 +136,7 @@ function parseNewsContent(content: string, categorySlug: string) {
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
       if (parsed.articles && Array.isArray(parsed.articles)) {
-        console.log(`Found ${parsed.articles.length} articles in JSON format`);
+        console.log(`Found ${parsed.articles.length} immigration articles in JSON format`);
         
         for (const article of parsed.articles) {
           if (article.title && article.source_url && isValidSource(article.source_url)) {
@@ -143,13 +146,13 @@ function parseNewsContent(content: string, categorySlug: string) {
               summary: article.summary || article.title,
               source_url: article.source_url,
               category: categorySlug,
-              tags: Array.isArray(article.tags) ? [...article.tags, categorySlug] : [categorySlug],
+              tags: Array.isArray(article.tags) ? [...article.tags, categorySlug, 'immigration'] : [categorySlug, 'immigration'],
               is_urgent: article.is_urgent || false,
               status: 'published'
             });
-            console.log(`Valid article: ${article.title}`);
+            console.log(`Valid immigration article: ${article.title}`);
           } else {
-            console.log(`Skipping invalid article - missing required fields or invalid source`);
+            console.log(`Skipping invalid immigration article - missing required fields or invalid source`);
           }
         }
       }
@@ -160,7 +163,7 @@ function parseNewsContent(content: string, categorySlug: string) {
   
   // Fallback: text parsing if JSON failed
   if (articles.length === 0) {
-    console.log('Attempting text-based parsing...');
+    console.log('Attempting text-based parsing for immigration content...');
     
     const lines = content.split('\n').filter(line => line.trim());
     let currentArticle: any = {};
@@ -182,11 +185,11 @@ function parseNewsContent(content: string, categorySlug: string) {
               summary: currentArticle.summary || currentArticle.title,
               source_url: currentArticle.source_url,
               category: categorySlug,
-              tags: [categorySlug],
+              tags: [categorySlug, 'immigration'],
               is_urgent: false,
               status: 'published'
             });
-            console.log(`Text-parsed article: ${currentArticle.title}`);
+            console.log(`Text-parsed immigration article: ${currentArticle.title}`);
           }
         }
         currentArticle = {};
@@ -202,7 +205,7 @@ function parseNewsContent(content: string, categorySlug: string) {
     }
   }
   
-  console.log(`Total articles parsed for ${categorySlug}: ${articles.length}`);
+  console.log(`Total immigration articles parsed for ${categorySlug}: ${articles.length}`);
   return articles;
 }
 
@@ -229,12 +232,12 @@ serve(async (req) => {
         .limit(1);
 
       if (recentNews && recentNews.length > 0) {
-        console.log('Recent news exists, skipping fetch');
+        console.log('Recent immigration news exists, skipping fetch');
         return new Response(
           JSON.stringify({ 
             success: true, 
             articlesAdded: 0,
-            message: 'Recent news already exists. Use refresh to force update.'
+            message: 'Recent immigration news already exists. Use refresh to force update.'
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -247,17 +250,17 @@ serve(async (req) => {
       categoriesToFetch = immigrationCategories.filter(cat => cat.slug === category);
     }
 
-    console.log(`Fetching news for ${categoriesToFetch.length} categories`);
+    console.log(`Fetching immigration news for ${categoriesToFetch.length} categories`);
 
     const allArticles = [];
 
     for (const cat of categoriesToFetch) {
       try {
-        console.log(`Processing category: ${cat.name}`);
+        console.log(`Processing immigration category: ${cat.name}`);
         const newsContent = await fetchNewsFromPerplexity(cat.name);
         const parsedArticles = parseNewsContent(newsContent, cat.slug);
         
-        console.log(`Found ${parsedArticles.length} articles for ${cat.name}`);
+        console.log(`Found ${parsedArticles.length} immigration articles for ${cat.name}`);
         
         for (const article of parsedArticles) {
           // Check for duplicates
@@ -283,29 +286,29 @@ serve(async (req) => {
             .single();
 
           if (error) {
-            console.error(`Error inserting article:`, error);
+            console.error(`Error inserting immigration article:`, error);
           } else {
             allArticles.push(data);
-            console.log(`Successfully inserted: ${article.title}`);
+            console.log(`Successfully inserted immigration article: ${article.title}`);
           }
         }
 
         // Delay between requests to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 3000));
       } catch (error) {
-        console.error(`Error processing category ${cat.slug}:`, error);
+        console.error(`Error processing immigration category ${cat.slug}:`, error);
         // Continue with other categories
       }
     }
 
-    console.log(`Function completed. Total articles added: ${allArticles.length}`);
+    console.log(`Immigration news function completed. Total articles added: ${allArticles.length}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         articlesAdded: allArticles.length,
         articles: allArticles,
-        message: `Successfully fetched ${allArticles.length} verified articles from CNN, NPR, NYTimes, CNBC, FOX and other trusted sources`
+        message: `Successfully fetched ${allArticles.length} verified immigration articles from NBC News, Fox News, NPR and other trusted sources`
       }), 
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
