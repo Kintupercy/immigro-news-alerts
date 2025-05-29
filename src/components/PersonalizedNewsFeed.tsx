@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -35,42 +36,112 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
   const [articles, setArticles] = useState<PersonalizedNewsArticle[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchPersonalizedNews();
+    console.log('PersonalizedNewsFeed: Component mounted for user:', user.id);
     fetchCategories();
+    fetchPersonalizedNews();
   }, [user]);
 
   const fetchCategories = async () => {
     try {
+      console.log('PersonalizedNewsFeed: Fetching categories...');
       const { data, error } = await supabase
         .from('immigration_categories')
         .select('*')
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('PersonalizedNewsFeed: Error fetching categories:', error);
+        throw error;
+      }
+      
+      console.log('PersonalizedNewsFeed: Categories fetched:', data?.length || 0);
       setCategories(data || []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('PersonalizedNewsFeed: Categories fetch failed:', error);
+      setError('Failed to load categories');
     }
   };
 
   const fetchPersonalizedNews = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Use type assertion to work around missing RPC types
-      const { data, error } = await (supabase as any).rpc('get_personalized_news', {
-        user_id_param: user.id,
-        limit_param: 20
-      });
+      console.log('PersonalizedNewsFeed: Fetching personalized news for user:', user.id);
+      
+      // First check if user has a profile with categories
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('preferred_categories')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
-      setArticles(data || []);
-    } catch (error) {
-      console.error('Error fetching personalized news:', error);
+      if (profileError) {
+        console.error('PersonalizedNewsFeed: Error fetching user profile:', profileError);
+        throw profileError;
+      }
+
+      console.log('PersonalizedNewsFeed: User profile:', userProfile);
+
+      if (!userProfile || !userProfile.preferred_categories || userProfile.preferred_categories.length === 0) {
+        console.log('PersonalizedNewsFeed: No preferred categories found, showing empty state');
+        setArticles([]);
+        setLoading(false);
+        return;
+      }
+
+      // Try to use the RPC function first, but fall back to direct query if it fails
+      try {
+        console.log('PersonalizedNewsFeed: Attempting RPC call...');
+        const { data: rpcData, error: rpcError } = await (supabase as any).rpc('get_personalized_news', {
+          user_id_param: user.id,
+          limit_param: 20
+        });
+
+        if (rpcError) {
+          console.log('PersonalizedNewsFeed: RPC failed, falling back to direct query:', rpcError);
+          throw rpcError;
+        }
+
+        console.log('PersonalizedNewsFeed: RPC successful, articles found:', rpcData?.length || 0);
+        setArticles(rpcData || []);
+      } catch (rpcError) {
+        console.log('PersonalizedNewsFeed: RPC failed, using fallback query');
+        
+        // Fallback: direct query
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('immigration_news')
+          .select('*')
+          .in('category', userProfile.preferred_categories)
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
+          .limit(20);
+
+        if (fallbackError) {
+          console.error('PersonalizedNewsFeed: Fallback query failed:', fallbackError);
+          throw fallbackError;
+        }
+
+        console.log('PersonalizedNewsFeed: Fallback query successful, articles found:', fallbackData?.length || 0);
+        
+        // Transform data to match expected format
+        const transformedData = fallbackData?.map(article => ({
+          ...article,
+          is_read: false // Default to unread since we don't have reading history in fallback
+        })) || [];
+
+        setArticles(transformedData);
+      }
+    } catch (error: any) {
+      console.error('PersonalizedNewsFeed: Error fetching personalized news:', error);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      setError(`Failed to load personalized news: ${errorMessage}`);
+      
       toast({
         title: "Error loading news",
         description: "Please try refreshing the page.",
@@ -83,6 +154,8 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
 
   const markAsRead = async (articleId: string) => {
     try {
+      console.log('PersonalizedNewsFeed: Marking article as read:', articleId);
+      
       // Use direct fetch approach since the table types aren't available
       const session = await supabase.auth.getSession();
       const response = await fetch('https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/news_reading_history', {
@@ -101,7 +174,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
       });
 
       if (!response.ok) {
-        console.error('Error marking as read:', await response.text());
+        console.error('PersonalizedNewsFeed: Error marking as read:', await response.text());
       }
 
       // Update local state
@@ -111,7 +184,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
           : article
       ));
     } catch (error) {
-      console.error('Error marking as read:', error);
+      console.error('PersonalizedNewsFeed: Error marking as read:', error);
       // Just update local state as fallback
       setArticles(articles.map(article => 
         article.id === articleId 
@@ -244,6 +317,23 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="py-8 text-center">
+            <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+            <h3 className="text-lg font-semibold mb-2">Error Loading News</h3>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => fetchPersonalizedNews()}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-6">
@@ -257,8 +347,11 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
         <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground mb-4">
-              No personalized news found. Check your category preferences in your profile.
+              No personalized news found. Check your category preferences in your profile or complete the onboarding process.
             </p>
+            <Button onClick={() => fetchPersonalizedNews()}>
+              Refresh
+            </Button>
           </CardContent>
         </Card>
       ) : (
