@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -50,23 +49,23 @@ function isValidSource(url: string): boolean {
 }
 
 async function fetchNewsFromPerplexity(categoryName: string) {
-  const prompt = `Find 2-3 recent U.S. immigration news articles about ${categoryName} from the past 24-48 hours.
+  const prompt = `Find 2-3 recent U.S. immigration news articles about ${categoryName} from the past 24-48 hours from official government sources (USCIS, DHS, State Dept, ICE, CBP) or major news outlets (Reuters, AP, CNN, BBC, NYT, NPR, etc.). 
 
-ONLY search these verified sources:
-- Government: uscis.gov, dhs.gov, state.gov, ice.gov, cbp.gov
-- News: reuters.com, apnews.com, cnn.com, bbc.com, nytimes.com, washingtonpost.com, npr.org, nbcnews.com, cbsnews.com, politico.com
+For each article found, provide EXACTLY this format:
 
-For each article, provide:
-TITLE: [Article headline]
-SUMMARY: [2-3 sentences about the news]
-CONTENT: [Brief description of what happened]
-SOURCE: [Complete URL from approved source]
-URGENT: [true only for immediate deadlines/breaking news, otherwise false]
+===ARTICLE_START===
+TITLE: [exact headline]
+SUMMARY: [brief 2-3 sentence summary]
+CONTENT: [detailed description of the news]
+SOURCE: [complete URL to the original article]
+URGENT: [true if urgent deadline/breaking news, false otherwise]
+===ARTICLE_END===
 
 Requirements:
-- Must include valid source URLs from approved domains
+- Only use verified sources from approved domains
 - NO YouTube, social media, or video content
-- Focus on policy changes, official announcements, court decisions`;
+- Include complete source URLs
+- Focus on policy changes, announcements, court decisions`;
 
   console.log(`Making Perplexity API request for: ${categoryName}`);
 
@@ -77,11 +76,11 @@ Requirements:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-sonar-small-128k-online',
+      model: 'llama-3.1-sonar-large-128k-online',
       messages: [
         {
           role: 'system',
-          content: 'You are an immigration law news researcher. Only search official government sources and major trusted news outlets. Never include YouTube or video content. Always provide source URLs from approved domains.'
+          content: 'You are an expert immigration law news researcher. Only search official government sources and major trusted news outlets. Never include YouTube or video content. Always provide complete source URLs from approved domains. Format responses exactly as requested.'
         },
         {
           role: 'user',
@@ -89,7 +88,7 @@ Requirements:
         }
       ],
       temperature: 0.1,
-      max_tokens: 2000
+      max_tokens: 3000
     }),
   });
 
@@ -101,16 +100,21 @@ Requirements:
 
   const data = await response.json();
   const content = data.choices[0]?.message?.content;
-  console.log(`Perplexity response for ${categoryName}:`, content?.substring(0, 300));
+  console.log(`Perplexity response for ${categoryName}:`, content?.substring(0, 500));
   return content;
 }
 
 function parseNewsContent(content: string, categorySlug: string) {
   const articles = [];
-  const sections = content.split(/(?=TITLE:|Title:)/i).filter(section => section.trim());
   
-  for (const section of sections) {
-    const lines = section.split('\n').map(line => line.trim()).filter(line => line);
+  // Split by article markers
+  const articleSections = content.split('===ARTICLE_START===').filter(section => section.trim());
+  
+  for (const section of articleSections) {
+    const articleEnd = section.indexOf('===ARTICLE_END===');
+    const articleContent = articleEnd !== -1 ? section.substring(0, articleEnd) : section;
+    
+    const lines = articleContent.split('\n').map(line => line.trim()).filter(line => line);
     
     let article: any = {
       category: categorySlug,
@@ -120,19 +124,29 @@ function parseNewsContent(content: string, categorySlug: string) {
     };
     
     for (const line of lines) {
-      if (line.toLowerCase().startsWith('title:') || line.toLowerCase().startsWith('title ')) {
-        article.title = line.replace(/^title:?\s*/i, '').replace(/[*#]/g, '').trim();
-      } else if (line.toLowerCase().startsWith('summary:')) {
+      const lowerLine = line.toLowerCase();
+      
+      if (lowerLine.startsWith('title:')) {
+        article.title = line.replace(/^title:\s*/i, '').replace(/[*#]/g, '').trim();
+      } else if (lowerLine.startsWith('summary:')) {
         article.summary = line.replace(/^summary:\s*/i, '').trim();
-      } else if (line.toLowerCase().startsWith('content:')) {
+      } else if (lowerLine.startsWith('content:')) {
         article.content = line.replace(/^content:\s*/i, '').trim();
-      } else if (line.toLowerCase().startsWith('source:') || line.startsWith('http')) {
-        const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+      } else if (lowerLine.startsWith('source:')) {
+        const urlText = line.replace(/^source:\s*/i, '').trim();
+        const urlMatch = urlText.match(/(https?:\/\/[^\s\)]+)/);
         if (urlMatch && isValidSource(urlMatch[1])) {
           article.source_url = urlMatch[1];
         }
-      } else if (line.toLowerCase().startsWith('urgent:')) {
-        article.is_urgent = line.toLowerCase().includes('true');
+      } else if (lowerLine.startsWith('urgent:')) {
+        article.is_urgent = lowerLine.includes('true');
+      }
+      // Also look for URLs anywhere in the line
+      else if (line.includes('http')) {
+        const urlMatch = line.match(/(https?:\/\/[^\s\)]+)/);
+        if (urlMatch && isValidSource(urlMatch[1]) && !article.source_url) {
+          article.source_url = urlMatch[1];
+        }
       }
     }
     
@@ -145,10 +159,53 @@ function parseNewsContent(content: string, categorySlug: string) {
     if (article.title && article.title.length > 10 && 
         article.source_url && isValidSource(article.source_url) &&
         (article.summary || article.content)) {
+      
+      console.log(`Valid article found: ${article.title} from ${article.source_url}`);
       articles.push(article);
+    } else {
+      console.log(`Skipping invalid article - Title: ${article.title}, Source: ${article.source_url}, Has content: ${!!(article.summary || article.content)}`);
     }
   }
   
+  // Fallback parsing if no articles found with structured format
+  if (articles.length === 0) {
+    console.log('No structured articles found, trying fallback parsing...');
+    
+    // Try to find any article-like content
+    const sections = content.split(/(?=\*\*|##|\d+\.)/);
+    
+    for (const section of sections) {
+      if (section.length < 50) continue; // Skip very short sections
+      
+      const lines = section.split('\n').filter(line => line.trim());
+      if (lines.length < 2) continue;
+      
+      const firstLine = lines[0].replace(/^\*\*|\*\*$|^##|^\d+\.\s*/g, '').trim();
+      
+      if (firstLine.length > 10 && firstLine.length < 200) {
+        // Look for URL in this section
+        const urlMatch = section.match(/(https?:\/\/[^\s\)]+)/);
+        
+        if (urlMatch && isValidSource(urlMatch[1])) {
+          const article = {
+            title: firstLine,
+            content: section.replace(/(https?:\/\/[^\s\)]+)/g, '').trim(),
+            summary: lines[1] ? lines[1].trim() : firstLine,
+            source_url: urlMatch[1],
+            category: categorySlug,
+            tags: [categorySlug],
+            is_urgent: section.toLowerCase().includes('urgent') || section.toLowerCase().includes('breaking'),
+            status: 'published'
+          };
+          
+          console.log(`Fallback article found: ${article.title} from ${article.source_url}`);
+          articles.push(article);
+        }
+      }
+    }
+  }
+  
+  console.log(`Total articles parsed for ${categorySlug}: ${articles.length}`);
   return articles;
 }
 
@@ -236,7 +293,7 @@ serve(async (req) => {
         }
 
         // Add delay between requests to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
       } catch (error) {
         console.error(`Error fetching news for category ${cat.slug}:`, error);
       }
