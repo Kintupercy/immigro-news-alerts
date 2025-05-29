@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -15,12 +14,18 @@ const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const immigrationCategories = [
+  { slug: 'green-card', name: 'Green Card / Permanent Residency' },
+  { slug: 'citizenship', name: 'Citizenship & Naturalization' },
   { slug: 'international-students', name: 'International Students (F-1, J-1, M-1)' },
-  { slug: 'employment-based', name: 'Employment-based immigrants (H-1B, L-1, TN, etc.)' },
-  { slug: 'family-based', name: 'Family-based immigrants' },
-  { slug: 'green-card', name: 'Green card applicants/holders' },
-  { slug: 'citizenship', name: 'Citizenship applicants' },
-  { slug: 'refugees-asylees', name: 'Refugees/asylees/DACA/TPS holders' },
+  { slug: 'family-based', name: 'Family-Based Immigration' },
+  { slug: 'employment-based', name: 'Work Visas & Employment-Based (H-1B, L-1, TN, O-1)' },
+  { slug: 'refugees-asylees', name: 'Humanitarian & Refugee/Asylee (DACA, TPS)' },
+  { slug: 'temporary-visitors', name: 'Temporary Visitors & Tourists (B-1, B-2)' },
+  { slug: 'exchange-visitors', name: 'Exchange Visitors & Cultural Programs' },
+  { slug: 'investors', name: 'Investor & Entrepreneur Visas (EB-5, E-1, E-2)' },
+  { slug: 'religious-workers', name: 'Religious Worker Visas (R-1)' },
+  { slug: 'specialty-occupations', name: 'Specialty Occupations & NAFTA/USMCA' },
+  { slug: 'undocumented', name: 'Undocumented & Mixed-Status Families' },
 ];
 
 // Prioritizing NBC, FOX, NPR, CNN plus other trusted sources for immigration news
@@ -310,7 +315,7 @@ serve(async (req) => {
         success: true, 
         articlesAdded: allArticles.length,
         articles: allArticles,
-        message: `Successfully fetched ${allArticles.length} verified immigration articles from NBC News, Fox News, NPR and other trusted sources`
+        message: `Successfully fetched ${allArticles.length} verified immigration articles from NBC News, Fox News, NPR, CNN and other trusted sources`
       }), 
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
