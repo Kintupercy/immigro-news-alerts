@@ -23,11 +23,11 @@ const immigrationCategories = [
   { slug: 'refugees-asylees', name: 'Refugees/asylees/DACA/TPS holders' },
 ];
 
-// Approved sources - verified news outlets and government sites
+// Expanded list of approved sources including major news outlets
 const approvedDomains = [
   "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "reuters.com", "apnews.com", "cnn.com", "bbc.com", 
-  "nytimes.com", "washingtonpost.com", "npr.org", 
+  "cnn.com", "npr.org", "nytimes.com", "cnbc.com", "foxnews.com",
+  "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
   "abcnews.go.com", "nbcnews.com", "cbsnews.com",
   "politico.com", "axios.com", "bloomberg.com", "wsj.com"
 ];
@@ -47,15 +47,23 @@ function isValidSource(url: string): boolean {
 }
 
 async function fetchNewsFromPerplexity(categoryName: string) {
-  const prompt = `Find recent U.S. immigration news about ${categoryName} from the past 48 hours from official sources like USCIS, DHS, State Department, or major news outlets like Reuters, AP, CNN, NPR.
+  const prompt = `Find recent U.S. immigration news about ${categoryName} from the past 48 hours from these specific sources:
 
-Return exactly 2-3 news articles in this JSON format:
+OFFICIAL GOVERNMENT SOURCES:
+- USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
+
+MAJOR NEWS OUTLETS:
+- CNN.com, NPR.org, NYTimes.com, CNBC.com, FoxNews.com
+- Reuters.com, AP News, BBC.com, Washington Post
+- NBC News, ABC News, CBS News, Politico, Bloomberg
+
+Return exactly 4-5 news articles in this JSON format:
 {
   "articles": [
     {
       "title": "Exact headline here",
       "summary": "Brief 2-3 sentence summary",
-      "content": "Detailed content paragraph with key information",
+      "content": "Detailed content paragraph with key information and context",
       "source_url": "https://full-url-to-article.com",
       "is_urgent": false,
       "tags": ["relevant", "tags"]
@@ -64,10 +72,12 @@ Return exactly 2-3 news articles in this JSON format:
 }
 
 Requirements:
-- Only include articles with valid URLs from approved sources
-- No YouTube, social media, or video content
-- Focus on policy changes, announcements, court decisions
-- Mark urgent only for breaking news or immediate deadlines`;
+- MUST include valid URLs from the specified sources above
+- Focus on policy changes, court decisions, enforcement updates, application changes
+- Mark urgent only for breaking news or immediate deadlines
+- Include diverse perspectives from different news outlets
+- Ensure each article has a legitimate source URL
+- NO YouTube, social media, or video content`;
 
   console.log(`Making Perplexity API request for: ${categoryName}`);
 
@@ -83,7 +93,7 @@ Requirements:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert immigration news researcher. Always return valid JSON format with verified source URLs from approved domains. Never include YouTube or social media content.'
+            content: 'You are an expert immigration news researcher. Always return valid JSON format with verified source URLs from approved domains (CNN, NPR, NYTimes, CNBC, FOX, Reuters, AP, government sites). Never include YouTube or social media content. Each article MUST have a real, working source URL.'
           },
           {
             role: 'user',
@@ -91,7 +101,7 @@ Requirements:
           }
         ],
         temperature: 0.1,
-        max_tokens: 2000,
+        max_tokens: 3000,
         return_citations: true
       }),
     });
@@ -215,7 +225,7 @@ serve(async (req) => {
       const { data: recentNews } = await supabase
         .from('immigration_news')
         .select('created_at')
-        .gte('created_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()) // 6 hours
+        .gte('created_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()) // 4 hours
         .limit(1);
 
       if (recentNews && recentNews.length > 0) {
@@ -231,8 +241,8 @@ serve(async (req) => {
       }
     }
     
-    // Limit categories to prevent timeout
-    let categoriesToFetch = immigrationCategories.slice(0, 3); // Start with 3 categories
+    // Process all categories for comprehensive coverage
+    let categoriesToFetch = immigrationCategories;
     if (category && category !== 'all') {
       categoriesToFetch = immigrationCategories.filter(cat => cat.slug === category);
     }
@@ -280,8 +290,8 @@ serve(async (req) => {
           }
         }
 
-        // Small delay between requests
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Delay between requests to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 3000));
       } catch (error) {
         console.error(`Error processing category ${cat.slug}:`, error);
         // Continue with other categories
@@ -295,7 +305,7 @@ serve(async (req) => {
         success: true, 
         articlesAdded: allArticles.length,
         articles: allArticles,
-        message: `Successfully fetched ${allArticles.length} verified articles`
+        message: `Successfully fetched ${allArticles.length} verified articles from CNN, NPR, NYTimes, CNBC, FOX and other trusted sources`
       }), 
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

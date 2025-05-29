@@ -24,13 +24,13 @@ interface NewsItem {
   tags: string[];
 }
 
-// Approved sources - strictly no YouTube or video content
+// Expanded approved sources including major news outlets
 const approvedDomains = [
   "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "reuters.com", "apnews.com", "cnn.com", "bbc.com", 
-  "nytimes.com", "washingtonpost.com", "npr.org", 
+  "cnn.com", "npr.org", "nytimes.com", "cnbc.com", "foxnews.com",
+  "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
   "abcnews.go.com", "nbcnews.com", "cbsnews.com",
-  "politico.com", "axios.com", "bloomberg.com"
+  "politico.com", "axios.com", "bloomberg.com", "wsj.com"
 ];
 
 function isValidSource(url: string): boolean {
@@ -80,23 +80,30 @@ serve(async (req) => {
 
       const prompt = `Find the latest verified U.S. immigration law news related to ${category.name} from the past 24-48 hours.
 
-Search ONLY these approved sources:
-- Official government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-- Trusted news outlets: Reuters, AP News, CNN, BBC, NPR, New York Times, Washington Post, NBC, ABC, CBS, Politico, Axios, Bloomberg
+Search these specific trusted sources:
+
+OFFICIAL GOVERNMENT SOURCES:
+- USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
+
+MAJOR NEWS OUTLETS:
+- CNN.com, NPR.org, NYTimes.com, CNBC.com, FoxNews.com
+- Reuters.com, AP News, BBC.com, Washington Post
+- NBC News, ABC News, CBS News, Politico, Bloomberg
 
 Requirements:
-- Provide 2-4 distinct news items with valid source URLs
+- Provide 4-5 distinct news items with valid source URLs
 - Focus on factual, verified information only
 - Include: headline, detailed summary, original source URL
 - Mark as urgent only for immediate policy changes or breaking developments
 - Include relevant tags
 - NO YouTube, social media, or video content
+- MUST have real source URLs from the specified outlets
 
 Format each article as:
 Title: [Clear headline]
 Summary: [Brief 2-3 sentence summary]
 Content: [Detailed content 3-4 paragraphs]
-Source: [Full URL to original verified source]
+Source: [Full URL to original verified source from CNN, NPR, NYTimes, CNBC, FOX, etc.]
 Urgent: [true/false]
 Tags: [relevant tags separated by commas]`;
 
@@ -114,7 +121,7 @@ Tags: [relevant tags separated by commas]`;
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only. Never include YouTube, video content, or social media. Always return information with source URLs from approved domains.'
+                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only: CNN, NPR, NYTimes, CNBC, FOX News, Reuters, AP, government sites. Never include YouTube, video content, or social media. Always return information with source URLs from approved domains.'
               },
               {
                 role: 'user',
@@ -195,7 +202,7 @@ Tags: [relevant tags separated by commas]`;
         }
 
         // Delay between API calls to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 4000));
 
       } catch (apiError) {
         console.error(`Error fetching news for ${category.name}:`, apiError);
@@ -207,7 +214,7 @@ Tags: [relevant tags separated by commas]`;
         success: true, 
         articlesAdded: totalArticlesAdded,
         categoriesProcessed: categories.length,
-        message: `Added ${totalArticlesAdded} verified articles from approved sources only`
+        message: `Added ${totalArticlesAdded} verified articles from CNN, NPR, NYTimes, CNBC, FOX and other trusted sources`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
