@@ -14,6 +14,9 @@ import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
 import LoadingSpinner from "./LoadingSpinner";
 import BookmarkButton from "./BookmarkButton";
 import SocialShareButton from "./SocialShareButton";
+import LanguageToggle from "./LanguageToggle";
+import { useProMembership } from "@/hooks/useProMembership";
+import { translateText, translateCategory } from "@/utils/translation";
 
 interface NewsArticle {
   id: string;
@@ -43,7 +46,10 @@ const NewsFeed = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
+  const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const { toast } = useToast();
+  const { isProMember } = useProMembership(user);
 
   useEffect(() => {
     // Get current user
@@ -54,6 +60,27 @@ const NewsFeed = () => {
     fetchCategories();
     fetchArticles();
   }, []);
+
+  const handleLanguageChange = async (language: 'en' | 'es') => {
+    if (language === 'es' && !isProMember) {
+      return;
+    }
+    
+    setCurrentLanguage(language);
+    
+    if (language === 'es' && articles.length > 0) {
+      // Translate articles
+      const translated: Record<string, any> = {};
+      for (const article of articles) {
+        translated[article.id] = {
+          title: await translateText(article.title, 'es'),
+          summary: article.summary ? await translateText(article.summary, 'es') : null,
+          content: await translateText(article.content, 'es'),
+        };
+      }
+      setTranslatedContent(translated);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -237,6 +264,13 @@ const NewsFeed = () => {
     return officialDomains.some(domain => url.includes(domain));
   };
 
+  const getDisplayText = (text: string, articleId?: string, field?: string) => {
+    if (currentLanguage === 'es' && articleId && field && translatedContent[articleId]) {
+      return translatedContent[articleId][field] || text;
+    }
+    return text;
+  };
+
   const ArticleCard = ({ article }: { article: NewsArticle }) => {
     const isExpanded = expandedArticle === article.id;
     const sourceDomain = getSourceDomain(article.source_url);
@@ -250,7 +284,7 @@ const NewsFeed = () => {
               {article.is_urgent && (
                 <AlertTriangle className="inline-block w-5 h-5 text-red-500 mr-2" />
               )}
-              {article.title}
+              {getDisplayText(article.title, article.id, 'title')}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
               <Clock className="w-4 h-4" />
@@ -260,7 +294,10 @@ const NewsFeed = () => {
           
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant={article.is_urgent ? "destructive" : "secondary"}>
-              {categories.find(cat => cat.slug === article.category)?.name || article.category}
+              {currentLanguage === 'es' 
+                ? translateCategory(categories.find(cat => cat.slug === article.category)?.name || article.category)
+                : categories.find(cat => cat.slug === article.category)?.name || article.category
+              }
             </Badge>
             
             <Badge 
@@ -282,13 +319,15 @@ const NewsFeed = () => {
         <CardContent className="pt-0">
           {article.summary && (
             <p className="text-muted-foreground mb-3">
-              {article.summary}
+              {getDisplayText(article.summary, article.id, 'summary')}
             </p>
           )}
           
           {isExpanded && (
             <div className="prose max-w-none mb-4">
-              <p className="whitespace-pre-wrap">{article.content}</p>
+              <p className="whitespace-pre-wrap">
+                {getDisplayText(article.content, article.id, 'content')}
+              </p>
             </div>
           )}
           
@@ -298,7 +337,10 @@ const NewsFeed = () => {
               size="sm"
               onClick={() => setExpandedArticle(isExpanded ? null : article.id)}
             >
-              {isExpanded ? 'Show Less' : 'Read More'}
+              {isExpanded 
+                ? (currentLanguage === 'es' ? 'Mostrar Menos' : 'Show Less')
+                : (currentLanguage === 'es' ? 'Leer Más' : 'Read More')
+              }
             </Button>
             
             {article.source_url && (
@@ -315,7 +357,7 @@ const NewsFeed = () => {
                   className="flex items-center gap-1"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Source
+                  {currentLanguage === 'es' ? 'Fuente' : 'Source'}
                 </a>
               </Button>
             )}
@@ -349,22 +391,34 @@ const NewsFeed = () => {
       <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">VERIFIED IMMIGRATION UPDATES</h1>
+            <h1 className="text-3xl font-bold mb-2">
+              {currentLanguage === 'es' ? 'ACTUALIZACIONES DE INMIGRACIÓN VERIFICADAS' : 'VERIFIED IMMIGRATION UPDATES'}
+            </h1>
             <p className="text-cream-200 text-sm uppercase tracking-wide">
               <Shield className="inline w-4 h-4 mr-1" />
-              SEARCH, SAVE & SHARE NEWS
+              {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS' : 'SEARCH, SAVE & SHARE NEWS'}
             </p>
           </div>
-          <Button 
-            onClick={() => refreshNews(true)} 
-            disabled={refreshing}
-            variant="outline"
-            size="sm"
-            className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Fetching Latest...' : 'Refresh'}
-          </Button>
+          <div className="flex items-center gap-3">
+            <LanguageToggle 
+              currentLanguage={currentLanguage}
+              onLanguageChange={handleLanguageChange}
+              isProMember={isProMember}
+            />
+            <Button 
+              onClick={() => refreshNews(true)} 
+              disabled={refreshing}
+              variant="outline"
+              size="sm"
+              className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing 
+                ? (currentLanguage === 'es' ? 'Obteniendo Últimas...' : 'Fetching Latest...') 
+                : (currentLanguage === 'es' ? 'Actualizar' : 'Refresh')
+              }
+            </Button>
+          </div>
         </div>
 
         {/* Enhanced Search */}
@@ -372,7 +426,10 @@ const NewsFeed = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-600 w-5 h-5" />
             <Input
-              placeholder="Search immigration news, alerts, and updates..."
+              placeholder={currentLanguage === 'es' 
+                ? "Buscar noticias, alertas y actualizaciones de inmigración..."
+                : "Search immigration news, alerts, and updates..."
+              }
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-12 bg-cream-50 text-navy-800 border-cream-200 placeholder:text-navy-600/70"
@@ -391,7 +448,7 @@ const NewsFeed = () => {
               : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
             }
           >
-            All Categories
+            {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
           </Button>
           {categories.map((category) => (
             <Button
@@ -404,7 +461,7 @@ const NewsFeed = () => {
                 : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
               }
             >
-              {category.name}
+              {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
             </Button>
           ))}
         </div>
@@ -413,8 +470,10 @@ const NewsFeed = () => {
       {/* Results count */}
       {searchTerm && (
         <div className="mb-4 text-sm text-muted-foreground">
-          Found {filteredArticles.length} article{filteredArticles.length !== 1 ? 's' : ''} 
-          {searchTerm && ` matching "${searchTerm}"`}
+          {currentLanguage === 'es' 
+            ? `${filteredArticles.length} ${filteredArticles.length === 1 ? 'artículo encontrado' : 'artículos encontrados'} que coinciden con "${searchTerm}"`
+            : `Found ${filteredArticles.length} article${filteredArticles.length !== 1 ? 's' : ''} matching "${searchTerm}"`
+          }
         </div>
       )}
 
@@ -422,14 +481,14 @@ const NewsFeed = () => {
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="all">
-            All News ({filteredArticles.length})
+            {currentLanguage === 'es' ? `Todas las Noticias (${filteredArticles.length})` : `All News (${filteredArticles.length})`}
           </TabsTrigger>
           <TabsTrigger value="urgent" className="text-red-600">
             <AlertTriangle className="w-4 h-4 mr-1" />
-            Urgent ({urgentArticles.length})
+            {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
           </TabsTrigger>
           <TabsTrigger value="regular">
-            Regular ({regularArticles.length})
+            {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
           </TabsTrigger>
         </TabsList>
 
@@ -441,16 +500,22 @@ const NewsFeed = () => {
                   <Shield className="w-12 h-12 mx-auto mb-4 text-navy-400" />
                   <p className="text-muted-foreground mb-4">
                     {searchTerm 
-                      ? `No articles found matching "${searchTerm}". Try different keywords.`
+                      ? (currentLanguage === 'es' 
+                          ? `No se encontraron artículos que coincidan con "${searchTerm}". Prueba con diferentes palabras clave.`
+                          : `No articles found matching "${searchTerm}". Try different keywords.`
+                        )
                       : refreshing 
-                        ? 'Fetching latest verified immigration news...' 
-                        : 'No verified articles found. Click refresh to fetch the latest news from official sources.'
+                        ? (currentLanguage === 'es' ? 'Obteniendo últimas noticias de inmigración verificadas...' : 'Fetching latest verified immigration news...') 
+                        : (currentLanguage === 'es' 
+                            ? 'No se encontraron artículos verificados. Haz clic en actualizar para obtener las últimas noticias de fuentes oficiales.'
+                            : 'No verified articles found. Click refresh to fetch the latest news from official sources.'
+                          )
                     }
                   </p>
                   {!searchTerm && (
                     <Button onClick={() => refreshNews(true)} disabled={refreshing}>
                       <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                      Fetch Latest Verified News
+                      {currentLanguage === 'es' ? 'Obtener Últimas Noticias Verificadas' : 'Fetch Latest Verified News'}
                     </Button>
                   )}
                 </CardContent>
@@ -469,7 +534,13 @@ const NewsFeed = () => {
               <Card>
                 <CardContent className="py-8 text-center">
                   <p className="text-muted-foreground">
-                    {searchTerm ? `No urgent alerts found matching "${searchTerm}".` : 'No urgent alerts at this time.'}
+                    {searchTerm 
+                      ? (currentLanguage === 'es' 
+                          ? `No se encontraron alertas urgentes que coincidan con "${searchTerm}".`
+                          : `No urgent alerts found matching "${searchTerm}".`
+                        )
+                      : (currentLanguage === 'es' ? 'No hay alertas urgentes en este momento.' : 'No urgent alerts at this time.')
+                    }
                   </p>
                 </CardContent>
               </Card>
@@ -487,7 +558,13 @@ const NewsFeed = () => {
               <Card>
                 <CardContent className="py-8 text-center">
                   <p className="text-muted-foreground">
-                    {searchTerm ? `No regular news found matching "${searchTerm}".` : 'No regular news articles found.'}
+                    {searchTerm 
+                      ? (currentLanguage === 'es' 
+                          ? `No se encontraron noticias regulares que coincidan con "${searchTerm}".`
+                          : `No regular news found matching "${searchTerm}".`
+                        )
+                      : (currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares.' : 'No regular news articles found.')
+                    }
                   </p>
                 </CardContent>
               </Card>
