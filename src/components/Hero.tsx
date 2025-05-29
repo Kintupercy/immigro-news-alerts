@@ -1,63 +1,9 @@
-import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Mail } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 
 const Hero = () => {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase
-        .from('email_subscriptions')
-        .insert([{ email }]);
-
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Already subscribed",
-            description: "This email is already subscribed to our alerts.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          title: "Successfully subscribed!",
-          description: "You'll receive updates on US immigration law changes.",
-        });
-        setEmail("");
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast({
-        title: "Subscription failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const universities = [
     { name: "Harvard University", logo: "/lovable-uploads/e45200f2-c4b5-48f4-88d4-4ce3b18bd012.png" },
     { name: "Cornell University", logo: "/lovable-uploads/cf72dc3c-7e9d-4a5c-9d01-477501a41c2e.png" },
@@ -170,29 +116,13 @@ const Hero = () => {
             Get 24/7 alerts and news on all US Immigration policy and law changes
           </p>
 
-          {/* Email subscription form */}
-          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-            <div className="relative flex-1">
-              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400 h-5 w-5" />
-              <Input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-                className="pl-12 py-3 text-base bg-cream-50 border-navy-300 text-navy-800 placeholder-navy-400 focus:border-navy-700 focus:ring-navy-700 rounded-full"
-              />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              disabled={isLoading}
-              className="px-8 py-3 text-base bg-navy-800 text-cream-50 hover:bg-navy-700 font-medium transition-all duration-200 rounded-full disabled:opacity-50"
-            >
-              {isLoading ? "Subscribing..." : "Subscribe"}
-            </Button>
-          </form>
+          {/* Join Now button */}
+          <Button asChild size="lg" className="px-8 py-3 text-base bg-navy-800 text-cream-50 hover:bg-navy-700 font-medium transition-all duration-200 rounded-full">
+            <Link to="/auth" className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Join Now
+            </Link>
+          </Button>
 
           <p className="text-sm text-navy-500 mt-6">
             Join 10,000+ staying updated on US immigration law changes
