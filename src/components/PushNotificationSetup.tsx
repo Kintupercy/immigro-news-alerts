@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -66,11 +65,14 @@ const PushNotificationSetup = ({ user, notificationPreferences, onPreferencesUpd
           applicationServerKey: urlBase64ToUint8Array(getVapidPublicKey())
         });
 
+        // Convert subscription to JSON and then to compatible format
+        const subscriptionJson = subscription.toJSON();
+        
         // Save subscription to user profile
         const { error } = await supabase
           .from('user_profiles')
           .update({
-            push_subscription: subscription.toJSON(),
+            push_subscription: subscriptionJson as any, // Cast to any to match Json type
             notification_preferences: {
               ...notificationPreferences,
               push: true
