@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { cache } from "@/utils/cache";
 import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
 import LoadingSpinner from "./LoadingSpinner";
+import BookmarkButton from "./BookmarkButton";
+import SocialShareButton from "./SocialShareButton";
 
 interface NewsArticle {
   id: string;
@@ -40,9 +42,15 @@ const NewsFeed = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Get current user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
     fetchCategories();
     fetchArticles();
   }, []);
@@ -311,6 +319,16 @@ const NewsFeed = () => {
                 </a>
               </Button>
             )}
+
+            {user && (
+              <>
+                <BookmarkButton articleId={article.id} user={user} />
+                <SocialShareButton 
+                  title={article.title}
+                  url={article.source_url || window.location.href}
+                />
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -327,14 +345,14 @@ const NewsFeed = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header Section */}
+      {/* Header Section with enhanced search */}
       <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold mb-2">VERIFIED IMMIGRATION UPDATES</h1>
             <p className="text-cream-200 text-sm uppercase tracking-wide">
               <Shield className="inline w-4 h-4 mr-1" />
-              CACHED & OPTIMIZED FOR FAST ACCESS
+              SEARCH, SAVE & SHARE NEWS
             </p>
           </div>
           <Button 
@@ -347,6 +365,19 @@ const NewsFeed = () => {
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Fetching Latest...' : 'Refresh'}
           </Button>
+        </div>
+
+        {/* Enhanced Search */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-600 w-5 h-5" />
+            <Input
+              placeholder="Search immigration news, alerts, and updates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 bg-cream-50 text-navy-800 border-cream-200 placeholder:text-navy-600/70"
+            />
+          </div>
         </div>
 
         {/* Category Filter Buttons */}
@@ -379,34 +410,13 @@ const NewsFeed = () => {
         </div>
       </div>
 
-      {/* Search Controls */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search verified news and alerts..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.slug}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Results count */}
+      {searchTerm && (
+        <div className="mb-4 text-sm text-muted-foreground">
+          Found {filteredArticles.length} article{filteredArticles.length !== 1 ? 's' : ''} 
+          {searchTerm && ` matching "${searchTerm}"`}
         </div>
-      </div>
+      )}
 
       {/* News Tabs */}
       <Tabs defaultValue="all" className="w-full">
@@ -430,12 +440,19 @@ const NewsFeed = () => {
                 <CardContent className="py-8 text-center">
                   <Shield className="w-12 h-12 mx-auto mb-4 text-navy-400" />
                   <p className="text-muted-foreground mb-4">
-                    {refreshing ? 'Fetching latest verified immigration news...' : 'No verified articles found. Click refresh to fetch the latest news from official sources.'}
+                    {searchTerm 
+                      ? `No articles found matching "${searchTerm}". Try different keywords.`
+                      : refreshing 
+                        ? 'Fetching latest verified immigration news...' 
+                        : 'No verified articles found. Click refresh to fetch the latest news from official sources.'
+                    }
                   </p>
-                  <Button onClick={() => refreshNews(true)} disabled={refreshing}>
-                    <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                    Fetch Latest Verified News
-                  </Button>
+                  {!searchTerm && (
+                    <Button onClick={() => refreshNews(true)} disabled={refreshing}>
+                      <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                      Fetch Latest Verified News
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -451,7 +468,9 @@ const NewsFeed = () => {
             {urgentArticles.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">No urgent alerts at this time.</p>
+                  <p className="text-muted-foreground">
+                    {searchTerm ? `No urgent alerts found matching "${searchTerm}".` : 'No urgent alerts at this time.'}
+                  </p>
                 </CardContent>
               </Card>
             ) : (
@@ -467,7 +486,9 @@ const NewsFeed = () => {
             {regularArticles.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">No regular news articles found.</p>
+                  <p className="text-muted-foreground">
+                    {searchTerm ? `No regular news found matching "${searchTerm}".` : 'No regular news articles found.'}
+                  </p>
                 </CardContent>
               </Card>
             ) : (

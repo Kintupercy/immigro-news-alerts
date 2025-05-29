@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { User } from "@supabase/supabase-js";
+import PushNotificationSetup from "./PushNotificationSetup";
 
 interface UserProfile {
   id: string;
@@ -207,12 +208,14 @@ const UserProfile = ({ user }: UserProfileProps) => {
   const updateNotificationPreference = (key: string, value: boolean) => {
     if (!profile) return;
 
+    const updatedPrefs = {
+      ...profile.notification_preferences,
+      [key]: value
+    };
+
     setProfile({
       ...profile,
-      notification_preferences: {
-        ...profile.notification_preferences,
-        [key]: value
-      }
+      notification_preferences: updatedPrefs
     });
   };
 
@@ -226,6 +229,7 @@ const UserProfile = ({ user }: UserProfileProps) => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
+      {/* Personal Information Card */}
       <Card>
         <CardHeader>
           <CardTitle>Personal Information</CardTitle>
@@ -270,6 +274,7 @@ const UserProfile = ({ user }: UserProfileProps) => {
         </CardContent>
       </Card>
 
+      {/* News Preferences Card */}
       <Card>
         <CardHeader>
           <CardTitle>News Preferences</CardTitle>
@@ -295,6 +300,19 @@ const UserProfile = ({ user }: UserProfileProps) => {
         </CardContent>
       </Card>
 
+      {/* Push Notification Setup */}
+      <PushNotificationSetup 
+        user={user}
+        notificationPreferences={profile.notification_preferences}
+        onPreferencesUpdate={(preferences) => 
+          setProfile({
+            ...profile,
+            notification_preferences: preferences
+          })
+        }
+      />
+
+      {/* Notification Settings Card */}
       <Card>
         <CardHeader>
           <CardTitle>Notification Settings</CardTitle>
@@ -317,16 +335,6 @@ const UserProfile = ({ user }: UserProfileProps) => {
               checked={profile.notification_preferences.sms}
               onCheckedChange={(checked) => 
                 updateNotificationPreference('sms', checked)
-              }
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="push-notifications">Push Notifications</Label>
-            <Switch
-              id="push-notifications"
-              checked={profile.notification_preferences.push}
-              onCheckedChange={(checked) => 
-                updateNotificationPreference('push', checked)
               }
             />
           </div>

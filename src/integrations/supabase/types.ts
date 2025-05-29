@@ -9,6 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "immigration_news"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_subscriptions: {
         Row: {
           email: string
@@ -114,6 +143,7 @@ export type Database = {
           onboarding_completed: boolean | null
           phone_number: string | null
           preferred_categories: string[] | null
+          push_subscription: Json | null
           updated_at: string
           user_id: string
         }
@@ -128,6 +158,7 @@ export type Database = {
           onboarding_completed?: boolean | null
           phone_number?: string | null
           preferred_categories?: string[] | null
+          push_subscription?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -142,6 +173,7 @@ export type Database = {
           onboarding_completed?: boolean | null
           phone_number?: string | null
           preferred_categories?: string[] | null
+          push_subscription?: Json | null
           updated_at?: string
           user_id?: string
         }

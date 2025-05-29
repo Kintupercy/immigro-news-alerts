@@ -5,13 +5,14 @@ import { User, Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { LogOut, User as UserIcon, Newspaper, Settings } from "lucide-react";
+import { LogOut, User as UserIcon, Newspaper, Settings, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import NewsFeed from "@/components/NewsFeed";
 import PersonalizedNewsFeed from "@/components/PersonalizedNewsFeed";
 import UserProfile from "@/components/UserProfile";
 import OnboardingWrapper from "@/components/OnboardingWrapper";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
+import BookmarkedArticles from "@/components/BookmarkedArticles";
 
 const AuthenticatedApp = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -77,7 +78,7 @@ const AuthenticatedApp = () => {
 
   const MainApp = () => (
     <div className="min-h-screen bg-gray-50">
-      {/* Simplified Header with just logo and sign out */}
+      {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between py-4">
@@ -102,7 +103,7 @@ const AuthenticatedApp = () => {
         <EmailVerificationBanner user={user} />
         
         <Tabs defaultValue="personalized" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="personalized" className="flex items-center gap-2">
               <UserIcon className="w-4 h-4" />
               My News
@@ -110,6 +111,10 @@ const AuthenticatedApp = () => {
             <TabsTrigger value="all" className="flex items-center gap-2">
               <Newspaper className="w-4 h-4" />
               All News
+            </TabsTrigger>
+            <TabsTrigger value="bookmarks" className="flex items-center gap-2">
+              <Bookmark className="w-4 h-4" />
+              Saved
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -123,6 +128,10 @@ const AuthenticatedApp = () => {
 
           <TabsContent value="all" className="mt-6">
             <NewsFeed />
+          </TabsContent>
+
+          <TabsContent value="bookmarks" className="mt-6">
+            <BookmarkedArticles user={user} />
           </TabsContent>
 
           <TabsContent value="profile" className="mt-6">
