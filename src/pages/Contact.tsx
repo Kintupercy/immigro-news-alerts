@@ -1,16 +1,67 @@
 
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Contact form submitted");
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: formData
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent Successfully!",
+        description: data.message,
+      });
+
+      // Reset form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+    } catch (error) {
+      console.error('Error sending contact email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -95,8 +146,11 @@ const Contact = () => {
                     </label>
                     <Input
                       id="firstName"
+                      name="firstName"
                       type="text"
                       required
+                      value={formData.firstName}
+                      onChange={handleInputChange}
                       className="w-full"
                       placeholder="Your first name"
                     />
@@ -107,8 +161,11 @@ const Contact = () => {
                     </label>
                     <Input
                       id="lastName"
+                      name="lastName"
                       type="text"
                       required
+                      value={formData.lastName}
+                      onChange={handleInputChange}
                       className="w-full"
                       placeholder="Your last name"
                     />
@@ -121,8 +178,11 @@ const Contact = () => {
                   </label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     required
+                    value={formData.email}
+                    onChange={handleInputChange}
                     className="w-full"
                     placeholder="your.email@example.com"
                   />
@@ -134,8 +194,11 @@ const Contact = () => {
                   </label>
                   <Input
                     id="subject"
+                    name="subject"
                     type="text"
                     required
+                    value={formData.subject}
+                    onChange={handleInputChange}
                     className="w-full"
                     placeholder="What is this regarding?"
                   />
@@ -147,8 +210,11 @@ const Contact = () => {
                   </label>
                   <Textarea
                     id="message"
+                    name="message"
                     required
                     rows={5}
+                    value={formData.message}
+                    onChange={handleInputChange}
                     className="w-full"
                     placeholder="Please describe how we can help you..."
                   />
@@ -156,9 +222,10 @@ const Contact = () => {
                 
                 <Button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3"
                 >
-                  Send Message
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
