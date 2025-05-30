@@ -32,6 +32,66 @@ const translations: Record<string, string> = {
   'Citizenship': 'Ciudadanía',
   'Humanitarian': 'Humanitario',
   'Investment': 'Inversión',
+  
+  // Immigration-specific terms
+  'H-1B': 'H-1B',
+  'H-1B Cap Season': 'Temporada de Límite H-1B',
+  'Specialty Occupations': 'Ocupaciones Especializadas',
+  'EB-4': 'EB-4',
+  'Non-Minister': 'No Ministro',
+  'Special Immigrant': 'Inmigrante Especial',
+  'Religious Worker': 'Trabajador Religioso',
+  'Religious Worker Program': 'Programa de Trabajadores Religiosos',
+  'Exchange Visitors': 'Visitantes de Intercambio',
+  'Exchange Visitors Program': 'Programa de Visitantes de Intercambio',
+  'Program Extended': 'Programa Extendido',
+  'Program Overview': 'Resumen del Programa',
+  'USCIS': 'USCIS',
+  'Immigration': 'Inmigración',
+  'Visa': 'Visa',
+  'Green Card Application': 'Solicitud de Tarjeta Verde',
+  'Citizenship Test': 'Examen de Ciudadanía',
+  'Work Authorization': 'Autorización de Trabajo',
+  'Permanent Resident': 'Residente Permanente',
+  'Temporary Worker': 'Trabajador Temporal',
+  'Student Status': 'Estatus de Estudiante',
+  'Family Reunification': 'Reunificación Familiar',
+  'Asylum': 'Asilo',
+  'Refugee': 'Refugiado',
+  'Deportation': 'Deportación',
+  'Border': 'Frontera',
+  'Immigration Court': 'Corte de Inmigración',
+  'Policy Update': 'Actualización de Política',
+  'Law Change': 'Cambio de Ley',
+  'Application Process': 'Proceso de Solicitud',
+  'Filing Fee': 'Tarifa de Presentación',
+  'Priority Date': 'Fecha de Prioridad',
+  'Adjustment of Status': 'Ajuste de Estatus'
+};
+
+// Helper function to translate individual words and phrases
+const translatePhrase = (phrase: string): string => {
+  // Direct translation lookup
+  if (translations[phrase]) {
+    return translations[phrase];
+  }
+  
+  // Try case-insensitive lookup
+  const lowerPhrase = phrase.toLowerCase();
+  for (const [key, value] of Object.entries(translations)) {
+    if (key.toLowerCase() === lowerPhrase) {
+      return value;
+    }
+  }
+  
+  // Try partial matches for compound phrases
+  let translatedPhrase = phrase;
+  for (const [english, spanish] of Object.entries(translations)) {
+    const regex = new RegExp(`\\b${english}\\b`, 'gi');
+    translatedPhrase = translatedPhrase.replace(regex, spanish);
+  }
+  
+  return translatedPhrase !== phrase ? translatedPhrase : phrase;
 };
 
 export const translateText = async (text: string, targetLanguage: 'es' | 'en'): Promise<string> => {
@@ -44,13 +104,32 @@ export const translateText = async (text: string, targetLanguage: 'es' | 'en'): 
     return translations[text];
   }
 
-  // For longer content, we would typically use a translation API
-  // For now, return original text with a note that it needs translation
-  if (text.length > 100) {
-    // In production, integrate with Google Translate API or similar
+  // For titles and shorter content (less than 300 characters), try phrase-by-phrase translation
+  if (text.length <= 300) {
+    const translatedText = translatePhrase(text);
+    if (translatedText !== text) {
+      return translatedText;
+    }
+    
+    // If no direct translation found, try word-by-word for key terms
+    let result = text;
+    for (const [english, spanish] of Object.entries(translations)) {
+      const regex = new RegExp(`\\b${english}\\b`, 'gi');
+      result = result.replace(regex, spanish);
+    }
+    
+    // If we made some translations, return the result
+    if (result !== text) {
+      return result;
+    }
+  }
+
+  // For longer content or if no translation was found, return with translation note
+  if (text.length > 300) {
     return `[Traducción disponible con API de traducción] ${text}`;
   }
 
+  // For shorter text that couldn't be translated, return original
   return text;
 };
 
