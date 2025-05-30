@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -67,7 +68,7 @@ const Contact = () => {
   };
 
   const handleFollowOnX = () => {
-    window.open('https://twitter.com/Immigro_news', '_blank', 'noopener,noreferrer');
+    window.open('https://twitter.com/Immigronews', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -115,7 +116,7 @@ const Contact = () => {
                       variant="outline" 
                       className="w-full bg-black hover:bg-gray-800 text-white border-black"
                     >
-                      @Immigro_news
+                      @Immigronews
                     </Button>
                     <p className="text-sm text-gray-500 mt-2">Get the latest updates on immigration news</p>
                   </div>
