@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import SocialShareButton from "@/components/SocialShareButton";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -65,6 +66,10 @@ const Contact = () => {
     }
   };
 
+  const handleFollowOnX = () => {
+    window.open('https://twitter.com/immigro_news', '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -91,7 +96,7 @@ const Contact = () => {
                     We're here to help with any questions you may have.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
                   <div className="flex items-start space-x-4">
                     <Mail className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
                     <div>
@@ -99,6 +104,20 @@ const Contact = () => {
                       <p className="text-gray-600 mb-2">support@immigro.com</p>
                       <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
                     </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-3">Follow us on X</h3>
+                    <Button 
+                      onClick={handleFollowOnX}
+                      variant="outline" 
+                      className="w-full bg-black hover:bg-gray-800 text-white border-black"
+                    >
+                      @immigro_news
+                    </Button>
+                    <p className="text-sm text-gray-500 mt-2">Get the latest updates on immigration news</p>
                   </div>
                 </CardContent>
               </Card>
