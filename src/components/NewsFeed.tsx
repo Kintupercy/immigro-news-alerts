@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Newspaper } from "lucide-react";
 import { format } from "date-fns";
-import { cache } from "@/utils/cache";
+import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
-import LoadingSpinner from "./LoadingSpinner";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import ErrorBoundary from "./ErrorBoundary";
+import { NewsLoadingState, NewsCardSkeleton, EmptyState, CategoriesSkeleton } from "./LoadingStates";
 import BookmarkButton from "./BookmarkButton";
 import SocialShareButton from "./SocialShareButton";
 import LanguageToggle from "./LanguageToggle";
@@ -50,43 +51,35 @@ const NewsFeed = () => {
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const { toast } = useToast();
   const { isProMember } = useProMembership(user);
+  const { handleError, retry, canRetry } = useErrorHandler({
+    maxRetries: 3,
+    onError: (error) => console.error('NewsFeed error:', error)
+  });
 
   useEffect(() => {
-    // Get current user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
+    const initializeData = async () => {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
 
-    fetchCategories();
-    fetchArticles();
-  }, []);
-
-  const handleLanguageChange = async (language: 'en' | 'es') => {
-    if (language === 'es' && !isProMember) {
-      return;
-    }
-    
-    setCurrentLanguage(language);
-    
-    if (language === 'es' && articles.length > 0) {
-      // Translate articles
-      const translated: Record<string, any> = {};
-      for (const article of articles) {
-        translated[article.id] = {
-          title: await translateText(article.title, 'es'),
-          summary: article.summary ? await translateText(article.summary, 'es') : null,
-          content: await translateText(article.content, 'es'),
-        };
+        // Load categories and articles in parallel with enhanced caching
+        await Promise.all([
+          fetchCategories(),
+          fetchArticles()
+        ]);
+      } catch (error) {
+        handleError(error as Error, 'initialization');
       }
-      setTranslatedContent(translated);
-    }
-  };
+    };
+
+    initializeData();
+  }, []);
 
   const fetchCategories = async () => {
     try {
-      const cacheKey = 'immigration_categories';
-      const categories = await cache.getOrFetch(
-        cacheKey,
+      const categories = await enhancedCache.getOrFetch(
+        cacheKeys.categories(),
         async () => {
           const { data, error } = await supabase
             .from('immigration_categories')
@@ -101,12 +94,7 @@ const NewsFeed = () => {
       
       setCategories(categories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast({
-        title: "Error loading categories",
-        description: "Please try refreshing the page.",
-        variant: "destructive",
-      });
+      handleError(error as Error, 'fetching categories');
     }
   };
 
@@ -114,7 +102,6 @@ const NewsFeed = () => {
     try {
       setLoading(true);
       
-      // Check rate limit
       if (!rateLimiter.isAllowed('news-fetch', RATE_LIMITS.NEWS_FETCH)) {
         toast({
           title: "Rate limit exceeded",
@@ -124,8 +111,10 @@ const NewsFeed = () => {
         return;
       }
 
-      const cacheKey = `news_${selectedCategory}`;
-      const articles = await cache.getOrFetch(
+      const cacheKey = cacheKeys.news(selectedCategory, searchTerm);
+      
+      // Use background refresh for better UX
+      const articles = await enhancedCache.backgroundRefresh(
         cacheKey,
         async () => {
           let query = supabase
@@ -140,35 +129,25 @@ const NewsFeed = () => {
           }
 
           const { data, error } = await query;
-
           if (error) throw error;
           
-          // Filter out any problematic content
-          const filteredData = (data || []).filter(article => 
+          return (data || []).filter(article => 
             article.source_url && 
             !article.source_url.includes('youtube.com') &&
             !article.source_url.includes('youtu.be')
           );
-          
-          return filteredData;
         },
         5 // Cache for 5 minutes
       );
       
       setArticles(articles);
 
-      // If no articles found and not cached, fetch fresh news
       if (articles.length === 0) {
         console.log('No articles found, fetching fresh news...');
         await refreshNews(false);
       }
     } catch (error) {
-      console.error('Error fetching articles:', error);
-      toast({
-        title: "Error loading news",
-        description: "Please try refreshing the page.",
-        variant: "destructive",
-      });
+      handleError(error as Error, 'fetching articles');
     } finally {
       setLoading(false);
     }
@@ -178,7 +157,6 @@ const NewsFeed = () => {
     try {
       setRefreshing(true);
       
-      // Check rate limit for refresh
       if (!rateLimiter.isAllowed('news-refresh', RATE_LIMITS.API_CALLS)) {
         toast({
           title: "Too many refresh attempts",
@@ -188,9 +166,8 @@ const NewsFeed = () => {
         return;
       }
 
-      // Clear cache to force fresh data
       if (forceRefresh) {
-        cache.delete(`news_${selectedCategory}`);
+        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
       }
       
       toast({
@@ -212,8 +189,7 @@ const NewsFeed = () => {
           title: "News updated!",
           description: `Successfully fetched ${data.articlesAdded} new verified articles.`,
         });
-        // Clear cache and refetch
-        cache.delete(`news_${selectedCategory}`);
+        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
         await fetchArticles();
       } else {
         toast({
@@ -222,20 +198,14 @@ const NewsFeed = () => {
         });
       }
     } catch (error) {
-      console.error('Error refreshing news:', error);
-      toast({
-        title: "Error refreshing news",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      handleError(error as Error, 'refreshing news');
     } finally {
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    // Clear cache and fetch when category changes
-    cache.delete(`news_${selectedCategory}`);
+    enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
     fetchArticles();
   }, [selectedCategory]);
 
@@ -277,7 +247,7 @@ const NewsFeed = () => {
     const isOfficial = isOfficialSource(article.source_url);
     
     return (
-      <Card className={`mb-4 ${article.is_urgent ? 'border-red-200 bg-red-50' : ''}`}>
+      <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${article.is_urgent ? 'border-red-200 bg-red-50' : ''}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg leading-tight flex-1">
@@ -378,205 +348,193 @@ const NewsFeed = () => {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <LoadingSpinner size="lg" text="Loading verified news..." className="py-12" />
-      </div>
-    );
+    return <NewsLoadingState />;
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header Section with enhanced search */}
-      <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              {currentLanguage === 'es' ? 'ACTUALIZACIONES DE INMIGRACIÓN VERIFICADAS' : 'VERIFIED IMMIGRATION UPDATES'}
-            </h1>
-            <p className="text-cream-200 text-sm uppercase tracking-wide">
-              <Shield className="inline w-4 h-4 mr-1" />
-              {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS' : 'SEARCH, SAVE & SHARE NEWS'}
-            </p>
+    <ErrorBoundary>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header Section with enhanced search */}
+        <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                {currentLanguage === 'es' ? 'ACTUALIZACIONES DE INMIGRACIÓN VERIFICADAS' : 'VERIFIED IMMIGRATION UPDATES'}
+              </h1>
+              <p className="text-cream-200 text-sm uppercase tracking-wide">
+                <Shield className="inline w-4 h-4 mr-1" />
+                {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS' : 'SEARCH, SAVE & SHARE NEWS'}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <LanguageToggle 
+                currentLanguage={currentLanguage}
+                onLanguageChange={handleLanguageChange}
+                isProMember={isProMember}
+              />
+              <Button 
+                onClick={() => retry(() => refreshNews(true))} 
+                disabled={refreshing || !canRetry}
+                variant="outline"
+                size="sm"
+                className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing 
+                  ? (currentLanguage === 'es' ? 'Obteniendo Últimas...' : 'Fetching Latest...') 
+                  : (currentLanguage === 'es' ? 'Actualizar' : 'Refresh')
+                }
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageToggle 
-              currentLanguage={currentLanguage}
-              onLanguageChange={handleLanguageChange}
-              isProMember={isProMember}
-            />
-            <Button 
-              onClick={() => refreshNews(true)} 
-              disabled={refreshing}
-              variant="outline"
-              size="sm"
-              className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing 
-                ? (currentLanguage === 'es' ? 'Obteniendo Últimas...' : 'Fetching Latest...') 
-                : (currentLanguage === 'es' ? 'Actualizar' : 'Refresh')
-              }
-            </Button>
+
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-600 w-5 h-5" />
+              <Input
+                placeholder={currentLanguage === 'es' 
+                  ? "Buscar noticias, alertas y actualizaciones de inmigración..."
+                  : "Search immigration news, alerts, and updates..."
+                }
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 bg-cream-50 text-navy-800 border-cream-200 placeholder:text-navy-600/70"
+              />
+            </div>
           </div>
+
+          {loading ? (
+            <CategoriesSkeleton />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory('all')}
+                className={selectedCategory === 'all' 
+                  ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                  : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+                }
+              >
+                {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.slug ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category.slug)}
+                  className={selectedCategory === category.slug 
+                    ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                    : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+                  }
+                >
+                  {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Enhanced Search */}
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-600 w-5 h-5" />
-            <Input
-              placeholder={currentLanguage === 'es' 
-                ? "Buscar noticias, alertas y actualizaciones de inmigración..."
-                : "Search immigration news, alerts, and updates..."
-              }
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 bg-cream-50 text-navy-800 border-cream-200 placeholder:text-navy-600/70"
-            />
-          </div>
-        </div>
-
-        {/* Category Filter Buttons */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={selectedCategory === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedCategory('all')}
-            className={selectedCategory === 'all' 
-              ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-              : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+        {searchTerm && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            {currentLanguage === 'es' 
+              ? `${filteredArticles.length} ${filteredArticles.length === 1 ? 'artículo encontrado' : 'artículos encontrados'} que coinciden con "${searchTerm}"`
+              : `Found ${filteredArticles.length} article${filteredArticles.length !== 1 ? 's' : ''} matching "${searchTerm}"`
             }
-          >
-            {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
-          </Button>
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.slug ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedCategory(category.slug)}
-              className={selectedCategory === category.slug 
-                ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-              }
-            >
-              {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
-            </Button>
-          ))}
-        </div>
-      </div>
+          </div>
+        )}
 
-      {/* Results count */}
-      {searchTerm && (
-        <div className="mb-4 text-sm text-muted-foreground">
-          {currentLanguage === 'es' 
-            ? `${filteredArticles.length} ${filteredArticles.length === 1 ? 'artículo encontrado' : 'artículos encontrados'} que coinciden con "${searchTerm}"`
-            : `Found ${filteredArticles.length} article${filteredArticles.length !== 1 ? 's' : ''} matching "${searchTerm}"`
-          }
-        </div>
-      )}
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">
+              {currentLanguage === 'es' ? `Todas las Noticias (${filteredArticles.length})` : `All News (${filteredArticles.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="urgent" className="text-red-600">
+              <AlertTriangle className="w-4 h-4 mr-1" />
+              {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="regular">
+              {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
+            </TabsTrigger>
+          </TabsList>
 
-      {/* News Tabs */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">
-            {currentLanguage === 'es' ? `Todas las Noticias (${filteredArticles.length})` : `All News (${filteredArticles.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="urgent" className="text-red-600">
-            <AlertTriangle className="w-4 h-4 mr-1" />
-            {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="regular">
-            {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="mt-6">
-          <div className="space-y-4">
-            {filteredArticles.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <Shield className="w-12 h-12 mx-auto mb-4 text-navy-400" />
-                  <p className="text-muted-foreground mb-4">
-                    {searchTerm 
-                      ? (currentLanguage === 'es' 
-                          ? `No se encontraron artículos que coincidan con "${searchTerm}". Prueba con diferentes palabras clave.`
-                          : `No articles found matching "${searchTerm}". Try different keywords.`
-                        )
-                      : refreshing 
-                        ? (currentLanguage === 'es' ? 'Obteniendo últimas noticias de inmigración verificadas...' : 'Fetching latest verified immigration news...') 
-                        : (currentLanguage === 'es' 
-                            ? 'No se encontraron artículos verificados. Haz clic en actualizar para obtener las últimas noticias de fuentes oficiales.'
-                            : 'No verified articles found. Click refresh to fetch the latest news from official sources.'
-                          )
-                    }
-                  </p>
-                  {!searchTerm && (
-                    <Button onClick={() => refreshNews(true)} disabled={refreshing}>
+          <TabsContent value="all" className="mt-6">
+            <div className="space-y-4">
+              {filteredArticles.length === 0 ? (
+                <EmptyState
+                  icon={Newspaper}
+                  title={searchTerm 
+                    ? (currentLanguage === 'es' 
+                        ? `No se encontraron artículos que coincidan con "${searchTerm}"`
+                        : `No articles found matching "${searchTerm}"`)
+                    : (currentLanguage === 'es' 
+                        ? 'No se encontraron artículos verificados'
+                        : 'No verified articles found')
+                  }
+                  description={searchTerm 
+                    ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
+                    : (currentLanguage === 'es' 
+                        ? 'Haz clic en actualizar para obtener las últimas noticias de fuentes oficiales.'
+                        : 'Click refresh to fetch the latest news from official sources.')
+                  }
+                  action={!searchTerm && (
+                    <Button onClick={() => retry(() => refreshNews(true))} disabled={refreshing || !canRetry}>
                       <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                       {currentLanguage === 'es' ? 'Obtener Últimas Noticias Verificadas' : 'Fetch Latest Verified News'}
                     </Button>
                   )}
-                </CardContent>
-              </Card>
-            ) : (
-              filteredArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))
-            )}
-          </div>
-        </TabsContent>
+                />
+              ) : (
+                filteredArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))
+              )}
+            </div>
+          </TabsContent>
 
-        <TabsContent value="urgent" className="mt-6">
-          <div className="space-y-4">
-            {urgentArticles.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">
-                    {searchTerm 
-                      ? (currentLanguage === 'es' 
-                          ? `No se encontraron alertas urgentes que coincidan con "${searchTerm}".`
-                          : `No urgent alerts found matching "${searchTerm}".`
-                        )
-                      : (currentLanguage === 'es' ? 'No hay alertas urgentes en este momento.' : 'No urgent alerts at this time.')
-                    }
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              urgentArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))
-            )}
-          </div>
-        </TabsContent>
+          <TabsContent value="urgent" className="mt-6">
+            <div className="space-y-4">
+              {urgentArticles.length === 0 ? (
+                <EmptyState
+                  icon={AlertTriangle}
+                  title={searchTerm 
+                    ? (currentLanguage === 'es' 
+                        ? `No se encontraron alertas urgentes que coincidan con "${searchTerm}"`
+                        : `No urgent alerts found matching "${searchTerm}"`)
+                    : (currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time')
+                  }
+                />
+              ) : (
+                urgentArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))
+              )}
+            </div>
+          </TabsContent>
 
-        <TabsContent value="regular" className="mt-6">
-          <div className="space-y-4">
-            {regularArticles.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">
-                    {searchTerm 
-                      ? (currentLanguage === 'es' 
-                          ? `No se encontraron noticias regulares que coincidan con "${searchTerm}".`
-                          : `No regular news found matching "${searchTerm}".`
-                        )
-                      : (currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares.' : 'No regular news articles found.')
-                    }
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              regularArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value="regular" className="mt-6">
+            <div className="space-y-4">
+              {regularArticles.length === 0 ? (
+                <EmptyState
+                  icon={Newspaper}
+                  title={searchTerm 
+                    ? (currentLanguage === 'es' 
+                        ? `No se encontraron noticias regulares que coincidan con "${searchTerm}"`
+                        : `No regular news found matching "${searchTerm}"`)
+                    : (currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found')
+                  }
+                />
+              ) : (
+                regularArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ErrorBoundary>
   );
 };
 
