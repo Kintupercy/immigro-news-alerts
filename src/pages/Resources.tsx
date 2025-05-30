@@ -71,66 +71,66 @@ const Resources = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="pt-24 pb-16">
+      <div className="pt-16 sm:pt-24 pb-8 sm:pb-16 px-4 sm:px-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-8">
-            <Clock className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="mb-6 sm:mb-8">
+            <Clock className="w-12 h-12 sm:w-16 sm:h-16 text-emerald-600 mx-auto mb-4 sm:mb-6" />
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Legal Resources Coming Soon
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">
               We're building partnerships with trusted immigration lawyers to provide you with the best legal guidance.
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
               What to Expect
             </h2>
             
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid gap-6 sm:gap-6 md:grid-cols-3">
               <div className="text-center">
-                <Users className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Users className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-600 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                   Vetted Lawyers
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Carefully selected immigration attorneys with proven track records
                 </p>
               </div>
               
               <div className="text-center">
-                <Star className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Star className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-600 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                   Specialized Expertise
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Lawyers specializing in different immigration categories and situations
                 </p>
               </div>
               
               <div className="text-center">
-                <Clock className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Clock className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-600 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                   Quick Matching
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Fast connections to the right lawyer for your specific needs
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-emerald-50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-emerald-50 rounded-lg p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
               Get Notified When We Launch
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
               Be the first to know when our legal resources become available.
             </p>
             
-            <form onSubmit={handleWaitlistSignup} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-              <div className="relative flex-1">
+            <form onSubmit={handleWaitlistSignup} className="flex flex-col gap-3 max-w-lg mx-auto">
+              <div className="relative">
                 <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
                   type="email"
@@ -139,13 +139,13 @@ const Resources = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-12 py-3 text-base bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg"
+                  className="pl-12 py-3 text-base bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg min-h-[44px]"
                 />
               </div>
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="px-8 py-3 text-base bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-colors rounded-lg disabled:opacity-50"
+                className="px-6 sm:px-8 py-3 text-base bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition-colors rounded-lg disabled:opacity-50 min-h-[44px]"
               >
                 {isLoading ? "Joining..." : "Join the Waitlist"}
               </Button>

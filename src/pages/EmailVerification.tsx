@@ -40,7 +40,6 @@ const EmailVerification = () => {
           description: "You can now access all features of Immigro.",
         });
 
-        // Redirect to dashboard after a short delay
         setTimeout(() => navigate('/'), 2000);
       } catch (error: any) {
         console.error('Email verification error:', error);
@@ -70,26 +69,26 @@ const EmailVerification = () => {
     >
       <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
       
-      <Card className="w-full max-w-md relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-navy-800">
+      <Card className="w-full max-w-sm sm:max-w-md relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm mx-4">
+        <CardHeader className="text-center pb-4 sm:pb-6">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-navy-800">
             Email Verification
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center space-y-4">
+        <CardContent className="text-center space-y-4 px-4 sm:px-6">
           {verifying && (
             <div className="space-y-4">
-              <Loader2 className="w-12 h-12 mx-auto animate-spin text-navy-600" />
-              <p className="text-muted-foreground">Verifying your email...</p>
+              <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto animate-spin text-navy-600" />
+              <p className="text-sm sm:text-base text-muted-foreground">Verifying your email...</p>
             </div>
           )}
 
           {verified && (
             <div className="space-y-4">
-              <CheckCircle className="w-12 h-12 mx-auto text-green-600" />
+              <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-green-600" />
               <div>
-                <h3 className="text-lg font-semibold text-green-800">Email Verified!</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-base sm:text-lg font-semibold text-green-800">Email Verified!</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Your email has been successfully verified. Redirecting you to the app...
                 </p>
               </div>
@@ -98,12 +97,12 @@ const EmailVerification = () => {
 
           {error && (
             <div className="space-y-4">
-              <XCircle className="w-12 h-12 mx-auto text-red-600" />
+              <XCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-red-600" />
               <div>
-                <h3 className="text-lg font-semibold text-red-800">Verification Failed</h3>
-                <p className="text-muted-foreground">{error}</p>
+                <h3 className="text-base sm:text-lg font-semibold text-red-800">Verification Failed</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">{error}</p>
               </div>
-              <Button onClick={() => navigate('/auth')} className="w-full">
+              <Button onClick={() => navigate('/auth')} className="w-full min-h-[44px]">
                 Back to Login
               </Button>
             </div>

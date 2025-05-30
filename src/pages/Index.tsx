@@ -13,10 +13,16 @@ import AdBanner from "@/components/AdBanner";
 
 const Index = () => {
   useEffect(() => {
-    // Auto-scroll functionality
+    // Auto-scroll functionality - disabled on mobile for better UX
     let scrollTimeout: NodeJS.Timeout;
     let isUserScrolling = false;
     let autoScrollEnabled = true;
+
+    // Check if device is mobile
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      autoScrollEnabled = false;
+    }
 
     const handleUserScroll = () => {
       isUserScrolling = true;
@@ -25,40 +31,42 @@ const Index = () => {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         isUserScrolling = false;
-        autoScrollEnabled = true;
-      }, 3000); // Resume auto-scroll after 3 seconds of no user interaction
+        if (!isMobile) {
+          autoScrollEnabled = true;
+        }
+      }, 3000);
     };
 
     const autoScroll = () => {
-      if (!autoScrollEnabled || isUserScrolling) return;
+      if (!autoScrollEnabled || isUserScrolling || isMobile) return;
       
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = document.documentElement.clientHeight;
       const currentScroll = window.pageYOffset;
       
-      // If we've reached the bottom, scroll back to top
       if (currentScroll + clientHeight >= scrollHeight - 10) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        // Scroll down slowly
         window.scrollBy({ top: 1, behavior: 'smooth' });
       }
     };
 
-    // Add scroll listener for user interaction
-    window.addEventListener('scroll', handleUserScroll, { passive: true });
-    window.addEventListener('wheel', handleUserScroll, { passive: true });
-    window.addEventListener('touchstart', handleUserScroll, { passive: true });
+    if (!isMobile) {
+      window.addEventListener('scroll', handleUserScroll, { passive: true });
+      window.addEventListener('wheel', handleUserScroll, { passive: true });
+      window.addEventListener('touchstart', handleUserScroll, { passive: true });
+    }
 
-    // Start auto-scroll after initial delay
-    const autoScrollInterval = setInterval(autoScroll, 50); // Adjust speed here
+    const autoScrollInterval = !isMobile ? setInterval(autoScroll, 50) : null;
 
     return () => {
-      clearInterval(autoScrollInterval);
+      if (autoScrollInterval) clearInterval(autoScrollInterval);
       clearTimeout(scrollTimeout);
-      window.removeEventListener('scroll', handleUserScroll);
-      window.removeEventListener('wheel', handleUserScroll);
-      window.removeEventListener('touchstart', handleUserScroll);
+      if (!isMobile) {
+        window.removeEventListener('scroll', handleUserScroll);
+        window.removeEventListener('wheel', handleUserScroll);
+        window.removeEventListener('touchstart', handleUserScroll);
+      }
     };
   }, []);
 
@@ -73,16 +81,16 @@ const Index = () => {
       <Header />
       <Hero />
       
-      {/* Ad after Hero section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {/* Ad after Hero section - responsive spacing */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <AdBanner position="header" />
       </div>
       
       <Features />
       <LatestNews />
       
-      {/* Ad between sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {/* Ad between sections - responsive spacing */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <AdBanner position="between-articles" />
       </div>
       

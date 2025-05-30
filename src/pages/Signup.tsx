@@ -7,7 +7,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="py-16">
+      <div className="py-8 sm:py-16 px-4 sm:px-0">
         <SignupForm />
       </div>
     </div>

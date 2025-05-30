@@ -13,7 +13,9 @@ const News = () => {
         url="https://immigro.app/news"
       />
       <Header />
-      <NewsFeed />
+      <div className="pt-4 sm:pt-0">
+        <NewsFeed />
+      </div>
     </div>
   );
 };
