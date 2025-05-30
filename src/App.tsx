@@ -22,6 +22,7 @@ import PasswordReset from "./pages/PasswordReset";
 import AuthenticatedApp from "./components/AuthenticatedApp";
 import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
+import AdminDashboard from "./pages/AdminDashboard";
 
 // Enhanced query client with better error handling and retries
 const queryClient = new QueryClient({
@@ -152,6 +153,14 @@ const App = () => {
               <Route 
                 path="/dashboard" 
                 element={user ? <AuthenticatedApp /> : <Navigate to="/auth" replace />} 
+              />
+              
+              {/* Admin Dashboard Route */}
+              <Route 
+                path="/admin" 
+                element={
+                  <AdminDashboard />
+                } 
               />
               
               <Route path="*" element={<NotFound />} />

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import UrgentNewsAlert from "./UrgentNewsAlert";
 import BreakingNewsAlert from "./BreakingNewsAlert";
+import Badge from "@/components/ui/badge";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,6 +18,25 @@ const Header = () => {
       const { data: { user } } = await supabase.auth.getUser();
       return user;
     },
+  });
+
+  // Check if user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ['isAdmin', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .single();
+      
+      if (error) return false;
+      return !!data;
+    },
+    enabled: !!user?.id,
   });
 
   const handleSignOut = async () => {
@@ -85,6 +105,18 @@ const Header = () => {
               >
                 Contact
               </Link>
+
+              {/* Admin Link - Only show for admins */}
+              {isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className={`transition-colors duration-200 ${
+                    isActive('/admin') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                  }`}
+                >
+                  <Badge variant="secondary" className="bg-red-100 text-red-800">Admin</Badge>
+                </Link>
+              )}
 
               {user ? (
                 <div className="flex items-center space-x-4">
@@ -181,6 +213,20 @@ const Header = () => {
                 >
                   Contact
                 </Link>
+
+                {/* Admin Link for Mobile - Only show for admins */}
+                {isAdmin && (
+                  <Link 
+                    to="/admin" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                      isActive('/admin') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                    }`}
+                  >
+                    <Badge variant="secondary" className="bg-red-100 text-red-800 mr-2">Admin</Badge>
+                    Dashboard
+                  </Link>
+                )}
 
                 {user ? (
                   <div className="px-3 py-2 space-y-2">
