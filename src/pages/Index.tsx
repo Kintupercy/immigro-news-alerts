@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import Categories from "@/components/Categories";
 import Features from "@/components/Features";
@@ -82,17 +81,13 @@ const Index = () => {
       <Hero />
       
       {/* Ad after Hero section - responsive spacing */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
-        <AdBanner position="header" />
-      </div>
+      
       
       <Features />
       <LatestNews />
       
       {/* Ad between sections - responsive spacing */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
-        <AdBanner position="between-articles" />
-      </div>
+      
       
       <Categories />
       <Pricing />
