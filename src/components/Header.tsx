@@ -81,58 +81,60 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link 
-                to="/" 
-                className={`transition-colors duration-200 ${
-                  isActive('/') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                }`}
-              >
-                Home
-              </Link>
-              <Link 
-                to="/news" 
-                className={`transition-colors duration-200 ${
-                  isActive('/news') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                }`}
-              >
-                News
-              </Link>
-              <Link 
-                to="/resources" 
-                className={`transition-colors duration-200 ${
-                  isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                }`}
-              >
-                Resources
-              </Link>
-              <Link 
-                to="/about" 
-                className={`transition-colors duration-200 ${
-                  isActive('/about') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                }`}
-              >
-                About
-              </Link>
-              <Link 
-                to="/contact" 
-                className={`transition-colors duration-200 ${
-                  isActive('/contact') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                }`}
-              >
-                Contact
-              </Link>
-
-              {/* Admin Link - Only show for admins */}
-              {isAdmin && (
+              <div className="flex items-center space-x-8">
                 <Link 
-                  to="/admin" 
+                  to="/" 
                   className={`transition-colors duration-200 ${
-                    isActive('/admin') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                    isActive('/') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                   }`}
                 >
-                  <Badge variant="secondary" className="bg-red-100 text-red-800">Admin</Badge>
+                  Home
                 </Link>
-              )}
+                <Link 
+                  to="/news" 
+                  className={`transition-colors duration-200 ${
+                    isActive('/news') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                  }`}
+                >
+                  News
+                </Link>
+                <Link 
+                  to="/resources" 
+                  className={`transition-colors duration-200 ${
+                    isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                  }`}
+                >
+                  Resources
+                </Link>
+                <Link 
+                  to="/about" 
+                  className={`transition-colors duration-200 ${
+                    isActive('/about') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                  }`}
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className={`transition-colors duration-200 ${
+                    isActive('/contact') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                  }`}
+                >
+                  Contact
+                </Link>
+
+                {/* Admin Link - Only show for admins */}
+                {isAdmin && (
+                  <Link 
+                    to="/admin" 
+                    className={`transition-colors duration-200 ${
+                      isActive('/admin') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                    }`}
+                  >
+                    <Badge variant="secondary" className="bg-red-100 text-red-800">Admin</Badge>
+                  </Link>
+                )}
+              </div>
 
               {user ? (
                 <div className="flex items-center space-x-4">
