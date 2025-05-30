@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +26,14 @@ const LatestNews = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock news data for now - in a real app this would fetch from your Supabase function
+    // Generate dynamic dates for realistic news timeline
+    const now = new Date();
+    const getRecentDate = (hoursAgo: number) => {
+      const date = new Date(now.getTime() - (hoursAgo * 60 * 60 * 1000));
+      return date.toISOString();
+    };
+
+    // Mock news data with dynamic dates
     const mockNews: NewsItem[] = [
       {
         id: '1',
@@ -36,7 +42,7 @@ const LatestNews = () => {
         category: 'Green Card',
         source_url: 'https://uscis.gov',
         is_urgent: false,
-        published_at: new Date().toISOString(),
+        published_at: getRecentDate(2), // 2 hours ago
         tags: ['green-card', 'processing-times']
       },
       {
@@ -46,7 +52,7 @@ const LatestNews = () => {
         category: 'Work Visas',
         source_url: 'https://uscis.gov',
         is_urgent: true,
-        published_at: new Date().toISOString(),
+        published_at: getRecentDate(1), // 1 hour ago
         tags: ['h1b', 'work-visa']
       },
       {
@@ -56,7 +62,7 @@ const LatestNews = () => {
         category: 'Student Visas',
         source_url: 'https://ice.gov',
         is_urgent: false,
-        published_at: new Date().toISOString(),
+        published_at: getRecentDate(4), // 4 hours ago
         tags: ['f1-visa', 'students']
       },
       {
@@ -66,7 +72,7 @@ const LatestNews = () => {
         category: 'Citizenship',
         source_url: 'https://uscis.gov',
         is_urgent: false,
-        published_at: new Date().toISOString(),
+        published_at: getRecentDate(6), // 6 hours ago
         tags: ['citizenship', 'fees']
       },
       {
@@ -76,7 +82,7 @@ const LatestNews = () => {
         category: 'Humanitarian',
         source_url: 'https://dhs.gov',
         is_urgent: true,
-        published_at: new Date().toISOString(),
+        published_at: getRecentDate(3), // 3 hours ago
         tags: ['tps', 'humanitarian']
       },
       {
@@ -86,7 +92,7 @@ const LatestNews = () => {
         category: 'Investment',
         source_url: 'https://uscis.gov',
         is_urgent: false,
-        published_at: new Date().toISOString(),
+        published_at: getRecentDate(8), // 8 hours ago
         tags: ['eb5', 'investment']
       }
     ];
@@ -99,12 +105,22 @@ const LatestNews = () => {
   }, []);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   };
 
   if (loading) {
