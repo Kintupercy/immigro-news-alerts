@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,6 +21,7 @@ import EmailVerification from "./pages/EmailVerification";
 import PasswordReset from "./pages/PasswordReset";
 import AuthenticatedApp from "./components/AuthenticatedApp";
 import NotFound from "./pages/NotFound";
+import CookieConsent from "./components/CookieConsent";
 
 // Enhanced query client with better error handling and retries
 const queryClient = new QueryClient({
@@ -156,6 +156,7 @@ const App = () => {
               
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <CookieConsent />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
