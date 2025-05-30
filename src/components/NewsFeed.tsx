@@ -56,6 +56,38 @@ const NewsFeed = () => {
     onError: (error) => console.error('NewsFeed error:', error)
   });
 
+  // Add the missing handleLanguageChange function
+  const handleLanguageChange = async (language: 'en' | 'es') => {
+    setCurrentLanguage(language);
+    
+    if (language === 'es' && isProMember) {
+      // Translate current articles if switching to Spanish
+      const newTranslatedContent: Record<string, any> = {};
+      
+      for (const article of articles) {
+        if (!translatedContent[article.id]) {
+          try {
+            const [translatedTitle, translatedSummary, translatedContent] = await Promise.all([
+              translateText(article.title, 'es'),
+              article.summary ? translateText(article.summary, 'es') : null,
+              translateText(article.content, 'es')
+            ]);
+            
+            newTranslatedContent[article.id] = {
+              title: translatedTitle,
+              summary: translatedSummary,
+              content: translatedContent
+            };
+          } catch (error) {
+            console.error('Translation error for article:', article.id, error);
+          }
+        }
+      }
+      
+      setTranslatedContent(prev => ({ ...prev, ...newTranslatedContent }));
+    }
+  };
+
   useEffect(() => {
     const initializeData = async () => {
       try {
