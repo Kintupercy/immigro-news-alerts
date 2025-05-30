@@ -1,8 +1,11 @@
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +15,21 @@ Allow: /
 
 User-agent: *
 Allow: /
+Crawl-delay: 2
+
+# Disallow admin and user-specific areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /signup/
+Disallow: /email-verification/
+Disallow: /password-reset/
+
+# Allow important content
+Allow: /news/
+Allow: /resources/
+Allow: /about/
+Allow: /contact/
+
+# Sitemap location
+Sitemap: https://immigro.app/sitemap.xml

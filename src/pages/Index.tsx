@@ -8,6 +8,7 @@ import LatestNews from "@/components/LatestNews";
 import Pricing from "@/components/Pricing";
 import NewsletterSubscription from "@/components/NewsletterSubscription";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const Index = () => {
   useEffect(() => {
@@ -62,6 +63,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <SEO 
+        title="Immigro - Stay Updated with Immigration Law Changes"
+        description="Get real-time immigration news, policy updates, and expert analysis. Stay informed about visa requirements, green card processes, and citizenship changes."
+        keywords={['immigration news', 'visa updates', 'green card', 'citizenship', 'immigration policy', 'USCIS updates']}
+        url="https://immigro.app"
+      />
       <Header />
       <Hero />
       <Features />

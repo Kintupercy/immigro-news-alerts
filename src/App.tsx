@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from 'react-helmet-async';
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -90,85 +92,91 @@ const App = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <h1 className="text-2xl font-bold text-navy-800 mb-2 mt-4">Immigro</h1>
-          <p className="text-muted-foreground">Loading your personalized immigration news...</p>
+      <HelmetProvider>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <h1 className="text-2xl font-bold text-navy-800 mb-2 mt-4">Immigro</h1>
+            <p className="text-muted-foreground">Loading your personalized immigration news...</p>
+          </div>
         </div>
-      </div>
+      </HelmetProvider>
     );
   }
 
   if (authError) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <ErrorBoundary
-          fallback={
-            <div className="text-center p-8">
-              <h1 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h1>
-              <p className="text-muted-foreground mb-4">{authError}</p>
-              <button 
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-navy-800 text-white rounded hover:bg-navy-700"
-              >
-                Retry
-              </button>
-            </div>
-          }
-        >
-          <div />
-        </ErrorBoundary>
-      </div>
+      <HelmetProvider>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <ErrorBoundary
+            fallback={
+              <div className="text-center p-8">
+                <h1 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h1>
+                <p className="text-muted-foreground mb-4">{authError}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-navy-800 text-white rounded hover:bg-navy-700"
+                >
+                  Retry
+                </button>
+              </div>
+            }
+          >
+            <div />
+          </ErrorBoundary>
+        </div>
+      </HelmetProvider>
     );
   }
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route 
-                path="/" 
-                element={user ? <AuthenticatedApp /> : <Index />} 
-              />
-              <Route path="/news" element={<News />} />
-              <Route path="/resources" element={<Resources />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route 
-                path="/auth" 
-                element={user ? <Navigate to="/" replace /> : <Auth />} 
-              />
-              
-              <Route path="/email-verification" element={<EmailVerification />} />
-              <Route path="/password-reset" element={<PasswordReset />} />
-              
-              <Route 
-                path="/dashboard" 
-                element={user ? <AuthenticatedApp /> : <Navigate to="/auth" replace />} 
-              />
-              
-              {/* Admin Dashboard Route */}
-              <Route 
-                path="/admin" 
-                element={
-                  <AdminDashboard />
-                } 
-              />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <CookieConsent />
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={user ? <AuthenticatedApp /> : <Index />} 
+                />
+                <Route path="/news" element={<News />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route 
+                  path="/auth" 
+                  element={user ? <Navigate to="/" replace /> : <Auth />} 
+                />
+                
+                <Route path="/email-verification" element={<EmailVerification />} />
+                <Route path="/password-reset" element={<PasswordReset />} />
+                
+                <Route 
+                  path="/dashboard" 
+                  element={user ? <AuthenticatedApp /> : <Navigate to="/auth" replace />} 
+                />
+                
+                {/* Admin Dashboard Route */}
+                <Route 
+                  path="/admin" 
+                  element={
+                    <AdminDashboard />
+                  } 
+                />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <CookieConsent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 };
