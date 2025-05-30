@@ -67,7 +67,7 @@ const Contact = () => {
   };
 
   const handleFollowOnX = () => {
-    window.open('https://twitter.com/immigro_news', '_blank', 'noopener,noreferrer');
+    window.open('https://twitter.com/Immigro_news', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -115,7 +115,7 @@ const Contact = () => {
                       variant="outline" 
                       className="w-full bg-black hover:bg-gray-800 text-white border-black"
                     >
-                      @immigro_news
+                      @Immigro_news
                     </Button>
                     <p className="text-sm text-gray-500 mt-2">Get the latest updates on immigration news</p>
                   </div>
