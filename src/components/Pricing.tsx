@@ -12,7 +12,6 @@ const Pricing = () => {
       period: "forever",
       description: "Perfect for getting started with immigration news",
       features: [
-        "Weekly news digest",
         "3 immigration categories",
         "Email notifications",
         "Basic news archive",
@@ -34,6 +33,7 @@ const Pricing = () => {
       period: "per month",
       description: "For individuals who need comprehensive coverage",
       features: [
+        "Weekly news digest",
         "Real-time alerts",
         "All 13+ immigration categories",
         "Email notifications",
@@ -59,6 +59,7 @@ const Pricing = () => {
       originalPrice: "$59.88",
       description: "Best value - Save 30% with annual billing",
       features: [
+        "Weekly news digest",
         "Real-time alerts",
         "All 13+ immigration categories", 
         "Email notifications",
