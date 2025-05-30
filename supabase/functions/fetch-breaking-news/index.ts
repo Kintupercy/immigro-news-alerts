@@ -8,45 +8,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface NewsSource {
-  name: string;
-  rssUrl: string;
-  category: string;
-}
-
-const NEWS_SOURCES: NewsSource[] = [
-  {
-    name: "CNN",
-    rssUrl: "http://rss.cnn.com/rss/edition.rss",
-    category: "breaking-news"
-  },
-  {
-    name: "FOX News",
-    rssUrl: "http://feeds.foxnews.com/foxnews/latest",
-    category: "breaking-news"
-  },
-  {
-    name: "NPR",
-    rssUrl: "https://feeds.npr.org/1001/rss.xml",
-    category: "breaking-news"
-  },
-  {
-    name: "Reuters",
-    rssUrl: "https://feeds.reuters.com/Reuters/domesticNews",
-    category: "breaking-news"
-  },
-  {
-    name: "Associated Press",
-    rssUrl: "https://feeds.apnews.com/rss/apf-topnews",
-    category: "breaking-news"
-  }
-];
-
 const IMMIGRATION_KEYWORDS = [
   'immigration', 'visa', 'green card', 'deportation', 'asylum', 'refugee',
   'border', 'citizenship', 'naturalization', 'ICE', 'CBP', 'USCIS',
-  'H1B', 'F1', 'student visa', 'work permit', 'DACA', 'TPS',
-  'family reunification', 'chain migration', 'merit-based'
+  'H1B', 'H-1B', 'F1', 'F-1', 'student visa', 'work permit', 'DACA', 'TPS',
+  'family reunification', 'chain migration', 'merit-based', 'undocumented',
+  'immigration policy', 'immigration law', 'immigration court', 'immigration judge',
+  'removal proceedings', 'adjustment of status', 'consular processing',
+  'priority date', 'visa bulletin', 'employment authorization', 'travel document'
 ];
 
 const handler = async (req: Request): Promise<Response> => {
@@ -57,112 +26,162 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const perplexityApiKey = Deno.env.get("PERPLEXITY_API_KEY")!;
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Starting breaking news fetch from major outlets...");
+    console.log("Starting immigration-specific breaking news fetch...");
+
+    // Use Perplexity API to fetch immigration-specific breaking news
+    const prompt = `Find ONLY U.S. IMMIGRATION-related breaking news from the past 24 hours. Focus STRICTLY on:
+
+IMMIGRATION TOPICS ONLY:
+- Visa policy changes (H-1B, F-1, etc.)
+- Deportation raids or enforcement actions
+- Immigration court decisions
+- Border policy updates
+- USCIS/CBP/ICE announcements
+- Green card processing changes
+- Asylum policy updates
+- DACA/TPS announcements
+- Immigration executive orders
+- Citizenship ceremony changes
+
+REQUIRED SOURCES - Major trusted outlets:
+- NBCNews.com, FoxNews.com, NPR.org, CNN.com
+- Reuters.com, AP News, Washington Post, ABC News
+- USCIS.gov, DHS.gov, State.gov official announcements
+
+STRICT REQUIREMENTS:
+- MUST be directly related to U.S. immigration law, policy, or enforcement
+- NO general crime, politics, or non-immigration news
+- NO local news unless it's major immigration enforcement
+- Include valid URLs from trusted sources
+- Mark urgent only for immediate policy changes or deadlines
+
+Return exactly 3-5 immigration-specific breaking news articles in JSON format:
+{
+  "articles": [
+    {
+      "title": "Immigration-specific breaking news headline",
+      "summary": "Brief summary focusing on immigration impact",
+      "content": "Detailed content about immigration policy/enforcement",
+      "source_url": "https://trusted-source-url.com",
+      "is_urgent": false,
+      "tags": ["immigration", "breaking-news", "relevant-tag"]
+    }
+  ]
+}`;
+
+    console.log("Making Perplexity API request for immigration breaking news...");
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${perplexityApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-sonar-large-128k-online',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert U.S. immigration news researcher. ONLY return immigration-related breaking news. Reject any general news, crime stories, or non-immigration content. Focus exclusively on visa updates, deportation, asylum, border policy, USCIS changes, and immigration enforcement. Always return valid JSON with verified URLs from trusted news sources.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 2000,
+        return_citations: true
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Perplexity API error: ${response.status} - ${errorText}`);
+      throw new Error(`Perplexity API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content;
+    console.log("Perplexity immigration breaking news response:", content);
 
     let totalArticlesAdded = 0;
     let urgentNewsFound = 0;
 
-    for (const source of NEWS_SOURCES) {
-      try {
-        console.log(`Fetching from ${source.name}...`);
-        
-        const response = await fetch(source.rssUrl, {
-          headers: {
-            'User-Agent': 'Immigro News Fetcher/1.0'
-          }
-        });
+    // Parse the response
+    const articles = parseImmigrationBreakingNews(content);
+    console.log(`Found ${articles.length} immigration breaking news articles`);
 
-        if (!response.ok) {
-          console.log(`Failed to fetch from ${source.name}: ${response.status}`);
-          continue;
+    for (const article of articles) {
+      // Double-check immigration relevance
+      if (!isImmigrationRelated(article.title, article.content)) {
+        console.log(`Skipping non-immigration article: ${article.title}`);
+        continue;
+      }
+
+      // Check if article already exists
+      const { data: existingArticle } = await supabase
+        .from('immigration_news')
+        .select('id')
+        .eq('title', article.title)
+        .eq('source_url', article.source_url)
+        .single();
+
+      if (existingArticle) {
+        console.log(`Duplicate found: ${article.title}`);
+        continue;
+      }
+
+      // Insert the article
+      const { data: insertedArticle, error } = await supabase
+        .from('immigration_news')
+        .insert({
+          title: article.title,
+          content: article.content,
+          summary: article.summary,
+          category: 'breaking-news',
+          source_url: article.source_url,
+          published_at: new Date().toISOString(),
+          is_urgent: article.is_urgent,
+          tags: ['breaking-news', 'immigration', ...article.tags],
+          status: 'published'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error(`Error inserting immigration breaking news:`, error);
+        continue;
+      }
+
+      totalArticlesAdded++;
+      console.log(`Added immigration breaking news: ${article.title}`);
+
+      // If urgent, trigger urgent alert system
+      if (article.is_urgent && insertedArticle) {
+        urgentNewsFound++;
+        try {
+          await supabase.functions.invoke('urgent-news-alert', {
+            body: { newsId: insertedArticle.id }
+          });
+          console.log(`Triggered urgent alert for: ${article.title}`);
+        } catch (alertError) {
+          console.error('Error triggering urgent alert:', alertError);
         }
-
-        const rssText = await response.text();
-        const articles = parseRSSFeed(rssText, source);
-        
-        console.log(`Found ${articles.length} articles from ${source.name}`);
-
-        for (const article of articles) {
-          // Check if article is immigration-related
-          const isImmigrationRelated = IMMIGRATION_KEYWORDS.some(keyword =>
-            article.title.toLowerCase().includes(keyword.toLowerCase()) ||
-            article.content.toLowerCase().includes(keyword.toLowerCase())
-          );
-
-          if (!isImmigrationRelated) {
-            continue;
-          }
-
-          // Check if article already exists
-          const { data: existingArticle } = await supabase
-            .from('immigration_news')
-            .select('id')
-            .eq('title', article.title)
-            .eq('source_url', article.source_url)
-            .single();
-
-          if (existingArticle) {
-            continue;
-          }
-
-          // Determine if this is urgent breaking news
-          const isUrgent = article.title.toLowerCase().includes('breaking') ||
-                          article.title.toLowerCase().includes('urgent') ||
-                          article.content.toLowerCase().includes('breaking news');
-
-          // Insert the article
-          const { data: insertedArticle, error } = await supabase
-            .from('immigration_news')
-            .insert({
-              title: article.title,
-              content: article.content,
-              summary: article.summary,
-              category: 'breaking-news',
-              source_url: article.source_url,
-              published_at: article.published_at,
-              is_urgent: isUrgent,
-              tags: ['breaking-news', source.name.toLowerCase(), ...article.tags],
-              status: 'published'
-            })
-            .select()
-            .single();
-
-          if (error) {
-            console.error(`Error inserting article from ${source.name}:`, error);
-            continue;
-          }
-
-          totalArticlesAdded++;
-          console.log(`Added: ${article.title}`);
-
-          // If urgent, trigger urgent alert system
-          if (isUrgent && insertedArticle) {
-            urgentNewsFound++;
-            try {
-              await supabase.functions.invoke('urgent-news-alert', {
-                body: { newsId: insertedArticle.id }
-              });
-              console.log(`Triggered urgent alert for: ${article.title}`);
-            } catch (alertError) {
-              console.error('Error triggering urgent alert:', alertError);
-            }
-          }
-        }
-      } catch (error) {
-        console.error(`Error processing ${source.name}:`, error);
       }
     }
 
-    console.log(`Breaking news fetch completed: ${totalArticlesAdded} articles added, ${urgentNewsFound} urgent alerts sent`);
+    console.log(`Immigration breaking news fetch completed: ${totalArticlesAdded} articles added, ${urgentNewsFound} urgent alerts sent`);
 
     return new Response(JSON.stringify({
       success: true,
       articlesAdded: totalArticlesAdded,
       urgentNewsFound: urgentNewsFound,
-      message: `Successfully processed breaking news from major outlets. Added ${totalArticlesAdded} immigration-related articles.`
+      message: `Successfully processed immigration-specific breaking news. Added ${totalArticlesAdded} immigration-related articles.`
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -180,44 +199,82 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-function parseRSSFeed(rssText: string, source: NewsSource) {
+function parseImmigrationBreakingNews(content: string) {
   const articles: any[] = [];
   
   try {
-    // Simple RSS parsing - extract items between <item> tags
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-    const items = rssText.match(itemRegex) || [];
-
-    for (const item of items.slice(0, 10)) { // Limit to 10 most recent
-      const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/i);
-      const descriptionMatch = item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/i);
-      const linkMatch = item.match(/<link><!\[CDATA\[(.*?)\]\]><\/link>|<link>(.*?)<\/link>/i);
-      const pubDateMatch = item.match(/<pubDate>(.*?)<\/pubDate>/i);
-
-      const title = (titleMatch?.[1] || titleMatch?.[2] || '').trim();
-      const description = (descriptionMatch?.[1] || descriptionMatch?.[2] || '').trim();
-      const link = (linkMatch?.[1] || linkMatch?.[2] || '').trim();
-      const pubDate = pubDateMatch?.[1]?.trim();
-
-      if (title && description && link) {
-        // Clean up HTML tags from description
-        const cleanDescription = description.replace(/<[^>]*>/g, '').trim();
+    // Try to parse as JSON first
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.articles && Array.isArray(parsed.articles)) {
+        console.log(`Found ${parsed.articles.length} articles in JSON format`);
         
-        articles.push({
-          title: title,
-          content: cleanDescription,
-          summary: cleanDescription.length > 200 ? cleanDescription.substring(0, 200) + '...' : cleanDescription,
-          source_url: link,
-          published_at: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-          tags: [source.name.toLowerCase(), 'breaking-news']
-        });
+        for (const article of parsed.articles) {
+          if (article.title && article.source_url && isValidSource(article.source_url)) {
+            articles.push({
+              title: article.title,
+              content: article.content || article.summary || '',
+              summary: article.summary || article.title,
+              source_url: article.source_url,
+              tags: Array.isArray(article.tags) ? article.tags : ['immigration', 'breaking-news'],
+              is_urgent: article.is_urgent || false
+            });
+            console.log(`Valid immigration breaking news: ${article.title}`);
+          } else {
+            console.log(`Skipping invalid article - missing required fields or invalid source`);
+          }
+        }
       }
     }
   } catch (error) {
-    console.error(`Error parsing RSS from ${source.name}:`, error);
+    console.log('JSON parsing failed for breaking news:', error);
   }
-
+  
   return articles;
+}
+
+function isValidSource(url: string): boolean {
+  if (!url) return false;
+  
+  // Reject video/social content
+  if (url.includes('youtube.com') || url.includes('youtu.be') || 
+      url.includes('vimeo.com') || url.includes('tiktok.com') ||
+      url.includes('instagram.com') || url.includes('facebook.com')) {
+    return false;
+  }
+  
+  // Only allow trusted news domains
+  const trustedDomains = [
+    "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
+    "nbcnews.com", "foxnews.com", "npr.org", "cnn.com",
+    "nytimes.com", "cnbc.com", "reuters.com", "apnews.com", 
+    "bbc.com", "washingtonpost.com", "abcnews.go.com", "cbsnews.com",
+    "politico.com", "axios.com", "bloomberg.com", "wsj.com"
+  ];
+  
+  return trustedDomains.some(domain => url.toLowerCase().includes(domain));
+}
+
+function isImmigrationRelated(title: string, content: string): boolean {
+  const text = `${title} ${content}`.toLowerCase();
+  
+  // Must contain at least one immigration keyword
+  const hasImmigrationKeyword = IMMIGRATION_KEYWORDS.some(keyword => 
+    text.includes(keyword.toLowerCase())
+  );
+  
+  // Exclude non-immigration topics even if they mention keywords
+  const excludedTopics = [
+    'police chief', 'arkansas prison', 'escape', 'reward', 'capture',
+    'criminal investigation', 'fugitive', 'manhunt', 'robbery', 'theft',
+    'drug trafficking', 'gang violence', 'domestic violence', 'murder',
+    'assault', 'fraud scheme', 'embezzlement', 'tax evasion'
+  ];
+  
+  const hasExcludedTopic = excludedTopics.some(topic => text.includes(topic));
+  
+  return hasImmigrationKeyword && !hasExcludedTopic;
 }
 
 serve(handler);
