@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Globe } from "lucide-react";
@@ -16,6 +17,7 @@ const Header = () => {
     queryKey: ['user'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Header - Current user:', user?.email);
       return user;
     },
   });
@@ -24,7 +26,12 @@ const Header = () => {
   const { data: isAdmin } = useQuery({
     queryKey: ['isAdmin', user?.id],
     queryFn: async () => {
-      if (!user?.id) return false;
+      if (!user?.id) {
+        console.log('Header - No user ID for admin check');
+        return false;
+      }
+      
+      console.log('Header - Checking admin status for user:', user.email, user.id);
       
       const { data, error } = await supabase
         .from('user_roles')
@@ -33,11 +40,18 @@ const Header = () => {
         .eq('role', 'admin')
         .single();
       
-      if (error) return false;
+      console.log('Header - Admin check result:', { data, error });
+      
+      if (error) {
+        console.log('Header - Admin check error:', error.message);
+        return false;
+      }
       return !!data;
     },
     enabled: !!user?.id,
   });
+
+  console.log('Header - Is admin:', isAdmin, 'for user:', user?.email);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
