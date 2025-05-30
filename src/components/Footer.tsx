@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import { Globe } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -9,7 +10,8 @@ const Footer = () => {
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-2xl font-bold">⚖️ Immigro</span>
+              <Globe className="h-8 w-8 text-gray-300 mr-2" />
+              <span className="text-2xl font-bold">Immigro</span>
             </div>
             <p className="text-gray-300 mb-4">
               Your trusted source for personalized immigration news and updates. 
