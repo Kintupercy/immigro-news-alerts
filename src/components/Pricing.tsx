@@ -144,9 +144,6 @@ const Pricing = () => {
         </div>
 
         <div className="text-center mt-12 animate-fade-in">
-          <p className="text-gray-600 mb-4">
-            All plans include a 14-day free trial. Cancel anytime.
-          </p>
           <p className="text-sm text-gray-500">
             © 2024 Immigro. Not legal advice. For informational purposes only.
           </p>
