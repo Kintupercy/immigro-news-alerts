@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,9 @@ import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import ErrorBoundary from "./ErrorBoundary";
 import { NewsCardSkeleton, EmptyState } from "./LoadingStates";
+import LanguageToggle from "./LanguageToggle";
+import { useProMembership } from "@/hooks/useProMembership";
+import { translateText, translateCategory } from "@/utils/translation";
 
 interface NewsArticle {
   id: string;
@@ -30,8 +34,11 @@ interface PersonalizedNewsFeedProps {
 
 const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
   const [refreshing, setRefreshing] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
+  const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
+  const { isProMember } = useProMembership(user);
 
   const { 
     data: articles, 
@@ -75,6 +82,37 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     staleTime: 5 * 60 * 1000,
   });
 
+  const handleLanguageChange = async (language: 'en' | 'es') => {
+    setCurrentLanguage(language);
+    
+    if (language === 'es' && isProMember && articles) {
+      // Translate current articles if switching to Spanish
+      const newTranslatedContent: Record<string, any> = {};
+      
+      for (const article of articles) {
+        if (!translatedContent[article.id]) {
+          try {
+            const [translatedTitle, translatedSummary, translatedContent] = await Promise.all([
+              translateText(article.title, 'es'),
+              article.summary ? translateText(article.summary, 'es') : null,
+              translateText(article.content, 'es')
+            ]);
+            
+            newTranslatedContent[article.id] = {
+              title: translatedTitle,
+              summary: translatedSummary,
+              content: translatedContent
+            };
+          } catch (error) {
+            console.error('Translation error for article:', article.id, error);
+          }
+        }
+      }
+      
+      setTranslatedContent(prev => ({ ...prev, ...newTranslatedContent }));
+    }
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -82,8 +120,10 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
       enhancedCache.delete(cacheKeys.personalizedNews(user.id, []));
       await refetch();
       toast({
-        title: "News updated",
-        description: "Your personalized feed has been refreshed.",
+        title: currentLanguage === 'es' ? "Noticias actualizadas" : "News updated",
+        description: currentLanguage === 'es' 
+          ? "Tu feed personalizado ha sido actualizado." 
+          : "Your personalized feed has been refreshed.",
       });
     } catch (error) {
       handleError(error as Error, 'refreshing personalized news');
@@ -97,9 +137,16 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    if (diffInHours < 1) return "Just now";
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 1) return currentLanguage === 'es' ? "Justo ahora" : "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ${currentLanguage === 'es' ? 'hace' : 'ago'}`;
     return date.toLocaleDateString();
+  };
+
+  const getDisplayText = (text: string, articleId?: string, field?: string) => {
+    if (currentLanguage === 'es' && articleId && field && translatedContent[articleId]) {
+      return translatedContent[articleId][field] || text;
+    }
+    return text;
   };
 
   if (isLoading) {
@@ -126,20 +173,32 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
       <ErrorBoundary>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Your Personalized News</h2>
-            <Button 
-              variant="outline" 
-              onClick={() => retry(handleRefresh)}
-              disabled={!canRetry}
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry
-            </Button>
+            <h2 className="text-2xl font-bold">
+              {currentLanguage === 'es' ? 'Tus Noticias Personalizadas' : 'Your Personalized News'}
+            </h2>
+            <div className="flex items-center gap-3">
+              <LanguageToggle 
+                currentLanguage={currentLanguage}
+                onLanguageChange={handleLanguageChange}
+                isProMember={isProMember}
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => retry(handleRefresh)}
+                disabled={!canRetry}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {currentLanguage === 'es' ? 'Reintentar' : 'Retry'}
+              </Button>
+            </div>
           </div>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Failed to load your personalized news. Please check your connection and try again.
+              {currentLanguage === 'es' 
+                ? 'Error al cargar tus noticias personalizadas. Por favor verifica tu conexión e intenta de nuevo.'
+                : 'Failed to load your personalized news. Please check your connection and try again.'
+              }
             </AlertDescription>
           </Alert>
         </div>
@@ -150,32 +209,44 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
   if (!articles || articles.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Your Personalized News</h2>
-          <Button 
-            variant="outline" 
-            onClick={() => retry(handleRefresh)} 
-            disabled={refreshing || !canRetry}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h2 className="text-2xl font-bold">
+            {currentLanguage === 'es' ? 'Tus Noticias Personalizadas' : 'Your Personalized News'}
+          </h2>
+          <div className="flex items-center gap-3">
+            <LanguageToggle 
+              currentLanguage={currentLanguage}
+              onLanguageChange={handleLanguageChange}
+              isProMember={isProMember}
+            />
+            <Button 
+              variant="outline" 
+              onClick={() => retry(handleRefresh)} 
+              disabled={refreshing || !canRetry}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {currentLanguage === 'es' ? 'Actualizar' : 'Refresh'}
+            </Button>
+          </div>
         </div>
         <EmptyState
           icon={Newspaper}
-          title="No news yet"
-          description="We're fetching the latest immigration news based on your preferences. Check back soon or adjust your interests in your profile."
+          title={currentLanguage === 'es' ? 'Aún no hay noticias' : 'No news yet'}
+          description={currentLanguage === 'es' 
+            ? 'Estamos obteniendo las últimas noticias de inmigración basadas en tus preferencias. Vuelve pronto o ajusta tus intereses en tu perfil.'
+            : 'We\'re fetching the latest immigration news based on your preferences. Check back soon or adjust your interests in your profile.'
+          }
           action={
             <Button onClick={() => retry(handleRefresh)} disabled={refreshing || !canRetry}>
               {refreshing ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Checking for news...
+                  {currentLanguage === 'es' ? 'Buscando noticias...' : 'Checking for news...'}
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Check for news
+                  {currentLanguage === 'es' ? 'Buscar noticias' : 'Check for news'}
                 </>
               )}
             </Button>
@@ -189,15 +260,24 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     <ErrorBoundary>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold">Your Personalized News</h2>
-          <Button 
-            variant="outline" 
-            onClick={() => retry(handleRefresh)} 
-            disabled={refreshing || !canRetry}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <h2 className="text-2xl font-bold">
+            {currentLanguage === 'es' ? 'Tus Noticias Personalizadas' : 'Your Personalized News'}
+          </h2>
+          <div className="flex items-center gap-3">
+            <LanguageToggle 
+              currentLanguage={currentLanguage}
+              onLanguageChange={handleLanguageChange}
+              isProMember={isProMember}
+            />
+            <Button 
+              variant="outline" 
+              onClick={() => retry(handleRefresh)} 
+              disabled={refreshing || !canRetry}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {currentLanguage === 'es' ? 'Actualizar' : 'Refresh'}
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 md:gap-6">
@@ -211,16 +291,19 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
                         variant={article.is_urgent ? "destructive" : "secondary"}
                         className="text-xs"
                       >
-                        {article.category.toUpperCase()}
+                        {currentLanguage === 'es' 
+                          ? translateCategory(article.category.toUpperCase())
+                          : article.category.toUpperCase()
+                        }
                       </Badge>
                       {article.is_urgent && (
                         <Badge variant="destructive" className="text-xs">
-                          URGENT
+                          {currentLanguage === 'es' ? 'URGENTE' : 'URGENT'}
                         </Badge>
                       )}
                     </div>
                     <CardTitle className="text-lg sm:text-xl leading-tight break-words">
-                      {article.title}
+                      {getDisplayText(article.title, article.id, 'title')}
                     </CardTitle>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground whitespace-nowrap">
@@ -231,11 +314,15 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground mb-4 leading-relaxed break-words">
-                  {article.summary || article.content.substring(0, 200) + '...'}
+                  {getDisplayText(
+                    article.summary || article.content.substring(0, 200) + '...',
+                    article.id,
+                    'summary'
+                  )}
                 </p>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <span className="text-sm font-medium text-navy-600 break-all">
-                    Source Article
+                    {currentLanguage === 'es' ? 'Artículo Fuente' : 'Source Article'}
                   </span>
                   <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                     <a 
@@ -245,7 +332,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
                       className="flex items-center justify-center"
                     >
                       <ExternalLink className="w-4 h-4 mr-1" />
-                      Read More
+                      {currentLanguage === 'es' ? 'Leer Más' : 'Read More'}
                     </a>
                   </Button>
                 </div>
