@@ -81,10 +81,10 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-8 h-10">
                 <Link 
                   to="/" 
-                  className={`transition-colors duration-200 ${
+                  className={`flex items-center h-full transition-colors duration-200 ${
                     isActive('/') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                   }`}
                 >
@@ -92,7 +92,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/news" 
-                  className={`transition-colors duration-200 ${
+                  className={`flex items-center h-full transition-colors duration-200 ${
                     isActive('/news') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                   }`}
                 >
@@ -100,7 +100,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/resources" 
-                  className={`transition-colors duration-200 ${
+                  className={`flex items-center h-full transition-colors duration-200 ${
                     isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                   }`}
                 >
@@ -108,7 +108,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/about" 
-                  className={`transition-colors duration-200 ${
+                  className={`flex items-center h-full transition-colors duration-200 ${
                     isActive('/about') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                   }`}
                 >
@@ -116,7 +116,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/contact" 
-                  className={`transition-colors duration-200 ${
+                  className={`flex items-center h-full transition-colors duration-200 ${
                     isActive('/contact') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                   }`}
                 >
@@ -127,7 +127,7 @@ const Header = () => {
                 {isAdmin && (
                   <Link 
                     to="/admin" 
-                    className={`transition-colors duration-200 ${
+                    className={`flex items-center h-full transition-colors duration-200 ${
                       isActive('/admin') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
                     }`}
                   >
