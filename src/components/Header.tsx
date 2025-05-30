@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import UrgentNewsAlert from "./UrgentNewsAlert";
 import BreakingNewsAlert from "./BreakingNewsAlert";
-import Badge from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

@@ -5,6 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Users, Mail, Bell, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+// Define interface for notification preferences
+interface NotificationPreferences {
+  email?: boolean;
+  push?: boolean;
+  sms?: boolean;
+  urgent_only?: boolean;
+}
+
 const UserAnalytics = () => {
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['userAnalytics'],
@@ -26,10 +34,10 @@ const UserAnalytics = () => {
       const activeSubscriptions = subscriptions.filter(s => s.is_active).length;
       const totalBookmarks = bookmarks.length;
 
-      // Notification preferences analysis
+      // Notification preferences analysis with proper type handling
       const notificationPrefs = users.reduce((acc, user) => {
         if (user.notification_preferences) {
-          const prefs = user.notification_preferences;
+          const prefs = user.notification_preferences as NotificationPreferences;
           acc.email += prefs.email ? 1 : 0;
           acc.push += prefs.push ? 1 : 0;
           acc.sms += prefs.sms ? 1 : 0;
