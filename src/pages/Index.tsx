@@ -9,6 +9,7 @@ import Pricing from "@/components/Pricing";
 import NewsletterSubscription from "@/components/NewsletterSubscription";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import AdBanner from "@/components/AdBanner";
 
 const Index = () => {
   useEffect(() => {
@@ -71,8 +72,20 @@ const Index = () => {
       />
       <Header />
       <Hero />
+      
+      {/* Ad after Hero section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <AdBanner position="header" />
+      </div>
+      
       <Features />
       <LatestNews />
+      
+      {/* Ad between sections */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <AdBanner position="between-articles" />
+      </div>
+      
       <Categories />
       <Pricing />
       <NewsletterSubscription />

@@ -16,6 +16,7 @@ import { NewsLoadingState, NewsCardSkeleton, EmptyState, CategoriesSkeleton } fr
 import BookmarkButton from "./BookmarkButton";
 import SocialShareButton from "./SocialShareButton";
 import LanguageToggle from "./LanguageToggle";
+import AdBanner from "./AdBanner";
 import { useProMembership } from "@/hooks/useProMembership";
 import { translateText, translateCategory } from "@/utils/translation";
 
@@ -403,6 +404,7 @@ const NewsFeed = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header Section with enhanced search */}
         <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
+          {/* Header Content */}
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">
@@ -494,6 +496,9 @@ const NewsFeed = () => {
           )}
         </div>
 
+        {/* Ad Banner - Header Position */}
+        <AdBanner position="header" className="mb-6" />
+
         {searchTerm && (
           <div className="mb-4 text-sm text-muted-foreground">
             {currentLanguage === 'es' 
@@ -503,102 +508,140 @@ const NewsFeed = () => {
           </div>
         )}
 
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">
-              {currentLanguage === 'es' ? `Todas (${filteredArticles.length})` : `All (${filteredArticles.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="urgent" className="text-red-600">
-              <AlertTriangle className="w-4 h-4 mr-1" />
-              {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="breaking" className="text-orange-600">
-              {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="regular">
-              {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                {/* Tabs List */}
+                <TabsTrigger value="all">
+                  {currentLanguage === 'es' ? `Todas (${filteredArticles.length})` : `All (${filteredArticles.length})`}
+                </TabsTrigger>
+                <TabsTrigger value="urgent" className="text-red-600">
+                  <AlertTriangle className="w-4 h-4 mr-1" />
+                  {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
+                </TabsTrigger>
+                <TabsTrigger value="breaking" className="text-orange-600">
+                  {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
+                </TabsTrigger>
+                <TabsTrigger value="regular">
+                  {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="all" className="mt-6">
-            <div className="space-y-4">
-              {filteredArticles.length === 0 ? (
-                <EmptyState
-                  icon={Newspaper}
-                  title={searchTerm 
-                    ? (currentLanguage === 'es' 
-                        ? `No se encontraron artículos que coincidan con "${searchTerm}"`
-                        : `No articles found matching "${searchTerm}"`)
-                    : (currentLanguage === 'es' 
-                        ? 'No se encontraron artículos verificados'
-                        : 'No verified articles found')
-                  }
-                  description={searchTerm 
-                    ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
-                    : (currentLanguage === 'es' 
-                        ? 'Haz clic en actualizar para obtener las últimas noticias de fuentes oficiales.'
-                        : 'Click refresh to fetch the latest news from official sources.')
-                  }
-                  action={!searchTerm && (
-                    <Button onClick={() => retry(() => refreshNews(true))} disabled={refreshing || !canRetry}>
-                      <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                      {currentLanguage === 'es' ? 'Obtener Últimas Noticias' : 'Fetch Latest News'}
-                    </Button>
+              <TabsContent value="all" className="mt-6">
+                <div className="space-y-4">
+                  {filteredArticles.length === 0 ? (
+                    <EmptyState
+                      icon={Newspaper}
+                      title={searchTerm 
+                        ? (currentLanguage === 'es' 
+                            ? `No se encontraron artículos que coincidan con "${searchTerm}"`
+                            : `No articles found matching "${searchTerm}"`)
+                        : (currentLanguage === 'es' 
+                            ? 'No se encontraron artículos verificados'
+                            : 'No verified articles found')
+                      }
+                      description={searchTerm 
+                        ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
+                        : (currentLanguage === 'es' 
+                            ? 'Haz clic en actualizar para obtener las últimas noticias de fuentes oficiales.'
+                            : 'Click refresh to fetch the latest news from official sources.')
+                      }
+                      action={!searchTerm && (
+                        <Button onClick={() => retry(() => refreshNews(true))} disabled={refreshing || !canRetry}>
+                          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                          {currentLanguage === 'es' ? 'Obtener Últimas Noticias' : 'Fetch Latest News'}
+                        </Button>
+                      )}
+                    />
+                  ) : (
+                    filteredArticles.map((article, index) => (
+                      <div key={article.id}>
+                        <ArticleCard article={article} />
+                        {/* Insert ad every 3 articles for free users */}
+                        {(index + 1) % 3 === 0 && (
+                          <AdBanner position="between-articles" className="my-6" />
+                        )}
+                      </div>
+                    ))
                   )}
-                />
-              ) : (
-                filteredArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
-                ))
-              )}
-            </div>
-          </TabsContent>
+                </div>
+              </TabsContent>
 
-          <TabsContent value="urgent" className="mt-6">
-            <div className="space-y-4">
-              {urgentArticles.length === 0 ? (
-                <EmptyState
-                  icon={AlertTriangle}
-                  title={currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time'}
-                />
-              ) : (
-                urgentArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
-                ))
-              )}
-            </div>
-          </TabsContent>
+              <TabsContent value="urgent" className="mt-6">
+                <div className="space-y-4">
+                  {urgentArticles.length === 0 ? (
+                    <EmptyState
+                      icon={AlertTriangle}
+                      title={currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time'}
+                    />
+                  ) : (
+                    urgentArticles.map((article, index) => (
+                      <div key={article.id}>
+                        <ArticleCard article={article} />
+                        {(index + 1) % 3 === 0 && (
+                          <AdBanner position="between-articles" className="my-6" />
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
 
-          <TabsContent value="breaking" className="mt-6">
-            <div className="space-y-4">
-              {breakingNewsArticles.length === 0 ? (
-                <EmptyState
-                  icon={Newspaper}
-                  title={currentLanguage === 'es' ? 'No hay noticias de última hora en este momento' : 'No breaking news at this time'}
-                />
-              ) : (
-                breakingNewsArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
-                ))
-              )}
-            </div>
-          </TabsContent>
+              <TabsContent value="breaking" className="mt-6">
+                <div className="space-y-4">
+                  {breakingNewsArticles.length === 0 ? (
+                    <EmptyState
+                      icon={Newspaper}
+                      title={currentLanguage === 'es' ? 'No hay noticias de última hora en este momento' : 'No breaking news at this time'}
+                    />
+                  ) : (
+                    breakingNewsArticles.map((article, index) => (
+                      <div key={article.id}>
+                        <ArticleCard article={article} />
+                        {(index + 1) % 3 === 0 && (
+                          <AdBanner position="between-articles" className="my-6" />
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
 
-          <TabsContent value="regular" className="mt-6">
-            <div className="space-y-4">
-              {regularArticles.length === 0 ? (
-                <EmptyState
-                  icon={Newspaper}
-                  title={currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found'}
-                />
-              ) : (
-                regularArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
-                ))
-              )}
+              <TabsContent value="regular" className="mt-6">
+                <div className="space-y-4">
+                  {regularArticles.length === 0 ? (
+                    <EmptyState
+                      icon={Newspaper}
+                      title={currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found'}
+                    />
+                  ) : (
+                    regularArticles.map((article, index) => (
+                      <div key={article.id}>
+                        <ArticleCard article={article} />
+                        {(index + 1) % 3 === 0 && (
+                          <AdBanner position="between-articles" className="my-6" />
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Sidebar with ads */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 space-y-4">
+              <AdBanner position="sidebar" />
+              {/* You can add more sidebar content here */}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
+
+        {/* Footer Ad */}
+        <AdBanner position="footer" className="mt-8" />
       </div>
     </ErrorBoundary>
   );
