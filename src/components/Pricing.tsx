@@ -15,7 +15,8 @@ const Pricing = () => {
         "3 immigration categories",
         "Email notifications",
         "Basic news archive",
-        "English only"
+        "English only",
+        "Ads supported"
       ],
       buttonText: "Get Started",
       popular: false
@@ -32,7 +33,8 @@ const Pricing = () => {
         "SMS notifications",
         "Spanish translation",
         "Full news archive",
-        "Priority support"
+        "Priority support",
+        "No ads"
       ],
       buttonText: "Start Pro Trial",
       popular: true
@@ -51,6 +53,7 @@ const Pricing = () => {
         "Spanish translation",
         "Full news archive",
         "Priority support",
+        "No ads",
         "30% savings vs monthly"
       ],
       buttonText: "Start Annual Trial",
@@ -115,8 +118,20 @@ const Pricing = () => {
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-center group-hover:translate-x-2 transition-transform duration-300" style={{ transitionDelay: `${featureIndex * 50}ms` }}>
-                      <Check className="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-gray-700">{feature}</span>
+                      <Check className={`w-5 h-5 mr-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ${
+                        feature === "No ads" || feature === "Ads supported" 
+                          ? feature === "No ads" ? "text-emerald-500" : "text-gray-400"
+                          : "text-emerald-500"
+                      }`} />
+                      <span className={`${
+                        feature === "No ads" 
+                          ? "text-emerald-700 font-medium" 
+                          : feature === "Ads supported"
+                          ? "text-gray-500"
+                          : "text-gray-700"
+                      }`}>
+                        {feature}
+                      </span>
                     </li>
                   ))}
                 </ul>
