@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -60,7 +59,7 @@ const NewsFeed = () => {
 
   // Free tier: limit to 3 categories
   const FREE_CATEGORIES_LIMIT = 3;
-  const FREE_TIER_CATEGORIES = ['green-card', 'citizenship', 'employment-based'];
+  const FREE_TIER_CATEGORIES = ['green-card', 'citizenship', 'work-visas-employment'];
 
   // Add the missing handleLanguageChange function
   const handleLanguageChange = async (language: 'en' | 'es') => {
@@ -456,7 +455,7 @@ const NewsFeed = () => {
                     onClick={() => setUpgradeModalOpen(true)}
                     className="ml-2 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
                   >
-                    Unlock All 13+ Categories
+                    Unlock All 12+ Categories
                   </Button>
                 </div>
               )}

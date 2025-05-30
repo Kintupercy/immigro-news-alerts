@@ -6,16 +6,16 @@ const Categories = () => {
   const categories = [
     { name: "Green Card / Permanent Residency", emoji: "🟢" },
     { name: "Citizenship & Naturalization", emoji: "🇺🇸" }, 
-    { name: "International Students", emoji: "🎓" },
-    { name: "Family-Based Immigration", emoji: "👨‍👩‍👧‍👦" },
     { name: "Work Visas & Employment-Based", emoji: "💼" },
-    { name: "Humanitarian & Refugee/Asylee", emoji: "🤝" },
-    { name: "Temporary Visitors & Tourists", emoji: "✈️" },
-    { name: "Exchange Visitors & Cultural Programs", emoji: "🌍" },
+    { name: "Student Visas", emoji: "🎓" },
+    { name: "Family-Based Immigration", emoji: "👨‍👩‍👧‍👦" },
     { name: "Investor & Entrepreneur Visas", emoji: "💰" },
-    { name: "Religious Worker Visas", emoji: "⛪" },
-    { name: "Specialty Occupations & NAFTA/USMCA", emoji: "🔧" },
-    { name: "Undocumented & Mixed-Status Families", emoji: "📋" }
+    { name: "Asylum & Refugee", emoji: "🤝" },
+    { name: "Deportation & Removal", emoji: "⚖️" },
+    { name: "DACA & Dreamers", emoji: "🌟" },
+    { name: "Border & Enforcement", emoji: "🛡️" },
+    { name: "Temporary Visitors & Tourists", emoji: "✈️" },
+    { name: "Religious Worker Visas", emoji: "⛪" }
   ];
 
   return (
