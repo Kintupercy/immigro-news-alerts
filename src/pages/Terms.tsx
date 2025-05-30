@@ -331,21 +331,6 @@ const Terms = () => {
               </p>
             </div>
           </div>
-
-          {/* Contact Information */}
-          <div className="bg-emerald-50 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
-            <p className="text-gray-700 mb-4">For questions about these Terms of Service or legal matters:</p>
-            <div className="text-gray-700 space-y-2">
-              <p><strong>Legal Department:</strong> legal@immigro.com</p>
-              <p><strong>General Support:</strong> support@immigro.com</p>
-              <p><strong>Mailing Address:</strong> [Your Business Address]</p>
-              <p><strong>Phone:</strong> [Your Phone Number]</p>
-            </div>
-            <p className="text-sm text-gray-600 mt-4">
-              Business hours: Monday-Friday, 9 AM - 5 PM [Your Time Zone]
-            </p>
-          </div>
         </div>
       </div>
       

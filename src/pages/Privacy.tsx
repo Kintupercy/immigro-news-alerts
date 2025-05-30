@@ -275,21 +275,6 @@ const Privacy = () => {
               </ul>
             </div>
           </div>
-
-          {/* Contact Information */}
-          <div className="bg-emerald-50 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
-            <p className="text-gray-700 mb-4">For privacy-related questions or to exercise your rights:</p>
-            <div className="text-gray-700 space-y-2">
-              <p><strong>Data Protection Officer:</strong> dpo@immigro.com</p>
-              <p><strong>Privacy Team:</strong> privacy@immigro.com</p>
-              <p><strong>Mailing Address:</strong> [Your Business Address]</p>
-              <p><strong>EU Representative:</strong> [EU Representative Details if applicable]</p>
-            </div>
-            <p className="text-sm text-gray-600 mt-4">
-              If you're not satisfied with our response, you have the right to lodge a complaint with your local data protection authority.
-            </p>
-          </div>
         </div>
       </div>
       
