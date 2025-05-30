@@ -3,24 +3,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Languages, Crown } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
+import { User } from "@supabase/supabase-js";
 
 interface LanguageToggleProps {
   currentLanguage: 'en' | 'es';
   onLanguageChange: (language: 'en' | 'es') => void;
   isProMember: boolean;
+  user?: User | null;
 }
 
-const LanguageToggle = ({ currentLanguage, onLanguageChange, isProMember }: LanguageToggleProps) => {
-  const { toast } = useToast();
+const LanguageToggle = ({ currentLanguage, onLanguageChange, isProMember, user }: LanguageToggleProps) => {
+  const { showUpgradePrompt, setUpgradeModalOpen } = useFreemiumFeatures(user);
 
   const handleLanguageChange = (language: 'en' | 'es') => {
     if (language === 'es' && !isProMember) {
-      toast({
-        title: "Pro Feature",
-        description: "Spanish translation is available for Pro members only. Upgrade to access this feature.",
-        variant: "destructive",
-      });
+      showUpgradePrompt('spanishTranslation');
+      setUpgradeModalOpen(true);
       return;
     }
     onLanguageChange(language);
@@ -53,7 +52,8 @@ const LanguageToggle = ({ currentLanguage, onLanguageChange, isProMember }: Lang
       </div>
       {!isProMember && (
         <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-300">
-          Pro Only
+          <Crown className="w-3 h-3 mr-1" />
+          Pro
         </Badge>
       )}
     </div>

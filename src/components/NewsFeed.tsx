@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Newspaper } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Newspaper, Crown, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
@@ -18,6 +18,8 @@ import SocialShareButton from "./SocialShareButton";
 import LanguageToggle from "./LanguageToggle";
 import AdBanner from "./AdBanner";
 import { useProMembership } from "@/hooks/useProMembership";
+import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
+import UpgradeModal from "./UpgradeModal";
 import { translateText, translateCategory } from "@/utils/translation";
 
 interface NewsArticle {
@@ -52,13 +54,19 @@ const NewsFeed = () => {
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const { toast } = useToast();
   const { isProMember } = useProMembership(user);
-  const { handleError, retry, canRetry } = useErrorHandler({
-    maxRetries: 3,
-    onError: (error) => console.error('NewsFeed error:', error)
-  });
+  const { checkFeatureAccess, showUpgradePrompt, upgradeModalOpen, setUpgradeModalOpen } = useFreemiumFeatures(user);
+
+  // Free tier: limit to 3 categories
+  const FREE_CATEGORIES_LIMIT = 3;
+  const FREE_TIER_CATEGORIES = ['green-card', 'citizenship', 'employment-based'];
 
   // Add the missing handleLanguageChange function
   const handleLanguageChange = async (language: 'en' | 'es') => {
+    if (language === 'es' && !isProMember) {
+      showUpgradePrompt('spanishTranslation');
+      return;
+    }
+    
     setCurrentLanguage(language);
     
     if (language === 'es' && isProMember) {
@@ -159,6 +167,11 @@ const NewsFeed = () => {
 
           if (selectedCategory !== 'all') {
             query = query.eq('category', selectedCategory);
+          }
+
+          // For free users, limit results
+          if (!isProMember) {
+            query = query.limit(10); // Limit articles for free users
           }
 
           const { data, error } = await query;
@@ -395,6 +408,21 @@ const NewsFeed = () => {
     );
   };
 
+  const handleCategoryClick = (categorySlug: string) => {
+    if (!isProMember && categorySlug !== 'all' && categorySlug !== 'breaking-news' && !FREE_TIER_CATEGORIES.includes(categorySlug)) {
+      showUpgradePrompt('allCategories');
+      setUpgradeModalOpen(true);
+      return;
+    }
+    setSelectedCategory(categorySlug);
+  };
+
+  const isCategoryLocked = (categorySlug: string) => {
+    if (isProMember) return false;
+    if (categorySlug === 'all' || categorySlug === 'breaking-news') return false;
+    return !FREE_TIER_CATEGORIES.includes(categorySlug);
+  };
+
   if (loading) {
     return <NewsLoadingState />;
   }
@@ -414,12 +442,29 @@ const NewsFeed = () => {
                 <Shield className="inline w-4 h-4 mr-1" />
                 {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS + BREAKING NEWS' : 'SEARCH, SAVE & SHARE NEWS + BREAKING NEWS'}
               </p>
+              {!isProMember && (
+                <div className="mt-2">
+                  <Badge className="bg-emerald-600 text-white">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Free Plan: 3 Categories
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setUpgradeModalOpen(true)}
+                    className="ml-2 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
+                  >
+                    Unlock All 13+ Categories
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <LanguageToggle 
                 currentLanguage={currentLanguage}
                 onLanguageChange={handleLanguageChange}
                 isProMember={isProMember}
+                user={user}
               />
               <Button 
                 onClick={() => retry(() => refreshNews(true))} 
@@ -459,7 +504,7 @@ const NewsFeed = () => {
               <Button
                 variant={selectedCategory === 'all' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedCategory('all')}
+                onClick={() => handleCategoryClick('all')}
                 className={selectedCategory === 'all' 
                   ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
                   : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
@@ -470,7 +515,7 @@ const NewsFeed = () => {
               <Button
                 variant={selectedCategory === 'breaking-news' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedCategory('breaking-news')}
+                onClick={() => handleCategoryClick('breaking-news')}
                 className={selectedCategory === 'breaking-news' 
                   ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
                   : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
@@ -478,26 +523,35 @@ const NewsFeed = () => {
               >
                 {currentLanguage === 'es' ? 'Noticias de Última Hora' : 'Breaking News'}
               </Button>
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.slug ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.slug)}
-                  className={selectedCategory === category.slug 
-                    ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                    : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-                  }
-                >
-                  {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
-                </Button>
-              ))}
+              {categories.map((category) => {
+                const isLocked = isCategoryLocked(category.slug);
+                return (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.slug ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleCategoryClick(category.slug)}
+                    disabled={isLocked}
+                    className={`relative ${selectedCategory === category.slug 
+                      ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                      : isLocked
+                      ? 'bg-transparent text-cream-400 border-cream-400 opacity-60 cursor-not-allowed'
+                      : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+                    }`}
+                  >
+                    {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
+                    {isLocked && (
+                      <Crown className="w-3 h-3 ml-1 text-yellow-400" />
+                    )}
+                  </Button>
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* Ad Banner - Header Position */}
-        <AdBanner position="header" className="mb-6" />
+        {/* Ad Banner - Header Position (only for free users) */}
+        {!isProMember && <AdBanner position="header" className="mb-6" />}
 
         {searchTerm && (
           <div className="mb-4 text-sm text-muted-foreground">
@@ -631,18 +685,39 @@ const NewsFeed = () => {
             </Tabs>
           </div>
 
-          {/* Sidebar with ads */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-4 space-y-4">
-              <AdBanner position="sidebar" />
-              {/* You can add more sidebar content here */}
+          {/* Sidebar with ads (only for free users) */}
+          {!isProMember && (
+            <div className="lg:col-span-1">
+              <div className="sticky top-4 space-y-4">
+                <AdBanner position="sidebar" />
+                {/* Upgrade prompt in sidebar */}
+                <Card className="bg-emerald-50 border-emerald-200">
+                  <CardContent className="p-4 text-center">
+                    <Crown className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+                    <h3 className="font-semibold text-emerald-800 mb-1">Upgrade to Pro</h3>
+                    <p className="text-sm text-emerald-700 mb-3">Remove ads and unlock all features</p>
+                    <Button 
+                      onClick={() => setUpgradeModalOpen(true)}
+                      size="sm" 
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      Learn More
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Footer Ad */}
-        <AdBanner position="footer" className="mt-8" />
+        {/* Footer Ad (only for free users) */}
+        {!isProMember && <AdBanner position="footer" className="mt-8" />}
       </div>
+
+      <UpgradeModal 
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+      />
     </ErrorBoundary>
   );
 };

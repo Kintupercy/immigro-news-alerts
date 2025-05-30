@@ -1,11 +1,14 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, Crown } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import UrgentNewsAlert from "./UrgentNewsAlert";
 import { Badge } from "@/components/ui/badge";
+import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
+import UpgradeModal from "./UpgradeModal";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,6 +51,8 @@ const Header = () => {
     },
     enabled: !!user?.id,
   });
+
+  const { isProMember, upgradeModalOpen, setUpgradeModalOpen } = useFreemiumFeatures(user);
 
   console.log('Header - Is admin:', isAdmin, 'for user:', user?.email);
 
@@ -131,7 +136,25 @@ const Header = () => {
 
               {user ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-cream-300">Welcome back!</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-cream-300">Welcome back!</span>
+                    {isProMember ? (
+                      <Badge className="bg-emerald-600 text-white">
+                        <Crown className="w-3 h-3 mr-1" />
+                        Pro
+                      </Badge>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setUpgradeModalOpen(true)}
+                        className="border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
+                      >
+                        <Crown className="w-3 h-3 mr-1" />
+                        Upgrade to Pro
+                      </Button>
+                    )}
+                  </div>
                   <Button 
                     onClick={handleSignOut}
                     variant="outline" 
@@ -241,7 +264,25 @@ const Header = () => {
 
                 {user ? (
                   <div className="px-3 py-2 space-y-2">
-                    <p className="text-cream-300 text-sm">Welcome back!</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-cream-300 text-sm">Welcome back!</p>
+                      {isProMember ? (
+                        <Badge className="bg-emerald-600 text-white">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Pro
+                        </Badge>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setUpgradeModalOpen(true)}
+                          className="border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
+                        >
+                          <Crown className="w-3 h-3 mr-1" />
+                          Upgrade
+                        </Button>
+                      )}
+                    </div>
                     <Button 
                       onClick={handleSignOut}
                       variant="outline" 
@@ -277,6 +318,11 @@ const Header = () => {
           )}
         </div>
       </header>
+
+      <UpgradeModal 
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+      />
     </>
   );
 };
