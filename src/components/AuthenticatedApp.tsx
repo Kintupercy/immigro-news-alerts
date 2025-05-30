@@ -82,12 +82,9 @@ const AuthenticatedApp = () => {
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-slate-800">⚖️ Immigro</h1>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <UserIcon className="w-4 h-4" />
-                <span>Welcome back, {user.user_metadata?.first_name || user.email}</span>
-              </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <UserIcon className="w-4 h-4" />
+              <span>Welcome back, {user.user_metadata?.first_name || user.email}</span>
             </div>
             <Button variant="ghost" onClick={handleSignOut} className="flex items-center gap-2">
               <LogOut className="w-4 h-4" />
