@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Globe } from "lucide-react";
@@ -6,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import UrgentNewsAlert from "./UrgentNewsAlert";
+import BreakingNewsAlert from "./BreakingNewsAlert";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,8 +30,9 @@ const Header = () => {
 
   return (
     <>
-      {/* Add the urgent news alert system */}
+      {/* Add both urgent news and breaking news alert systems */}
       <UrgentNewsAlert />
+      <BreakingNewsAlert />
       
       <header className="bg-navy-800 text-cream-50 sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

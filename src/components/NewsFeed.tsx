@@ -204,29 +204,34 @@ const NewsFeed = () => {
       
       toast({
         title: "Fetching latest news...",
-        description: "Getting verified immigration updates from official sources.",
+        description: "Getting verified immigration updates and breaking news from major outlets.",
       });
 
-      const { data, error } = await supabase.functions.invoke('fetch-immigration-news', {
-        body: { 
-          category: selectedCategory,
-          forceRefresh: forceRefresh
-        }
-      });
+      // Fetch both regular immigration news and breaking news
+      const [regularNewsResponse, breakingNewsResponse] = await Promise.all([
+        supabase.functions.invoke('fetch-immigration-news', {
+          body: { 
+            category: selectedCategory,
+            forceRefresh: forceRefresh
+          }
+        }),
+        supabase.functions.invoke('fetch-breaking-news')
+      ]);
 
-      if (error) throw error;
+      const totalArticlesAdded = (regularNewsResponse.data?.articlesAdded || 0) + (breakingNewsResponse.data?.articlesAdded || 0);
+      const urgentNewsFound = (breakingNewsResponse.data?.urgentNewsFound || 0);
 
-      if (data.articlesAdded > 0) {
+      if (totalArticlesAdded > 0) {
         toast({
           title: "News updated!",
-          description: `Successfully fetched ${data.articlesAdded} new verified articles.`,
+          description: `Successfully fetched ${totalArticlesAdded} new articles${urgentNewsFound > 0 ? ` (${urgentNewsFound} urgent)` : ''}.`,
         });
         enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
         await fetchArticles();
       } else {
         toast({
           title: "No new articles",
-          description: data.message || "All articles are up to date.",
+          description: "All articles are up to date.",
         });
       }
     } catch (error) {
@@ -249,6 +254,7 @@ const NewsFeed = () => {
 
   const urgentArticles = filteredArticles.filter(article => article.is_urgent);
   const regularArticles = filteredArticles.filter(article => !article.is_urgent);
+  const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news');
 
   const getSourceDomain = (url: string | null) => {
     if (!url) return 'Unknown';
@@ -277,14 +283,23 @@ const NewsFeed = () => {
     const isExpanded = expandedArticle === article.id;
     const sourceDomain = getSourceDomain(article.source_url);
     const isOfficial = isOfficialSource(article.source_url);
+    const isBreakingNews = article.category === 'breaking-news';
     
     return (
-      <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${article.is_urgent ? 'border-red-200 bg-red-50' : ''}`}>
+      <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${
+        article.is_urgent ? 'border-red-200 bg-red-50' : 
+        isBreakingNews ? 'border-orange-200 bg-orange-50' : ''
+      }`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg leading-tight flex-1">
               {article.is_urgent && (
                 <AlertTriangle className="inline-block w-5 h-5 text-red-500 mr-2" />
+              )}
+              {isBreakingNews && !article.is_urgent && (
+                <span className="inline-block bg-orange-500 text-white text-xs px-2 py-1 rounded mr-2">
+                  BREAKING
+                </span>
               )}
               {getDisplayText(article.title, article.id, 'title')}
             </CardTitle>
@@ -295,7 +310,7 @@ const NewsFeed = () => {
           </div>
           
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={article.is_urgent ? "destructive" : "secondary"}>
+            <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "default" : "secondary"}>
               {currentLanguage === 'es' 
                 ? translateCategory(categories.find(cat => cat.slug === article.category)?.name || article.category)
                 : categories.find(cat => cat.slug === article.category)?.name || article.category
@@ -395,7 +410,7 @@ const NewsFeed = () => {
               </h1>
               <p className="text-cream-200 text-sm uppercase tracking-wide">
                 <Shield className="inline w-4 h-4 mr-1" />
-                {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS' : 'SEARCH, SAVE & SHARE NEWS'}
+                {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS + BREAKING NEWS' : 'SEARCH, SAVE & SHARE NEWS + BREAKING NEWS'}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -426,7 +441,7 @@ const NewsFeed = () => {
               <Input
                 placeholder={currentLanguage === 'es' 
                   ? "Buscar noticias, alertas y actualizaciones de inmigración..."
-                  : "Search immigration news, alerts, and updates..."
+                  : "Search immigration news, alerts, and breaking news updates..."
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -449,6 +464,17 @@ const NewsFeed = () => {
                 }
               >
                 {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
+              </Button>
+              <Button
+                variant={selectedCategory === 'breaking-news' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory('breaking-news')}
+                className={selectedCategory === 'breaking-news' 
+                  ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                  : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+                }
+              >
+                {currentLanguage === 'es' ? 'Noticias de Última Hora' : 'Breaking News'}
               </Button>
               {categories.map((category) => (
                 <Button
@@ -478,13 +504,16 @@ const NewsFeed = () => {
         )}
 
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all">
-              {currentLanguage === 'es' ? `Todas las Noticias (${filteredArticles.length})` : `All News (${filteredArticles.length})`}
+              {currentLanguage === 'es' ? `Todas (${filteredArticles.length})` : `All (${filteredArticles.length})`}
             </TabsTrigger>
             <TabsTrigger value="urgent" className="text-red-600">
               <AlertTriangle className="w-4 h-4 mr-1" />
               {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="breaking" className="text-orange-600">
+              {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
             </TabsTrigger>
             <TabsTrigger value="regular">
               {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
@@ -513,7 +542,7 @@ const NewsFeed = () => {
                   action={!searchTerm && (
                     <Button onClick={() => retry(() => refreshNews(true))} disabled={refreshing || !canRetry}>
                       <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                      {currentLanguage === 'es' ? 'Obtener Últimas Noticias Verificadas' : 'Fetch Latest Verified News'}
+                      {currentLanguage === 'es' ? 'Obtener Últimas Noticias' : 'Fetch Latest News'}
                     </Button>
                   )}
                 />
@@ -530,15 +559,25 @@ const NewsFeed = () => {
               {urgentArticles.length === 0 ? (
                 <EmptyState
                   icon={AlertTriangle}
-                  title={searchTerm 
-                    ? (currentLanguage === 'es' 
-                        ? `No se encontraron alertas urgentes que coincidan con "${searchTerm}"`
-                        : `No urgent alerts found matching "${searchTerm}"`)
-                    : (currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time')
-                  }
+                  title={currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time'}
                 />
               ) : (
                 urgentArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="breaking" className="mt-6">
+            <div className="space-y-4">
+              {breakingNewsArticles.length === 0 ? (
+                <EmptyState
+                  icon={Newspaper}
+                  title={currentLanguage === 'es' ? 'No hay noticias de última hora en este momento' : 'No breaking news at this time'}
+                />
+              ) : (
+                breakingNewsArticles.map((article) => (
                   <ArticleCard key={article.id} article={article} />
                 ))
               )}
@@ -550,12 +589,7 @@ const NewsFeed = () => {
               {regularArticles.length === 0 ? (
                 <EmptyState
                   icon={Newspaper}
-                  title={searchTerm 
-                    ? (currentLanguage === 'es' 
-                        ? `No se encontraron noticias regulares que coincidan con "${searchTerm}"`
-                        : `No regular news found matching "${searchTerm}"`)
-                    : (currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found')
-                  }
+                  title={currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found'}
                 />
               ) : (
                 regularArticles.map((article) => (

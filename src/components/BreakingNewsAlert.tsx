@@ -1,0 +1,210 @@
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle, X, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+
+interface BreakingNews {
+  id: string;
+  title: string;
+  summary: string | null;
+  source_url: string | null;
+  published_at: string;
+  is_urgent: boolean;
+}
+
+const BreakingNewsAlert = () => {
+  const [breakingNews, setBreakingNews] = useState<BreakingNews[]>([]);
+  const [dismissedNews, setDismissedNews] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchBreakingNews();
+    
+    // Load dismissed news from localStorage
+    const dismissed = localStorage.getItem('dismissedBreakingNews');
+    if (dismissed) {
+      setDismissedNews(JSON.parse(dismissed));
+    }
+
+    // Listen for new breaking news
+    const channel = supabase
+      .channel('breaking-news-alerts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'immigration_news',
+          filter: 'category=eq.breaking-news'
+        },
+        async (payload) => {
+          console.log('New breaking news detected:', payload.new);
+          
+          const newArticle = payload.new as BreakingNews;
+          
+          // Add to breaking news list
+          setBreakingNews(prev => [newArticle, ...prev.slice(0, 4)]); // Keep max 5 items
+          
+          // Show toast notification
+          toast({
+            title: newArticle.is_urgent ? "🚨 URGENT Breaking News" : "📰 Breaking News",
+            description: newArticle.title,
+            variant: newArticle.is_urgent ? "destructive" : "default",
+            duration: 8000,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+
+  const fetchBreakingNews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('immigration_news')
+        .select('id, title, summary, source_url, published_at, is_urgent')
+        .eq('status', 'published')
+        .eq('category', 'breaking-news')
+        .order('published_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      setBreakingNews(data || []);
+    } catch (error) {
+      console.error('Error fetching breaking news:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const dismissNews = (newsId: string) => {
+    const newDismissed = [...dismissedNews, newsId];
+    setDismissedNews(newDismissed);
+    localStorage.setItem('dismissedBreakingNews', JSON.stringify(newDismissed));
+  };
+
+  const refreshBreakingNews = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-breaking-news');
+      
+      if (error) throw error;
+      
+      if (data.articlesAdded > 0) {
+        toast({
+          title: "Breaking News Updated!",
+          description: `Found ${data.articlesAdded} new immigration-related breaking news articles.`,
+        });
+        await fetchBreakingNews();
+      } else {
+        toast({
+          title: "No New Breaking News",
+          description: "All breaking news is up to date.",
+        });
+      }
+    } catch (error) {
+      console.error('Error refreshing breaking news:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh breaking news. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const visibleNews = breakingNews.filter(news => !dismissedNews.includes(news.id));
+
+  if (loading || visibleNews.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
+      <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+            <h3 className="font-bold text-red-900">Breaking Immigration News</h3>
+            <Badge variant="secondary" className="bg-red-100 text-red-800">
+              Live Updates
+            </Badge>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshBreakingNews}
+            disabled={loading}
+            className="border-red-200 text-red-800 hover:bg-red-100"
+          >
+            Refresh
+          </Button>
+        </div>
+        
+        <div className="space-y-2">
+          {visibleNews.map((news) => (
+            <Card key={news.id} className="bg-white border-red-200 shadow-sm">
+              <div className="flex items-start gap-3 p-3">
+                {news.is_urgent && (
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-red-900 text-sm leading-tight">
+                    {news.title}
+                  </h4>
+                  {news.summary && (
+                    <p className="text-red-700 text-xs mt-1 line-clamp-2">
+                      {news.summary}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    {news.source_url && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        asChild
+                        className="text-red-600 hover:text-red-800 h-auto p-0 text-xs"
+                      >
+                        <a 
+                          href={news.source_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Read Full Story
+                        </a>
+                      </Button>
+                    )}
+                    <span className="text-red-600 text-xs">
+                      {new Date(news.published_at).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => dismissNews(news.id)}
+                  className="text-red-600 hover:text-red-800 hover:bg-red-100 flex-shrink-0 h-auto p-1"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BreakingNewsAlert;
