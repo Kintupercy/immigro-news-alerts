@@ -74,11 +74,14 @@ serve(async (req) => {
 
     let totalArticlesAdded = 0;
 
-    // Process each category
+    // Process each category with specific search terms
     for (const category of categories as Category[]) {
       console.log(`Fetching verified news for category: ${category.name}`);
 
-      const prompt = `Find the latest verified U.S. immigration law news related to ${category.name} from the past 24-48 hours.
+      // Create category-specific search terms to avoid overlap
+      const categorySearchTerms = getCategorySearchTerms(category.slug);
+
+      const prompt = `Find the latest verified U.S. immigration law news specifically about ${categorySearchTerms} from the past 24-48 hours.
 
 Search these specific trusted sources:
 
@@ -91,19 +94,20 @@ MAJOR NEWS OUTLETS:
 - NBC News, ABC News, CBS News, Politico, Bloomberg
 
 Requirements:
-- Provide 4-5 distinct news items with valid source URLs
+- Provide 3-4 distinct news items specifically about ${categorySearchTerms}
 - Focus on factual, verified information only
 - Include: headline, detailed summary, original source URL
 - Mark as urgent only for immediate policy changes or breaking developments
 - Include relevant tags
 - NO YouTube, social media, or video content
 - MUST have real source URLs from the specified outlets
+- DO NOT include general immigration news that doesn't specifically relate to ${categorySearchTerms}
 
 Format each article as:
-Title: [Clear headline]
+Title: [Clear headline about ${categorySearchTerms}]
 Summary: [Brief 2-3 sentence summary]
 Content: [Detailed content 3-4 paragraphs]
-Source: [Full URL to original verified source from CNN, NPR, NYTimes, CNBC, FOX, etc.]
+Source: [Full URL to original verified source]
 Urgent: [true/false]
 Tags: [relevant tags separated by commas]`;
 
@@ -121,7 +125,7 @@ Tags: [relevant tags separated by commas]`;
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only: CNN, NPR, NYTimes, CNBC, FOX News, Reuters, AP, government sites. Never include YouTube, video content, or social media. Always return information with source URLs from approved domains.'
+                content: `You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only: CNN, NPR, NYTimes, CNBC, FOX News, Reuters, AP, government sites. Focus ONLY on ${categorySearchTerms}. Never include YouTube, video content, or social media. Always return information with source URLs from approved domains.`
               },
               {
                 role: 'user',
@@ -214,7 +218,7 @@ Tags: [relevant tags separated by commas]`;
         success: true, 
         articlesAdded: totalArticlesAdded,
         categoriesProcessed: categories.length,
-        message: `Added ${totalArticlesAdded} verified articles from CNN, NPR, NYTimes, CNBC, FOX and other trusted sources`
+        message: `Added ${totalArticlesAdded} verified articles from consolidated categories`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -233,6 +237,25 @@ Tags: [relevant tags separated by commas]`;
     );
   }
 });
+
+function getCategorySearchTerms(categorySlug: string): string {
+  const searchTermsMap: Record<string, string> = {
+    'work-visas-employment': 'H-1B visas, L-1 visas, employment-based visas, work permits, specialty occupation visas',
+    'green-card': 'green card applications, permanent residence, green card lottery, employment-based green cards',
+    'citizenship': 'citizenship applications, naturalization, citizenship test, oath ceremonies',
+    'student-visas': 'F-1 student visas, J-1 exchange programs, student visa policies, international students',
+    'family-based-immigration': 'family reunification, spouse visas, family-based green cards, K-1 fiancé visas',
+    'investor-entrepreneur-visas': 'EB-5 investor visas, E-1 E-2 visas, entrepreneur programs, investment immigration',
+    'asylum-refugee': 'asylum applications, refugee programs, humanitarian protection, asylum seekers',
+    'deportation-removal': 'deportation proceedings, removal orders, ICE enforcement, detention centers',
+    'daca-dreamer': 'DACA renewals, Dreamers, childhood arrivals, DACA policy changes',
+    'border-enforcement': 'border security, border wall, CBP enforcement, border crossings',
+    'breaking-news': 'breaking immigration news, urgent immigration updates, immediate policy changes',
+    'policy-updates': 'immigration policy changes, new regulations, executive orders, immigration reform'
+  };
+  
+  return searchTermsMap[categorySlug] || categorySlug;
+}
 
 function parseNewsContent(content: string, categorySlug: string): NewsItem[] {
   const articles: NewsItem[] = [];
