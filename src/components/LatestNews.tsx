@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Carousel,
   CarouselContent,
@@ -26,83 +28,30 @@ const LatestNews = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Generate dynamic dates for realistic news timeline
-    const now = new Date();
-    const getRecentDate = (hoursAgo: number) => {
-      const date = new Date(now.getTime() - (hoursAgo * 60 * 60 * 1000));
-      return date.toISOString();
-    };
-
-    // Mock news data with dynamic dates
-    const mockNews: NewsItem[] = [
-      {
-        id: '1',
-        title: 'USCIS Announces New Processing Times for Green Card Applications',
-        summary: 'The U.S. Citizenship and Immigration Services has updated processing times for family-based and employment-based green card applications, with some categories seeing significant improvements.',
-        category: 'Green Card',
-        source_url: 'https://uscis.gov',
-        is_urgent: false,
-        published_at: getRecentDate(2), // 2 hours ago
-        tags: ['green-card', 'processing-times']
-      },
-      {
-        id: '2',
-        title: 'H-1B Cap Registration Period Opens April 2024',
-        summary: 'The registration period for H-1B cap-subject petitions for fiscal year 2025 opens today. Employers must register during the designated period.',
-        category: 'Work Visas',
-        source_url: 'https://uscis.gov',
-        is_urgent: true,
-        published_at: getRecentDate(1), // 1 hour ago
-        tags: ['h1b', 'work-visa']
-      },
-      {
-        id: '3',
-        title: 'New Student Visa Policies for International Students',
-        summary: 'Recent policy updates affect F-1 student visa holders, including changes to work authorization and academic requirements.',
-        category: 'Student Visas',
-        source_url: 'https://ice.gov',
-        is_urgent: false,
-        published_at: getRecentDate(4), // 4 hours ago
-        tags: ['f1-visa', 'students']
-      },
-      {
-        id: '4',
-        title: 'Citizenship Application Fee Updates Take Effect',
-        summary: 'USCIS has implemented new fee structures for naturalization applications, with some applicants eligible for reduced fees.',
-        category: 'Citizenship',
-        source_url: 'https://uscis.gov',
-        is_urgent: false,
-        published_at: getRecentDate(6), // 6 hours ago
-        tags: ['citizenship', 'fees']
-      },
-      {
-        id: '5',
-        title: 'TPS Designation Extended for Several Countries',
-        summary: 'The Department of Homeland Security has extended Temporary Protected Status for nationals of several countries facing ongoing armed conflict.',
-        category: 'Humanitarian',
-        source_url: 'https://dhs.gov',
-        is_urgent: true,
-        published_at: getRecentDate(3), // 3 hours ago
-        tags: ['tps', 'humanitarian']
-      },
-      {
-        id: '6',
-        title: 'New EB-5 Investment Program Regulations',
-        summary: 'Updated regulations for the EB-5 Immigrant Investor Program include new integrity measures and regional center oversight requirements.',
-        category: 'Investment',
-        source_url: 'https://uscis.gov',
-        is_urgent: false,
-        published_at: getRecentDate(8), // 8 hours ago
-        tags: ['eb5', 'investment']
-      }
-    ];
-
-    // Simulate loading
-    setTimeout(() => {
-      setNews(mockNews);
-      setLoading(false);
-    }, 1000);
+    fetchLatestNews();
   }, []);
+
+  const fetchLatestNews = async () => {
+    try {
+      const { data: newsData, error } = await supabase
+        .from('immigration_news')
+        .select('id, title, summary, category, source_url, is_urgent, published_at, tags')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(6);
+
+      if (error) {
+        console.error('Error fetching news:', error);
+        return;
+      }
+
+      setNews(newsData || []);
+    } catch (error) {
+      console.error('Error fetching latest news:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -123,6 +72,25 @@ const LatestNews = () => {
     }
   };
 
+  const formatCategoryName = (slug: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'green-card': 'Green Card',
+      'citizenship': 'Citizenship',
+      'international-students': 'Student Visas',
+      'family-based': 'Family Based',
+      'employment-based': 'Work Visas',
+      'refugees-asylees': 'Humanitarian',
+      'temporary-visitors': 'Temporary Visitors',
+      'exchange-visitors': 'Exchange Visitors',
+      'investors': 'Investment',
+      'religious-workers': 'Religious Workers',
+      'specialty-occupations': 'Specialty Occupations',
+      'undocumented': 'Undocumented'
+    };
+    
+    return categoryMap[slug] || slug.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   if (loading) {
     return (
       <section className="py-16 bg-white">
@@ -141,6 +109,26 @@ const LatestNews = () => {
                 <div className="bg-gray-200 h-48 rounded-lg"></div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (news.length === 0) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="font-playfair text-3xl font-bold text-gray-900 mb-4">
+              Latest Immigration News
+            </h2>
+            <p className="text-xl text-gray-600">
+              Stay updated with today's most important immigration developments
+            </p>
+          </div>
+          <div className="text-center py-12">
+            <p className="text-gray-500">No news articles available at the moment.</p>
           </div>
         </div>
       </section>
@@ -173,7 +161,7 @@ const LatestNews = () => {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant={item.is_urgent ? "destructive" : "secondary"}>
-                        {item.category}
+                        {formatCategoryName(item.category)}
                       </Badge>
                       {item.is_urgent && (
                         <Badge variant="destructive" className="text-xs">
