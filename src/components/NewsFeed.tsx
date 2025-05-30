@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +54,7 @@ const NewsFeed = () => {
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const { toast } = useToast();
+  const { handleError, retry, canRetry } = useErrorHandler();
   const { isProMember } = useProMembership(user);
   const { checkFeatureAccess, showUpgradePrompt, upgradeModalOpen, setUpgradeModalOpen } = useFreemiumFeatures(user);
 
