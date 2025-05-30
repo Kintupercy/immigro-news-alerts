@@ -62,7 +62,7 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50 perspective-1000">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="font-playfair text-4xl font-bold text-gray-900 mb-4">
@@ -77,22 +77,15 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white rounded-lg shadow-sm border-2 p-8 transition-all duration-500 hover:transform hover:rotateY-12 hover:rotateX-5 hover:scale-105 hover:shadow-2xl preserve-3d group ${
+              className={`relative bg-white rounded-lg shadow-sm border-2 p-8 transition-all duration-300 hover:shadow-lg ${
                 plan.popular 
                   ? 'border-emerald-500 transform scale-105 shadow-lg' 
                   : 'border-gray-200 hover:border-emerald-300'
               }`}
-              style={{ 
-                transformStyle: 'preserve-3d',
-                animation: `cardFloat 6s ease-in-out infinite ${index * 0.5}s`
-              }}
             >
-              {/* 3D Background gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-emerald-50/20 to-blue-50/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-emerald-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg animate-pulse">
+                  <span className="bg-emerald-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
                     Most Popular
                   </span>
                 </div>
@@ -100,7 +93,7 @@ const Pricing = () => {
               
               <div className="relative z-10">
                 <div className="text-center mb-8">
-                  <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-2 group-hover:text-emerald-700 transition-colors duration-300">
+                  <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-2">
                     {plan.name}
                   </h3>
                   <div className="mb-4">
@@ -109,7 +102,7 @@ const Pricing = () => {
                         {plan.originalPrice} per year
                       </div>
                     )}
-                    <span className="text-4xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-300">{plan.price}</span>
+                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                     <span className="text-gray-600 ml-2">{plan.period}</span>
                   </div>
                   <p className="text-gray-600">{plan.description}</p>
@@ -117,8 +110,8 @@ const Pricing = () => {
 
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center group-hover:translate-x-2 transition-transform duration-300" style={{ transitionDelay: `${featureIndex * 50}ms` }}>
-                      <Check className={`w-5 h-5 mr-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ${
+                    <li key={featureIndex} className="flex items-center">
+                      <Check className={`w-5 h-5 mr-3 flex-shrink-0 ${
                         feature === "No ads" || feature === "Ads supported" 
                           ? feature === "No ads" ? "text-emerald-500" : "text-gray-400"
                           : "text-emerald-500"
@@ -136,7 +129,7 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button asChild className={`w-full transform transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                <Button asChild className={`w-full transition-all duration-300 ${
                   plan.popular 
                     ? 'bg-emerald-600 hover:bg-emerald-700' 
                     : 'bg-gray-900 hover:bg-gray-800'
