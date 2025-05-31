@@ -4,13 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { User } from "@supabase/supabase-js";
-import { Loader2, Save, Eye, EyeOff, Lock } from "lucide-react";
+import { Loader2, Check, AlertTriangle, Crown, MessageSquare, Mail, Bell } from "lucide-react";
+import { useProMembership } from "@/hooks/useProMembership";
+
+interface ProfileManagementProps {
+  user: User;
+}
 
 interface UserProfile {
   id: string;
@@ -25,6 +30,7 @@ interface UserProfile {
     push: boolean;
     urgent_only: boolean;
   };
+  onboarding_completed: boolean;
 }
 
 interface Category {
@@ -34,69 +40,68 @@ interface Category {
   description: string | null;
 }
 
-interface ProfileManagementProps {
-  user: User;
-}
-
 const ProfileManagement = ({ user }: ProfileManagementProps) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-  });
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
-  const [changingPassword, setChangingPassword] = useState(false);
   const { toast } = useToast();
+  const { isProMember } = useProMembership(user);
 
   useEffect(() => {
     fetchProfile();
     fetchCategories();
-  }, [user]);
+  }, [user.id]);
 
   const fetchProfile = async () => {
     try {
-      const profileData = await fetchUserProfileData();
-      if (profileData) {
-        setProfile(profileData);
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        setProfile(data);
+      } else {
+        // Create default profile if none exists
+        const defaultProfile: Partial<UserProfile> = {
+          user_id: user.id,
+          first_name: user.user_metadata?.first_name || null,
+          last_name: user.user_metadata?.last_name || null,
+          phone_number: null,
+          preferred_categories: [],
+          notification_preferences: {
+            email: true,
+            sms: false,
+            push: true,
+            urgent_only: false
+          },
+          onboarding_completed: false
+        };
+        
+        const { data: newProfile, error: createError } = await supabase
+          .from('user_profiles')
+          .insert(defaultProfile)
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        setProfile(newProfile);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
         title: "Error loading profile",
-        description: "Please try refreshing the page.",
-        variant: "destructive",
+        description: "Please try again later.",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchUserProfileData = async (): Promise<UserProfile | null> => {
-    try {
-      const session = await supabase.auth.getSession();
-      const response = await fetch(`https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/user_profiles?user_id=eq.${user.id}&select=*`, {
-        headers: {
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5YnBnb3Jia2lhaXRpbXhpcWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NDkzNTgsImV4cCI6MjA2NDAyNTM1OH0.zLJ37ZRmFDj4hpiohHOZZonAzBiv8ASNDw7TVghF0N0',
-          'Authorization': `Bearer ${session.data.session?.access_token}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.length > 0 ? data[0] : null;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      return null;
     }
   };
 
@@ -114,103 +119,53 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
     }
   };
 
-  const updateProfile = async () => {
+  const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!profile) return;
 
     setSaving(true);
     try {
-      const session = await supabase.auth.getSession();
-      const response = await fetch(`https://xybpgorbkiaitimxiqej.supabase.co/rest/v1/user_profiles?user_id=eq.${user.id}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5YnBnb3Jia2lhaXRpbXhpcWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NDkzNTgsImV4cCI6MjA2NDAyNTM1OH0.zLJ37ZRmFDj4hpiohHOZZonAzBiv8ASNDw7TVghF0N0',
-          'Authorization': `Bearer ${session.data.session?.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          phone_number: profile.phone_number,
-          preferred_categories: profile.preferred_categories,
-          notification_preferences: profile.notification_preferences,
-          updated_at: new Date().toISOString()
-        })
-      });
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(updates)
+        .eq('user_id', user.id);
 
-      if (response.ok) {
-        toast({
-          title: "Profile updated",
-          description: "Your preferences have been saved successfully.",
-        });
-      } else {
-        throw new Error('Failed to update profile');
-      }
+      if (error) throw error;
+
+      setProfile({ ...profile, ...updates });
+      toast({
+        title: "Profile updated",
+        description: "Your preferences have been saved successfully."
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
         title: "Error updating profile",
-        description: "Please try again.",
-        variant: "destructive",
+        description: "Please try again later.",
+        variant: "destructive"
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePasswordChange = async () => {
-    if (!passwordData.newPassword || !passwordData.confirmPassword) {
-      toast({
-        title: "Password required",
-        description: "Please fill in all password fields.",
-        variant: "destructive",
-      });
-      return;
+  const formatPhoneNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (!cleaned) return '';
+    
+    if (cleaned.length <= 3) {
+      return cleaned;
+    } else if (cleaned.length <= 6) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+    } else {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
     }
+  };
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation must be identical.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setChangingPassword(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword
-      });
-
-      if (error) throw error;
-
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-      });
-
-      toast({
-        title: "Password updated",
-        description: "Your password has been changed successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error updating password",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setChangingPassword(false);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    if (profile) {
+      const cleanPhone = formatted.replace(/\D/g, '');
+      updateProfile({ phone_number: cleanPhone || null });
     }
   };
 
@@ -221,294 +176,241 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
       ? profile.preferred_categories.filter(cat => cat !== categorySlug)
       : [...profile.preferred_categories, categorySlug];
 
-    setProfile({
-      ...profile,
-      preferred_categories: updatedCategories
-    });
+    updateProfile({ preferred_categories: updatedCategories });
   };
 
-  const updateNotificationPreference = (key: string, value: boolean) => {
+  const updateNotificationPreference = (key: keyof UserProfile['notification_preferences'], value: boolean) => {
     if (!profile) return;
 
-    const updatedPrefs = {
+    // If trying to enable SMS and not a pro member, show upgrade prompt
+    if (key === 'sms' && value && !isProMember) {
+      toast({
+        title: "Pro Feature",
+        description: "SMS notifications are available for Pro members only. Upgrade to Pro to receive text alerts.",
+        variant: "default"
+      });
+      return;
+    }
+
+    const updatedPreferences = {
       ...profile.notification_preferences,
       [key]: value
     };
 
-    setProfile({
-      ...profile,
-      notification_preferences: updatedPrefs
-    });
+    updateProfile({ notification_preferences: updatedPreferences });
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="w-6 h-6 animate-spin" />
-        <span className="ml-2">Loading profile...</span>
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
   if (!profile) {
-    return <div className="p-6">Error loading profile</div>;
+    return (
+      <div className="text-center p-8">
+        <p>Error loading profile. Please refresh the page.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="personal">Personal</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-        </TabsList>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Profile Settings</h1>
+        {isProMember && (
+          <Badge className="bg-emerald-600 text-white">
+            <Crown className="w-4 h-4 mr-1" />
+            Pro Member
+          </Badge>
+        )}
+      </div>
 
-        <TabsContent value="personal" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    value={profile.first_name || ''}
-                    onChange={(e) => setProfile({
-                      ...profile,
-                      first_name: e.target.value
-                    })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    value={profile.last_name || ''}
-                    onChange={(e) => setProfile({
-                      ...profile,
-                      last_name: e.target.value
-                    })}
-                  />
+      {/* Personal Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                value={profile.first_name || ''}
+                onChange={(e) => updateProfile({ first_name: e.target.value })}
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={profile.last_name || ''}
+                onChange={(e) => updateProfile({ last_name: e.target.value })}
+                disabled={saving}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="phone">Phone Number {isProMember && <span className="text-emerald-600">(Pro)</span>}</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="(555) 123-4567"
+              value={formatPhoneNumber(profile.phone_number || '')}
+              onChange={handlePhoneChange}
+              disabled={saving || !isProMember}
+              className={!isProMember ? "bg-gray-100" : ""}
+            />
+            {!isProMember && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Phone number is required for SMS notifications (Pro feature)
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Notification Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            Notification Preferences
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Mail className="w-5 h-5 text-navy-600" />
+                <div>
+                  <Label className="font-medium">Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive updates via email
+                  </p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  value={user.email || ''}
-                  disabled
-                  className="bg-gray-50"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed. Contact support if needed.
+              <Checkbox
+                checked={profile.notification_preferences.email}
+                onCheckedChange={(checked) => 
+                  updateNotificationPreference('email', checked as boolean)
+                }
+                disabled={saving}
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <MessageSquare className="w-5 h-5 text-navy-600" />
+                <div>
+                  <Label className="font-medium flex items-center gap-2">
+                    SMS Notifications 
+                    {isProMember ? (
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Pro</Badge>
+                    ) : (
+                      <Crown className="w-4 h-4 text-yellow-500" />
+                    )}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive urgent updates via text message
+                  </p>
+                </div>
+              </div>
+              <Checkbox
+                checked={profile.notification_preferences.sms && isProMember}
+                onCheckedChange={(checked) => 
+                  updateNotificationPreference('sms', checked as boolean)
+                }
+                disabled={saving || !isProMember}
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <Label className="font-medium">Urgent News Only</Label>
+                <p className="text-sm text-muted-foreground">
+                  Only receive notifications for urgent immigration news
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  value={profile.phone_number || ''}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    phone_number: e.target.value
-                  })}
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <Checkbox
+                checked={profile.notification_preferences.urgent_only}
+                onCheckedChange={(checked) => 
+                  updateNotificationPreference('urgent_only', checked as boolean)
+                }
+                disabled={saving}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="preferences" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>News Preferences</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Select the immigration categories you're interested in:
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {categories.map((category) => (
-                  <div key={category.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={category.slug}
-                      checked={profile.preferred_categories.includes(category.slug)}
-                      onCheckedChange={() => toggleCategory(category.slug)}
-                    />
-                    <Label htmlFor={category.slug} className="text-sm">
-                      {category.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="email-notifications">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive news updates via email</p>
-                </div>
-                <Switch
-                  id="email-notifications"
-                  checked={profile.notification_preferences.email}
-                  onCheckedChange={(checked) => 
-                    updateNotificationPreference('email', checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="sms-notifications">SMS Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive urgent updates via SMS</p>
-                </div>
-                <Switch
-                  id="sms-notifications"
-                  checked={profile.notification_preferences.sms}
-                  onCheckedChange={(checked) => 
-                    updateNotificationPreference('sms', checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="push-notifications">Push Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive browser notifications</p>
-                </div>
-                <Switch
-                  id="push-notifications"
-                  checked={profile.notification_preferences.push}
-                  onCheckedChange={(checked) => 
-                    updateNotificationPreference('push', checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="urgent-only">Urgent News Only</Label>
-                  <p className="text-sm text-muted-foreground">Only receive urgent breaking news</p>
-                </div>
-                <Switch
-                  id="urgent-only"
-                  checked={profile.notification_preferences.urgent_only}
-                  onCheckedChange={(checked) => 
-                    updateNotificationPreference('urgent_only', checked)
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="security" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="newPassword"
-                    type={showPasswords.new ? "text" : "password"}
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({
-                      ...passwordData,
-                      newPassword: e.target.value
-                    })}
-                    placeholder="Enter new password"
-                    className="pl-10 pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPasswords({
-                      ...showPasswords,
-                      new: !showPasswords.new
-                    })}
-                  >
-                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="confirmPassword"
-                    type={showPasswords.confirm ? "text" : "password"}
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({
-                      ...passwordData,
-                      confirmPassword: e.target.value
-                    })}
-                    placeholder="Confirm new password"
-                    className="pl-10 pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPasswords({
-                      ...showPasswords,
-                      confirm: !showPasswords.confirm
-                    })}
-                  >
-                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-              <Button 
-                onClick={handlePasswordChange} 
-                disabled={changingPassword}
-                className="w-full"
+      {/* Categories */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Immigration Categories</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Select the immigration topics you're interested in receiving news about.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
+                  profile.preferred_categories.includes(category.slug) 
+                    ? 'border-navy-500 bg-navy-50' 
+                    : 'border-gray-200'
+                }`}
+                onClick={() => toggleCategory(category.slug)}
               >
-                {changingPassword ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating Password...
-                  </>
-                ) : (
-                  'Update Password'
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                <Checkbox
+                  checked={profile.preferred_categories.includes(category.slug)}
+                  disabled={saving}
+                />
+                <div className="flex-1">
+                  <Label className="cursor-pointer font-medium">
+                    {category.name}
+                  </Label>
+                  {category.description && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {category.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
 
-      <div className="mt-6">
-        <Button onClick={updateProfile} disabled={saving} className="w-full">
-          {saving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving Changes...
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save All Changes
-            </>
+          {profile.preferred_categories.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-medium mb-2">Selected categories:</p>
+              <div className="flex flex-wrap gap-2">
+                {profile.preferred_categories.map(slug => {
+                  const category = categories.find(c => c.slug === slug);
+                  return (
+                    <Badge key={slug} variant="secondary">
+                      {category?.name || slug}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
           )}
-        </Button>
-      </div>
+        </CardContent>
+      </Card>
+
+      {saving && (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="w-6 h-6 animate-spin mr-2" />
+          <span>Saving changes...</span>
+        </div>
+      )}
     </div>
   );
 };

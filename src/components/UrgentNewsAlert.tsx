@@ -32,9 +32,9 @@ const UrgentNewsAlert = () => {
             duration: 10000, // Show for 10 seconds
           });
 
-          // Trigger email alerts to all subscribers
+          // Trigger notifications (email + SMS for pro members)
           try {
-            const { data, error } = await supabase.functions.invoke('urgent-news-alert', {
+            const { data, error } = await supabase.functions.invoke('notify-users', {
               body: { newsId: urgentNews.id }
             });
 
