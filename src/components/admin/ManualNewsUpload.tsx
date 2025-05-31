@@ -1,122 +1,126 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X, Save, AlertTriangle } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import { articleSchema, sanitizeInput, logSecurityEvent } from "@/utils/securityValidation";
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ExternalLink, AlertTriangle } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+type FormData = z.infer<typeof articleSchema>;
 
 const ManualNewsUpload = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    summary: '',
-    source_url: '',
-    category: 'general',
-    is_urgent: false,
-    source_verified: false,
-    tags: ''
-  });
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { categories, loading: categoriesLoading } = useCategories();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title.trim() || !formData.content.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in at least the title and content fields.",
-        variant: "destructive"
-      });
-      return;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors }
+  } = useForm<FormData>({
+    resolver: zodResolver(articleSchema),
+    defaultValues: {
+      is_urgent: false
     }
+  });
 
-    setIsLoading(true);
+  const watchedValues = watch();
+
+  const addTag = () => {
+    const sanitizedTag = sanitizeInput(tagInput.trim());
+    if (sanitizedTag && !tags.includes(sanitizedTag) && tags.length < 20) {
+      setTags([...tags, sanitizedTag]);
+      setTagInput("");
+      setValue("tags", [...tags, sanitizedTag]);
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    const newTags = tags.filter(tag => tag !== tagToRemove);
+    setTags(newTags);
+    setValue("tags", newTags);
+  };
+
+  const onSubmit = async (data: FormData) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      
-      const tagsArray = formData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+      setIsSubmitting(true);
 
-      const { data: article, error } = await supabase
+      // Get current user for admin validation
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Additional validation and sanitization
+      const sanitizedData = {
+        title: sanitizeInput(data.title),
+        content: sanitizeInput(data.content),
+        summary: data.summary ? sanitizeInput(data.summary) : null,
+        category: sanitizeInput(data.category),
+        source_url: data.source_url || null,
+        tags: tags.map(tag => sanitizeInput(tag)),
+        is_urgent: data.is_urgent || false,
+        manually_created: true,
+        created_by_admin: user.id,
+        status: 'published'
+      };
+
+      const { error } = await supabase
         .from('immigration_news')
-        .insert({
-          title: formData.title,
-          content: formData.content,
-          summary: formData.summary || null,
-          source_url: formData.source_url || null,
-          category: formData.category,
-          is_urgent: formData.is_urgent,
-          source_verified: formData.source_verified,
-          manually_created: true,
-          created_by_admin: user.user?.id,
-          tags: tagsArray,
-          status: 'published'
-        })
-        .select()
-        .single();
+        .insert(sanitizedData);
 
       if (error) throw error;
 
-      // Log admin action
-      await supabase.from('admin_logs').insert({
-        admin_user_id: user.user?.id,
-        action: 'create_article',
-        target_type: 'article',
-        target_id: article.id,
-        details: {
-          title: formData.title,
-          category: formData.category,
-          is_urgent: formData.is_urgent,
-          manually_created: true
-        }
-      });
-
-      // Send urgent alert if marked as urgent
-      if (formData.is_urgent) {
-        try {
-          await supabase.functions.invoke('urgent-news-alert', {
-            body: { newsId: article.id }
-          });
-        } catch (alertError) {
-          console.error('Error sending urgent alert:', alertError);
-        }
-      }
+      // Log the security event
+      await logSecurityEvent('MANUAL_ARTICLE_CREATED', {
+        articleTitle: sanitizedData.title,
+        category: sanitizedData.category,
+        isUrgent: sanitizedData.is_urgent,
+        adminUserId: user.id
+      }, 'article');
 
       toast({
-        title: "Article Published!",
-        description: `Successfully created "${formData.title}"${formData.is_urgent ? ' with urgent alert sent' : ''}`,
+        title: "Article uploaded successfully",
+        description: "The news article has been published.",
       });
 
       // Reset form
-      setFormData({
-        title: '',
-        content: '',
-        summary: '',
-        source_url: '',
-        category: 'general',
-        is_urgent: false,
-        source_verified: false,
-        tags: ''
-      });
+      reset();
+      setTags([]);
 
     } catch (error) {
-      console.error('Error creating article:', error);
+      console.error('Error uploading article:', error);
       toast({
-        title: "Error",
-        description: "Failed to create article. Please try again.",
-        variant: "destructive"
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload article",
+        variant: "destructive",
       });
+
+      // Log the security event for failed upload
+      await logSecurityEvent('MANUAL_ARTICLE_UPLOAD_FAILED', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        attemptedData: {
+          title: data.title,
+          category: data.category
+        }
+      }, 'article');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -124,145 +128,134 @@ const ManualNewsUpload = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ExternalLink className="h-5 w-5" />
+          <Plus className="h-5 w-5" />
           Manual News Upload
         </CardTitle>
         <CardDescription>
-          Add immigration news articles manually with full control over content and settings
+          Create and publish immigration news articles manually with enhanced security validation
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="title">Article Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter article title"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="source_url">Source URL</Label>
-                <Input
-                  id="source_url"
-                  type="url"
-                  value={formData.source_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, source_url: e.target.value }))}
-                  placeholder="https://example.com/article"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="breaking-news">Breaking News</SelectItem>
-                    <SelectItem value="policy-updates">Policy Updates</SelectItem>
-                    <SelectItem value="visa-immigration">Visa & Immigration</SelectItem>
-                    <SelectItem value="legal-changes">Legal Changes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                  placeholder="immigration, visa, policy, etc."
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="summary">Summary</Label>
-                <Textarea
-                  id="summary"
-                  value={formData.summary}
-                  onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
-                  placeholder="Brief summary of the article (optional)"
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-medium">Article Settings</h3>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                      Mark as Urgent
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Sends immediate email alerts to subscribers
-                    </p>
-                  </div>
-                  <Switch
-                    checked={formData.is_urgent}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_urgent: checked }))}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label>Source Verified</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Mark if source has been verified for authenticity
-                    </p>
-                  </div>
-                  <Switch
-                    checked={formData.source_verified}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, source_verified: checked }))}
-                  />
-                </div>
-              </div>
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Article Title *</Label>
+            <Input
+              id="title"
+              {...register("title")}
+              placeholder="Enter article title..."
+              className={errors.title ? "border-red-500" : ""}
+            />
+            {errors.title && (
+              <p className="text-sm text-red-500">{errors.title.message}</p>
+            )}
           </div>
 
-          <div>
-            <Label htmlFor="content">Article Content *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="summary">Summary</Label>
+            <Textarea
+              id="summary"
+              {...register("summary")}
+              placeholder="Brief summary of the article..."
+              className={`min-h-[80px] ${errors.summary ? "border-red-500" : ""}`}
+            />
+            {errors.summary && (
+              <p className="text-sm text-red-500">{errors.summary.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="content">Content *</Label>
             <Textarea
               id="content"
-              value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Enter the full article content"
-              rows={8}
-              required
+              {...register("content")}
+              placeholder="Full article content..."
+              className={`min-h-[200px] ${errors.content ? "border-red-500" : ""}`}
             />
+            {errors.content && (
+              <p className="text-sm text-red-500">{errors.content.message}</p>
+            )}
           </div>
 
-          <div className="flex items-center gap-4 pt-4 border-t">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isLoading ? 'Publishing...' : 'Publish Article'}
-            </Button>
-            
-            {formData.is_urgent && (
-              <Badge variant="destructive" className="flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" />
-                Will send urgent alerts
-              </Badge>
-            )}
-            
-            {formData.source_verified && (
-              <Badge variant="secondary">Source Verified</Badge>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select onValueChange={(value) => setValue("category", value)}>
+                <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {!categoriesLoading && categories.map((category) => (
+                    <SelectItem key={category.id} value={category.slug}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.category && (
+                <p className="text-sm text-red-500">{errors.category.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="source_url">Source URL</Label>
+              <Input
+                id="source_url"
+                {...register("source_url")}
+                placeholder="https://example.com/article"
+                type="url"
+                className={errors.source_url ? "border-red-500" : ""}
+              />
+              {errors.source_url && (
+                <p className="text-sm text-red-500">{errors.source_url.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tags</Label>
+            <div className="flex gap-2">
+              <Input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                placeholder="Add a tag..."
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                className="flex-1"
+              />
+              <Button type="button" onClick={addTag} variant="outline" size="sm">
+                Add
+              </Button>
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                    {tag}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => removeTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
             )}
           </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_urgent"
+              checked={watchedValues.is_urgent}
+              onCheckedChange={(checked) => setValue("is_urgent", checked)}
+            />
+            <Label htmlFor="is_urgent" className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+              Mark as Urgent
+            </Label>
+          </div>
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            <Save className="h-4 w-4 mr-2" />
+            {isSubmitting ? "Publishing..." : "Publish Article"}
+          </Button>
         </form>
       </CardContent>
     </Card>
