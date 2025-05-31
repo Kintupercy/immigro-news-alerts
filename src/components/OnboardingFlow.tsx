@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -111,6 +110,7 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
     
     try {
       console.log('Starting onboarding completion for user:', user.id);
+      console.log('User email:', user.email);
       console.log('Selected categories:', selectedCategories);
       console.log('Phone number:', phoneNumber);
       console.log('Notification preferences:', notificationPreferences);
@@ -135,44 +135,27 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
 
       console.log('Update data:', updateData);
 
-      // Check if profile exists first
-      const { data: existingProfile, error: fetchError } = await supabase
+      // Use a more robust approach - first try to upsert the profile
+      const { data: upsertResult, error: upsertError } = await supabase
         .from('user_profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .upsert({
+          user_id: user.id,
+          first_name: user.user_metadata?.first_name || null,
+          last_name: user.user_metadata?.last_name || null,
+          email_verified: user.email_confirmed_at ? true : false,
+          email_verified_at: user.email_confirmed_at || null,
+          ...updateData
+        }, {
+          onConflict: 'user_id'
+        })
+        .select();
 
-      if (fetchError) {
-        console.error('Error checking existing profile:', fetchError);
-        throw fetchError;
-      }
+      console.log('Upsert result:', upsertResult);
+      console.log('Upsert error:', upsertError);
 
-      let result;
-      if (existingProfile) {
-        // Update existing profile
-        console.log('Updating existing profile');
-        result = await supabase
-          .from('user_profiles')
-          .update(updateData)
-          .eq('user_id', user.id);
-      } else {
-        // Create new profile
-        console.log('Creating new profile');
-        result = await supabase
-          .from('user_profiles')
-          .insert({
-            user_id: user.id,
-            first_name: user.user_metadata?.first_name || null,
-            last_name: user.user_metadata?.last_name || null,
-            ...updateData
-          });
-      }
-
-      console.log('Database operation result:', result);
-
-      if (result.error) {
-        console.error('Database error:', result.error);
-        throw result.error;
+      if (upsertError) {
+        console.error('Upsert error details:', upsertError);
+        throw upsertError;
       }
 
       console.log('Onboarding completed successfully');
@@ -187,10 +170,20 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
       
     } catch (error: any) {
       console.error('Error completing onboarding:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       
       let errorMessage = "Please try again.";
       if (error?.message) {
-        errorMessage = `Error: ${error.message}`;
+        if (error.message.includes('infinite recursion')) {
+          errorMessage = "Database configuration issue detected. Please contact support.";
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
       }
       
       toast({

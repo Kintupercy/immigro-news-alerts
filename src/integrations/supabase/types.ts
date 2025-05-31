@@ -288,11 +288,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
-      has_role: {
-        Args: {
-          _user_id: string
-          _role: Database["public"]["Enums"]["app_role"]
-        }
+      get_user_role: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
+      user_has_role: {
+        Args: { target_user_id: string; check_role: string }
         Returns: boolean
       }
     }
