@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +43,7 @@ interface Category {
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 type DatabaseUserProfileUpdate = Database['public']['Tables']['user_profiles']['Update'];
+type DatabaseUserProfileInsert = Database['public']['Tables']['user_profiles']['Insert'];
 
 const ProfileManagement = ({ user }: ProfileManagementProps) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -86,7 +88,7 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
         setProfile(convertDatabaseProfileToUserProfile(data));
       } else {
         // Create default profile if none exists
-        const defaultProfile: DatabaseUserProfileUpdate = {
+        const defaultProfile: DatabaseUserProfileInsert = {
           user_id: user.id,
           first_name: user.user_metadata?.first_name || null,
           last_name: user.user_metadata?.last_name || null,
