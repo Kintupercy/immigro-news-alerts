@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { User } from "@supabase/supabase-js";
 import { Loader2, Check, AlertTriangle, Crown, MessageSquare, Mail, Bell } from "lucide-react";
 import { useProMembership } from "@/hooks/useProMembership";
+import { Database } from "@/integrations/supabase/types";
 
 interface ProfileManagementProps {
   user: User;
@@ -40,6 +40,9 @@ interface Category {
   description: string | null;
 }
 
+type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
+type DatabaseUserProfileUpdate = Database['public']['Tables']['user_profiles']['Update'];
+
 const ProfileManagement = ({ user }: ProfileManagementProps) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -52,6 +55,20 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
     fetchProfile();
     fetchCategories();
   }, [user.id]);
+
+  const convertDatabaseProfileToUserProfile = (dbProfile: DatabaseUserProfile): UserProfile => {
+    const notificationPrefs = dbProfile.notification_preferences as any;
+    return {
+      ...dbProfile,
+      preferred_categories: dbProfile.preferred_categories || [],
+      notification_preferences: {
+        email: notificationPrefs?.email ?? true,
+        sms: notificationPrefs?.sms ?? false,
+        push: notificationPrefs?.push ?? true,
+        urgent_only: notificationPrefs?.urgent_only ?? false
+      }
+    };
+  };
 
   const fetchProfile = async () => {
     try {
@@ -66,10 +83,10 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
       }
 
       if (data) {
-        setProfile(data);
+        setProfile(convertDatabaseProfileToUserProfile(data));
       } else {
         // Create default profile if none exists
-        const defaultProfile: Partial<UserProfile> = {
+        const defaultProfile: DatabaseUserProfileUpdate = {
           user_id: user.id,
           first_name: user.user_metadata?.first_name || null,
           last_name: user.user_metadata?.last_name || null,
@@ -91,7 +108,7 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
           .single();
 
         if (createError) throw createError;
-        setProfile(newProfile);
+        setProfile(convertDatabaseProfileToUserProfile(newProfile));
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -124,9 +141,21 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
 
     setSaving(true);
     try {
+      // Convert UserProfile updates to database format
+      const dbUpdates: DatabaseUserProfileUpdate = {};
+      
+      if (updates.first_name !== undefined) dbUpdates.first_name = updates.first_name;
+      if (updates.last_name !== undefined) dbUpdates.last_name = updates.last_name;
+      if (updates.phone_number !== undefined) dbUpdates.phone_number = updates.phone_number;
+      if (updates.preferred_categories !== undefined) dbUpdates.preferred_categories = updates.preferred_categories;
+      if (updates.notification_preferences !== undefined) {
+        dbUpdates.notification_preferences = updates.notification_preferences;
+      }
+      if (updates.onboarding_completed !== undefined) dbUpdates.onboarding_completed = updates.onboarding_completed;
+
       const { error } = await supabase
         .from('user_profiles')
-        .update(updates)
+        .update(dbUpdates)
         .eq('user_id', user.id);
 
       if (error) throw error;
