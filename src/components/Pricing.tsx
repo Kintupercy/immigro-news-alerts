@@ -1,4 +1,3 @@
-
 import { Check, Crown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +42,7 @@ const Pricing = () => {
         "Priority support",
         "No ads"
       ],
-      buttonText: "Start Pro Trial",
+      buttonText: "Get Started",
       popular: true,
       valueProps: [
         "Instant breaking news alerts",
@@ -70,7 +69,7 @@ const Pricing = () => {
         "No ads",
         "30% savings vs monthly"
       ],
-      buttonText: "Start Annual Trial",
+      buttonText: "Get Started",
       popular: false,
       savings: "Save $18/year"
     }
