@@ -1,6 +1,6 @@
 
 import { User } from "@supabase/supabase-js";
-import ProfileManagement from "./ProfileManagement";
+import ProfileManagement from "./profile/ProfileManagement";
 
 interface UserProfileProps {
   user: User;

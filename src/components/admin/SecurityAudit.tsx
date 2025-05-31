@@ -1,251 +1,198 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, AlertTriangle, CheckCircle, Clock, Refresh } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RefreshCw, AlertTriangle, Shield, Clock, UserX } from "lucide-react";
+import { format } from "date-fns";
+import { Database } from "@/integrations/supabase/types";
 
-interface SecurityEvent {
-  id: string;
-  event_type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  user_id?: string;
-  ip_address?: string;
-  user_agent?: string;
-  created_at: string;
-}
+type RateLimit = Database['public']['Tables']['auth_rate_limits']['Row'];
 
 const SecurityAudit = () => {
-  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
+  const [rateLimits, setRateLimits] = useState<RateLimit[]>([]);
+  const [adminLogs, setAdminLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalEvents: 0,
-    criticalEvents: 0,
-    recentEvents: 0,
-    blockedAttempts: 0
-  });
-  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("rate-limits");
 
   useEffect(() => {
     fetchSecurityData();
-  }, []);
+  }, [activeTab]);
 
   const fetchSecurityData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      // Fetch recent authentication rate limits
-      const { data: rateLimits, error: rateLimitError } = await supabase
-        .from('auth_rate_limits')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+      if (activeTab === "rate-limits") {
+        const { data, error } = await supabase
+          .from('auth_rate_limits')
+          .select('*')
+          .order('last_attempt', { ascending: false })
+          .limit(100);
 
-      if (rateLimitError) {
-        console.error('Error fetching rate limits:', rateLimitError);
+        if (error) throw error;
+        setRateLimits(data || []);
+      } else if (activeTab === "admin-logs") {
+        const { data, error } = await supabase
+          .from('admin_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (error) throw error;
+        setAdminLogs(data || []);
       }
-
-      // Calculate stats from rate limits
-      const now = new Date();
-      const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      
-      const recentAttempts = rateLimits?.filter(rl => 
-        new Date(rl.created_at) > last24Hours
-      ) || [];
-      
-      const blockedAttempts = rateLimits?.filter(rl => 
-        rl.blocked_until && new Date(rl.blocked_until) > now
-      ) || [];
-
-      // Mock security events for demonstration
-      const mockEvents: SecurityEvent[] = [
-        {
-          id: '1',
-          event_type: 'failed_login',
-          severity: 'medium',
-          description: 'Multiple failed login attempts detected',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          event_type: 'rate_limit_triggered',
-          severity: 'high',
-          description: 'Rate limit exceeded for authentication',
-          created_at: new Date(Date.now() - 60000).toISOString()
-        }
-      ];
-
-      setSecurityEvents(mockEvents);
-      setStats({
-        totalEvents: mockEvents.length + recentAttempts.length,
-        criticalEvents: mockEvents.filter(e => e.severity === 'critical').length,
-        recentEvents: recentAttempts.length,
-        blockedAttempts: blockedAttempts.length
-      });
-
     } catch (error) {
       console.error('Error fetching security data:', error);
-      toast({
-        title: "Error loading security data",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), 'MMM d, yyyy HH:mm:ss');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-pulse">Loading security audit...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Shield className="w-6 h-6" />
-          Security Audit
-        </h1>
-        <Button onClick={fetchSecurityData} variant="outline" size="sm">
-          <Refresh className="w-4 h-4 mr-2" />
-          Refresh
+    <div className="container mx-auto py-6 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold tracking-tight">Security Audit</h1>
+        <Button onClick={fetchSecurityData} variant="outline" size="icon">
+          <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Security Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-blue-600" />
-              <div>
-                <div className="text-2xl font-bold">{stats.totalEvents}</div>
-                <div className="text-sm text-muted-foreground">Total Events</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="rate-limits">Auth Rate Limits</TabsTrigger>
+          <TabsTrigger value="admin-logs">Admin Activity</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-              <div>
-                <div className="text-2xl font-bold text-red-600">{stats.criticalEvents}</div>
-                <div className="text-sm text-muted-foreground">Critical Events</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-orange-600" />
-              <div>
-                <div className="text-2xl font-bold">{stats.recentEvents}</div>
-                <div className="text-sm text-muted-foreground">Last 24h</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-600" />
-              <div>
-                <div className="text-2xl font-bold">{stats.blockedAttempts}</div>
-                <div className="text-sm text-muted-foreground">Blocked IPs</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Security Events */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Security Events</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {securityEvents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-500" />
-                <p>No security events detected. Your system is secure!</p>
-              </div>
-            ) : (
-              securityEvents.map((event) => (
-                <div key={event.id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className={getSeverityColor(event.severity)}>
-                          {event.severity.toUpperCase()}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {event.event_type.replace('_', ' ').toUpperCase()}
-                        </span>
-                      </div>
-                      <p className="font-medium">{event.description}</p>
-                      <div className="text-sm text-muted-foreground mt-2">
-                        {new Date(event.created_at).toLocaleString()}
-                        {event.ip_address && ` • IP: ${event.ip_address}`}
-                        {event.user_id && ` • User: ${event.user_id.slice(0, 8)}...`}
-                      </div>
-                    </div>
-                  </div>
+        <TabsContent value="rate-limits">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Authentication Rate Limiting
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="py-12 flex justify-center">
+                  <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Security Recommendations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Security Recommendations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">Row Level Security (RLS) enabled on all tables</span>
-            </div>
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">Rate limiting active for authentication</span>
-            </div>
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">Strong password requirements enforced</span>
-            </div>
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">Email verification required for new accounts</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Identifier</TableHead>
+                      <TableHead>Attempts</TableHead>
+                      <TableHead>Last Attempt</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rateLimits.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          No rate limit data available
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      rateLimits.map((limit) => (
+                        <TableRow key={limit.id}>
+                          <TableCell className="font-mono text-xs">
+                            {limit.identifier}
+                          </TableCell>
+                          <TableCell>{limit.attempt_count}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              {formatDate(limit.last_attempt)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {limit.blocked_until && new Date(limit.blocked_until) > new Date() ? (
+                              <Badge variant="destructive" className="flex items-center gap-1">
+                                <UserX className="h-3 w-3" />
+                                Blocked until {formatDate(limit.blocked_until)}
+                              </Badge>
+                            ) : (
+                              <Badge variant={limit.attempt_count > 3 ? "warning" : "success"}>
+                                {limit.attempt_count > 3 ? "Warning" : "Normal"}
+                              </Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="admin-logs">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Admin Activity Logs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="py-12 flex justify-center">
+                  <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Admin User</TableHead>
+                      <TableHead>Target</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {adminLogs.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          No admin logs available
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      adminLogs.map((log) => (
+                        <TableRow key={log.id}>
+                          <TableCell>
+                            <Badge>{log.action}</Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {log.admin_user_id}
+                          </TableCell>
+                          <TableCell>
+                            {log.target_type}: {log.target_id}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              {formatDate(log.created_at)}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
