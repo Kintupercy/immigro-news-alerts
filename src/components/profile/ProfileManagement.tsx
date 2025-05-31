@@ -14,6 +14,8 @@ interface ProfileManagementProps {
   user: User;
 }
 
+type NotificationPreferenceKey = 'email' | 'sms' | 'push' | 'urgent_only';
+
 const ProfileManagement = ({ user }: ProfileManagementProps) => {
   const { profile, loading: profileLoading, saving, updateProfile } = useUserProfile(user);
   const { categories, loading: categoriesLoading } = useCategories();
@@ -29,7 +31,7 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
     updateProfile({ preferred_categories: updatedCategories });
   };
 
-  const updateNotificationPreference = (key: keyof typeof profile?.notification_preferences, value: boolean) => {
+  const updateNotificationPreference = (key: NotificationPreferenceKey, value: boolean) => {
     if (!profile) return;
 
     const updatedPreferences = {

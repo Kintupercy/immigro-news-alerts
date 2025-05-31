@@ -13,11 +13,13 @@ interface NotificationPreferences {
   urgent_only: boolean;
 }
 
+type NotificationPreferenceKey = 'email' | 'sms' | 'push' | 'urgent_only';
+
 interface NotificationPreferencesSectionProps {
   preferences: NotificationPreferences;
   isProMember: boolean;
   saving: boolean;
-  onUpdate: (key: keyof NotificationPreferences, value: boolean) => void;
+  onUpdate: (key: NotificationPreferenceKey, value: boolean) => void;
 }
 
 const NotificationPreferencesSection = ({ 
