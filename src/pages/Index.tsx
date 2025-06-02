@@ -72,7 +72,7 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO 
-        title="ImmigrowNews - Breaking Immigration News, Visa Updates & Expert Legal Help"
+        title="ImmigroNews - Breaking Immigration News, Visa Updates & Expert Legal Help"
         description="Get real-time immigration news, policy updates, visa requirements, and green card information. Connect with trusted immigration lawyers and stay informed with breaking news alerts. Your trusted source for immigration updates."
         keywords={[
           'immigration news', 

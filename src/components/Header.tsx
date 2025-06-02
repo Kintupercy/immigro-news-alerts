@@ -23,7 +23,7 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <Globe className="h-8 w-8 text-cream-300" />
-              <span className="font-playfair text-2xl font-bold">ImmigrowNews</span>
+              <span className="font-playfair text-2xl font-bold">ImmigroNews</span>
             </Link>
 
             {/* Desktop Navigation */}
