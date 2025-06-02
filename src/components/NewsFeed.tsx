@@ -766,7 +766,7 @@ const NewsFeed = () => {
         )}
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-muted-foreground">
+        <div className="mb-6 text-sm text-muted-foreground">
           {currentLanguage === 'es' 
             ? `Mostrando ${paginatedArticles.length} de ${filteredArticles.length} artículos (Página ${currentPage} de ${totalPages})`
             : `Showing ${paginatedArticles.length} of ${filteredArticles.length} articles (Page ${currentPage} of ${totalPages})`
@@ -777,24 +777,24 @@ const NewsFeed = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6">
                 {/* Tabs List */}
-                <TabsTrigger value="all" className="text-xs sm:text-sm">
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">
                   {currentLanguage === 'es' ? `Todas (${filteredArticles.length})` : `All (${filteredArticles.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="urgent" className="text-red-600 text-xs sm:text-sm">
+                <TabsTrigger value="urgent" className="text-red-600 text-xs sm:text-sm px-2 py-2">
                   <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="breaking" className="text-orange-600 text-xs sm:text-sm">
+                <TabsTrigger value="breaking" className="text-orange-600 text-xs sm:text-sm px-2 py-2">
                   {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="regular" className="text-xs sm:text-sm">
+                <TabsTrigger value="regular" className="text-xs sm:text-sm px-2 py-2">
                   {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="all" className="mt-6">
+              <TabsContent value="all" className="mt-0">
                 <div className="space-y-4">
                   {paginatedArticles.length === 0 ? (
                     <EmptyState
@@ -831,7 +831,7 @@ const NewsFeed = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="urgent" className="mt-6">
+              <TabsContent value="urgent" className="mt-0">
                 <div className="space-y-4">
                   {urgentArticles.length === 0 ? (
                     <EmptyState
@@ -851,7 +851,7 @@ const NewsFeed = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="breaking" className="mt-6">
+              <TabsContent value="breaking" className="mt-0">
                 <div className="space-y-4">
                   {breakingNewsArticles.length === 0 ? (
                     <EmptyState
@@ -871,7 +871,7 @@ const NewsFeed = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="regular" className="mt-6">
+              <TabsContent value="regular" className="mt-0">
                 <div className="space-y-4">
                   {regularArticles.length === 0 ? (
                     <EmptyState
