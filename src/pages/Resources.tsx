@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -47,6 +46,28 @@ const Resources = () => {
     return `${prefix}#${suffix}`;
   };
 
+  const sendConfirmationEmail = async (caseId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-legal-help-confirmation', {
+        body: {
+          email: formData.email,
+          caseId: caseId,
+          stayAnonymous: formData.stayAnonymous,
+          freeConsult: formData.freeConsult
+        }
+      });
+
+      if (error) {
+        console.error('Error sending confirmation email:', error);
+        // Don't fail the whole process if email fails
+      } else {
+        console.log('Confirmation email sent successfully:', data);
+      }
+    } catch (error) {
+      console.error('Error calling confirmation email function:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -85,12 +106,17 @@ const Resources = () => {
         throw error;
       }
 
+      // Send confirmation email if user provided email and didn't choose to stay anonymous
+      if (formData.email && !formData.stayAnonymous) {
+        await sendConfirmationEmail(newCaseId);
+      }
+
       setCaseId(newCaseId);
       setSubmissionSuccess(true);
       
       toast({
         title: "Request submitted successfully!",
-        description: `Your case ID is ${newCaseId}. We'll connect you with a vetted immigration lawyer soon.`,
+        description: `Your case ID is ${newCaseId}. ${formData.email && !formData.stayAnonymous ? "Check your email for confirmation details." : "We'll connect you with a vetted immigration lawyer soon."}`,
       });
       
       // Reset form
@@ -126,7 +152,7 @@ const Resources = () => {
               <CardHeader>
                 <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
                 <CardTitle className="text-2xl text-emerald-800">
-                  Request Submitted Successfully!
+                  Thank you — we've received your request
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -137,6 +163,9 @@ const Resources = () => {
                 </div>
                 
                 <div className="text-left space-y-3 text-gray-700">
+                  <p><strong>We'll reach out to trusted immigration professionals on your behalf.</strong></p>
+                  <p>If you gave your email, we'll follow up discreetly within 1–2 days.</p>
+                  
                   <p><strong>What happens next:</strong></p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start">
