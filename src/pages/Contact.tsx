@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -103,7 +101,7 @@ const Contact = () => {
                     <Mail className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" />
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Email Support</h3>
-                      <p className="text-gray-600 mb-2">support@immigro.com</p>
+                      <p className="text-gray-600 mb-2">support@immigronews.com</p>
                       <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
                     </div>
                   </div>
@@ -269,28 +267,46 @@ const Contact = () => {
                   
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      Can I customize my news preferences?
+                      Can I subscribe to breaking news alerts?
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Yes! After creating an account, you can personalize your news feed based on your immigration status, interests, and specific categories.
+                      Yes! You can subscribe to our email alerts by category. We send urgent alerts for breaking immigration news that could affect your status.
                     </p>
                   </div>
                   
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      Is the service free to use?
+                      Do you provide legal assistance?
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      We offer both free and premium plans. The free plan includes basic news access, while premium plans offer personalization and additional features.
+                      We connect you with trusted immigration lawyers through our legal help request system. Submit a request and get matched with qualified attorneys in your area.
                     </p>
                   </div>
                   
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      Do you provide legal advice?
+                      Is my information kept confidential?
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      We provide news and information only. For legal advice, we recommend consulting with qualified immigration attorneys through our resources section.
+                      Absolutely. All requests for legal help can be submitted anonymously, and we maintain strict confidentiality for all user information and communications.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      How do I get urgent immigration updates?
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Subscribe to our email alerts and follow @ImmigroNews on X (Twitter) for real-time updates on urgent immigration policy changes and breaking news.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      What if I need immediate legal help?
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Use our legal help request form to get connected with immigration attorneys. Many offer free consultations, and we'll match you within 1-2 business days.
                     </p>
                   </div>
                 </div>
