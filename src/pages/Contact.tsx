@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -243,75 +244,6 @@ const Contact = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
-
-          {/* FAQ Section */}
-          <div className="mt-16">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl text-center">Frequently Asked Questions</CardTitle>
-                <CardDescription className="text-center">
-                  Find quick answers to common questions about our service.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      How often is immigration news updated?
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Our news feed is updated multiple times daily to ensure you receive the most current information about immigration policies and changes.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      Can I subscribe to breaking news alerts?
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Yes! You can subscribe to our email alerts by category. We send urgent alerts for breaking immigration news that could affect your status.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      Do you provide legal assistance?
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      We connect you with trusted immigration lawyers through our legal help request system. Submit a request and get matched with qualified attorneys in your area.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      Is my information kept confidential?
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Absolutely. All requests for legal help can be submitted anonymously, and we maintain strict confidentiality for all user information and communications.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      How do I get urgent immigration updates?
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Subscribe to our email alerts and follow @ImmigroNews on X (Twitter) for real-time updates on urgent immigration policy changes and breaking news.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      What if I need immediate legal help?
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Use our legal help request form to get connected with immigration attorneys. Many offer free consultations, and we'll match you within 1-2 business days.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
