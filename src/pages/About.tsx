@@ -1,3 +1,4 @@
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { GraduationCap, Globe, Heart, Users, Target, Award } from "lucide-react";
@@ -100,7 +101,7 @@ const About = () => {
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Community</h4>
                 <p className="text-gray-700">
-                  Building a supportive community where immigrants can stay informed and connected.
+                  Building partnerships with vetted legal immigration experts in local communities to provide comprehensive support.
                 </p>
               </div>
             </div>
@@ -137,10 +138,10 @@ const About = () => {
               <div className="text-center">
                 <Heart className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Community Support
+                  Community Support & Legal Partnerships
                 </h4>
                 <p className="text-gray-600">
-                  Connect with fellow immigrants and share experiences
+                  Partnership with vetted legal immigration experts in your local communities to provide comprehensive support
                 </p>
               </div>
             </div>
