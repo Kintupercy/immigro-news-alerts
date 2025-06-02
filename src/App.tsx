@@ -10,6 +10,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Disclaimer from "./pages/Disclaimer";
+import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import Resources from "./pages/Resources";
 import Auth from "./pages/Auth";
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/news" element={<News />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/auth" element={<Auth />} />

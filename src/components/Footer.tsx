@@ -38,6 +38,11 @@ const Footer = () => {
                   About Us
                 </Link>
               </li>
+              <li>
+                <Link to="/faq" className="text-gray-300 hover:text-white transition-colors">
+                  FAQ
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -53,6 +58,11 @@ const Footer = () => {
               <li>
                 <Link to="/terms" className="text-gray-300 hover:text-white transition-colors">
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/disclaimer" className="text-gray-300 hover:text-white transition-colors">
+                  Disclaimer
                 </Link>
               </li>
             </ul>
