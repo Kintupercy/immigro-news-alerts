@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import Categories from "@/components/Categories";
 import Features from "@/components/Features";
@@ -72,10 +73,10 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO 
-        title="Immigro - Stay Updated with Immigration Law Changes"
+        title="ImmigrowNews - Stay Updated with Immigration Law Changes"
         description="Get real-time immigration news, policy updates, and expert analysis. Stay informed about visa requirements, green card processes, and citizenship changes."
         keywords={['immigration news', 'visa updates', 'green card', 'citizenship', 'immigration policy', 'USCIS updates']}
-        url="https://immigro.app"
+        url="https://immigrownews.app"
       />
       <Header />
       <Hero />

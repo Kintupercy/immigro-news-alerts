@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center mb-4">
               <Globe className="h-8 w-8 text-gray-300 mr-2" />
-              <span className="text-2xl font-bold">Immigro</span>
+              <span className="text-2xl font-bold">ImmigrowNews</span>
             </div>
             <p className="text-gray-300 mb-4">
               Your trusted source for personalized immigration news and updates. 
@@ -62,7 +62,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © {new Date().getFullYear()} Immigro. All rights reserved.
+            © {new Date().getFullYear()} ImmigrowNews. All rights reserved.
           </p>
           <p className="text-gray-500 text-sm mt-2">
             Not a law firm. Information provided is for educational purposes only and should not be construed as legal advice.

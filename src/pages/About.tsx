@@ -13,7 +13,7 @@ const About = () => {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              About Immigro
+              About ImmigrowNews
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Born from personal experience, built with passion for helping fellow immigrants navigate their journey to the American Dream.
@@ -29,7 +29,7 @@ const About = () => {
             
             <div className="prose prose-lg text-gray-700">
               <p className="mb-6">
-                Immigro was founded by someone who has walked the same path as millions of international students and immigrants seeking to build their lives in the United States. As a former F1 student who successfully navigated the complex journey from international student to lawful permanent resident, I understand firsthand the challenges, uncertainties, and dreams that define the immigrant experience.
+                ImmigrowNews was founded by someone who has walked the same path as millions of international students and immigrants seeking to build their lives in the United States. As a former F1 student who successfully navigated the complex journey from international student to lawful permanent resident, I understand firsthand the challenges, uncertainties, and dreams that define the immigrant experience.
               </p>
               
               <p className="mb-6">
@@ -41,7 +41,7 @@ const About = () => {
               </p>
               
               <p>
-                That's why I created Immigro - to be the centralized, reliable source of immigration news and updates that I wish I had during my own journey. Every feature, every update, and every piece of content is designed with the immigrant experience in mind, because I've lived it too.
+                That's why I created ImmigrowNews - to be the centralized, reliable source of immigration news and updates that I wish I had during my own journey. Every feature, every update, and every piece of content is designed with the immigrant experience in mind, because I've lived it too.
               </p>
             </div>
           </div>

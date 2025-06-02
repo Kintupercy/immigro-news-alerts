@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Request Confirmation - Immigro</title>
+          <title>Request Confirmation - ImmigrowNews</title>
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
@@ -78,8 +78,8 @@ const handler = async (req: Request): Promise<Response> => {
             </ul>
             
             <div class="footer">
-              <p>This is a secure, confidential communication from Immigro.</p>
-              <p>© 2024 Immigro. All rights reserved.</p>
+              <p>This is a secure, confidential communication from ImmigrowNews.</p>
+              <p>© 2024 ImmigrowNews. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -87,9 +87,9 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "Immigro Legal Help <legal@immigro.co>",
+      from: "ImmigrowNews Legal Help <legal@immigrownews.co>",
       to: [email],
-      subject: `Request Confirmed - Case ${caseId} | Immigro Legal Help`,
+      subject: `Request Confirmed - Case ${caseId} | ImmigrowNews Legal Help`,
       html: emailHtml,
     });
 
