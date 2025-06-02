@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "ImmigrowNews Legal Help <legal@immigrownews.co>",
+      from: "ImmigrowNews Legal Help <legal@immigronews.com>",
       to: [email],
       subject: `Request Confirmed - Case ${caseId} | ImmigrowNews Legal Help`,
       html: emailHtml,

@@ -29,8 +29,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to the company
     const companyEmailResponse = await resend.emails.send({
-      from: "Contact Form <contact@immigro.co>",
-      to: ["support@immigro.com"],
+      from: "Contact Form <contact@immigronews.com>",
+      to: ["support@immigronews.com"],
       subject: `New Contact Form Submission: ${subject}`,
       html: `
         <!DOCTYPE html>
@@ -81,9 +81,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the user
     const userEmailResponse = await resend.emails.send({
-      from: "Immigro Support <support@immigro.co>",
+      from: "ImmigrowNews Support <support@immigronews.com>",
       to: [email],
-      subject: "We received your message - Immigro Support",
+      subject: "We received your message - ImmigrowNews Support",
       html: `
         <!DOCTYPE html>
         <html>
@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
           <body>
             <div class="header">
               <h1 style="margin: 0; font-size: 28px;">✅ Message Received</h1>
-              <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for contacting Immigro</p>
+              <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for contacting ImmigrowNews</p>
             </div>
             
             <div class="content">
@@ -114,12 +114,12 @@ const handler = async (req: Request): Promise<Response> => {
               
               <p>In the meantime, feel free to explore our latest immigration news and resources on our website.</p>
               
-              <a href="https://xybpgorbkiaitimxiqej.supabase.co" class="cta-button">Visit Immigro</a>
+              <a href="https://immigronews.com" class="cta-button">Visit ImmigrowNews</a>
               
               <div class="footer">
                 <p>If you have any urgent concerns, please call us at +1 (555) 123-4567</p>
-                <p>Best regards,<br>The Immigro Support Team</p>
-                <p>© 2024 Immigro. All rights reserved.</p>
+                <p>Best regards,<br>The ImmigrowNews Support Team</p>
+                <p>© 2024 ImmigrowNews. All rights reserved.</p>
               </div>
             </div>
           </body>
