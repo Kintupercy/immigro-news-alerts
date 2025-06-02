@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -241,14 +240,8 @@ const NewsFeed = () => {
             .select('*')
             .eq('status', 'published')
             .not('source_url', 'is', null)
-            .order('published_at', { ascending: false });
-
-          // For free users, limit results
-          if (!isProMember) {
-            query = query.limit(100); // Load more articles but still limit for free users
-          } else {
-            query = query.limit(500); // Load more articles for pro users
-          }
+            .order('published_at', { ascending: false })
+            .limit(500); // Load 500 articles for all users
 
           const { data, error } = await query;
           if (error) throw error;
