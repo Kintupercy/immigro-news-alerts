@@ -1,15 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { User } from "@supabase/supabase-js";
-import { ChevronRight, Mail, MessageSquare, Check, Crown } from "lucide-react";
+import { ChevronRight, Mail, Check, Crown } from "lucide-react";
 import { useProMembership } from "@/hooks/useProMembership";
 import UpgradeModal from "@/components/UpgradeModal";
 
@@ -34,11 +34,9 @@ const immigrationCategories = [
 const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState({
     email: true,
-    sms: false,
     push: true,
     urgent_only: false
   });
@@ -76,19 +74,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
     });
   };
 
-  const handleSMSToggle = (checked: boolean) => {
-    if (checked && !isProMember) {
-      toast({
-        title: "Pro Feature",
-        description: "SMS notifications are available for Pro members only. Upgrade to Pro to receive text alerts.",
-        variant: "default"
-      });
-      setUpgradeModalOpen(true);
-      return;
-    }
-    setNotificationPreferences(prev => ({ ...prev, sms: checked }));
-  };
-
   const handleUrgentOnlyToggle = (checked: boolean) => {
     if (checked && !isProMember) {
       toast({
@@ -112,15 +97,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
       return;
     }
 
-    if (currentStep === 2 && notificationPreferences.sms && !phoneNumber.trim()) {
-      toast({
-        title: "Phone number required",
-        description: "Please enter your phone number for SMS notifications.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setCurrentStep(prev => prev + 1);
   };
 
@@ -131,21 +107,15 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
       console.log('Starting onboarding completion for user:', user.id);
       console.log('User email:', user.email);
       console.log('Selected categories:', selectedCategories);
-      console.log('Phone number:', phoneNumber);
       console.log('Notification preferences:', notificationPreferences);
 
-      // Clean phone number - remove formatting for storage
-      const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
-      
       // Prepare the update data - ensure Pro features are disabled for non-Pro users
       const finalNotificationPrefs = {
         ...notificationPreferences,
-        sms: isProMember ? notificationPreferences.sms : false,
         urgent_only: isProMember ? notificationPreferences.urgent_only : false
       };
 
       const updateData = {
-        phone_number: (cleanPhoneNumber && isProMember) ? cleanPhoneNumber : null,
         preferred_categories: selectedCategories,
         notification_preferences: finalNotificationPrefs,
         onboarding_completed: true,
@@ -217,28 +187,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
 
   const handleUpgradeClick = () => {
     setUpgradeModalOpen(true);
-  };
-
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
-    const cleaned = value.replace(/\D/g, '');
-    
-    // Don't format if empty
-    if (!cleaned) return '';
-    
-    // Format as (XXX) XXX-XXXX
-    if (cleaned.length <= 3) {
-      return cleaned;
-    } else if (cleaned.length <= 6) {
-      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    } else {
-      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-    }
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value);
-    setPhoneNumber(formatted);
   };
 
   return (
@@ -383,71 +331,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
                     />
                   </div>
 
-                  {/* Pro Features Section */}
-                  {!isProMember && (
-                    <div className="p-4 border-2 border-emerald-200 rounded-lg bg-emerald-50">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Crown className="w-5 h-5 text-emerald-600" />
-                          <span className="font-semibold text-emerald-800">Unlock Pro Features</span>
-                          <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">$4.99/month</Badge>
-                        </div>
-                        <Button 
-                          onClick={handleUpgradeClick}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                          size="sm"
-                        >
-                          <Crown className="w-4 h-4 mr-1" />
-                          Upgrade to Pro
-                        </Button>
-                      </div>
-                      <p className="text-sm text-emerald-700 mb-2">
-                        Get SMS notifications, urgent news filtering, and more premium features!
-                      </p>
-                    </div>
-                  )}
-
-                  <div className={`flex items-center justify-between p-4 border rounded-lg ${!isProMember ? 'opacity-50 bg-gray-50' : ''}`}>
-                    <div className="flex items-center space-x-3">
-                      <MessageSquare className="w-5 h-5 text-navy-600" />
-                      <div>
-                        <Label className="font-medium flex items-center gap-2">
-                          SMS Notifications
-                          {isProMember ? (
-                            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Pro</Badge>
-                          ) : (
-                            <Crown className="w-4 h-4 text-yellow-500" />
-                          )}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive urgent updates via text message
-                        </p>
-                      </div>
-                    </div>
-                    <Checkbox
-                      checked={notificationPreferences.sms && isProMember}
-                      onCheckedChange={handleSMSToggle}
-                      disabled={!isProMember}
-                    />
-                  </div>
-
-                  {notificationPreferences.sms && isProMember && (
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="(555) 123-4567"
-                        value={phoneNumber}
-                        onChange={handlePhoneChange}
-                        maxLength={14}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Required for SMS notifications. We'll only use this for immigration news updates.
-                      </p>
-                    </div>
-                  )}
-
                   <div className={`flex items-center justify-between p-4 border rounded-lg ${!isProMember ? 'opacity-50 bg-gray-50' : ''}`}>
                     <div>
                       <Label className="font-medium flex items-center gap-2">
@@ -504,8 +387,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
                     <h4 className="font-medium text-sm">Notifications:</h4>
                     <div className="text-sm text-muted-foreground mt-1">
                       {notificationPreferences.email && "✓ Email"}
-                      {notificationPreferences.email && notificationPreferences.sms && isProMember && " • "}
-                      {notificationPreferences.sms && isProMember && `✓ SMS (${phoneNumber})`}
                       {notificationPreferences.urgent_only && isProMember && " • Urgent only"}
                     </div>
                   </div>

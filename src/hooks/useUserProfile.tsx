@@ -18,7 +18,6 @@ export interface UserProfile {
   preferred_categories: string[];
   notification_preferences: {
     email: boolean;
-    sms: boolean;
     push: boolean;
     urgent_only: boolean;
   };
@@ -38,7 +37,6 @@ export const useUserProfile = (user: User) => {
       preferred_categories: dbProfile.preferred_categories || [],
       notification_preferences: {
         email: notificationPrefs?.email ?? true,
-        sms: notificationPrefs?.sms ?? false,
         push: notificationPrefs?.push ?? true,
         urgent_only: notificationPrefs?.urgent_only ?? false
       }
@@ -69,7 +67,6 @@ export const useUserProfile = (user: User) => {
           preferred_categories: [],
           notification_preferences: {
             email: true,
-            sms: false,
             push: true,
             urgent_only: false
           },

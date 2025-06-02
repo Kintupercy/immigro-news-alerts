@@ -14,7 +14,7 @@ interface ProfileManagementProps {
   user: User;
 }
 
-type NotificationPreferenceKey = 'email' | 'sms' | 'push' | 'urgent_only';
+type NotificationPreferenceKey = 'email' | 'push' | 'urgent_only';
 
 const ProfileManagement = ({ user }: ProfileManagementProps) => {
   const { profile, loading: profileLoading, saving, updateProfile } = useUserProfile(user);

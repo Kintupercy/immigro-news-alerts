@@ -41,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get users who want notifications for this category
     const { data: profiles, error: profilesError } = await supabase
       .from('user_profiles')
-      .select('user_id, first_name, phone_number, preferred_categories, notification_preferences')
+      .select('user_id, first_name, preferred_categories, notification_preferences')
       .contains('preferred_categories', [news.category]);
 
     if (profilesError) {
@@ -61,7 +61,6 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const notifications = [];
-    let smsCount = 0;
     let emailCount = 0;
 
     for (const profile of profiles || []) {
@@ -115,55 +114,15 @@ const handler = async (req: Request): Promise<Response> => {
           notifications.push({ type: 'email', user: user.user.email, status: 'failed' });
         }
       }
-
-      // Send SMS notification (for pro members only)
-      if (preferences.sms && profile.phone_number) {
-        // Check if user is a pro member by checking if they have SMS enabled
-        // In a real app, you'd check a proper subscription table
-        const isProMember = preferences.sms === true;
-        
-        if (isProMember) {
-          try {
-            const smsResponse = await fetch(`${supabaseUrl}/functions/v1/send-sms-notification`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseServiceKey}`,
-              },
-              body: JSON.stringify({
-                to: profile.phone_number,
-                title: news.title,
-                category: news.category,
-                isUrgent: news.is_urgent,
-              }),
-            });
-
-            if (smsResponse.ok) {
-              smsCount++;
-              notifications.push({ type: 'sms', user: profile.phone_number, status: 'sent' });
-              console.log(`SMS sent successfully to: ${profile.phone_number}`);
-            } else {
-              console.error(`SMS failed for ${profile.phone_number}:`, await smsResponse.text());
-              notifications.push({ type: 'sms', user: profile.phone_number, status: 'failed' });
-            }
-          } catch (error) {
-            console.error('SMS notification error:', error);
-            notifications.push({ type: 'sms', user: profile.phone_number, status: 'failed' });
-          }
-        } else {
-          console.log(`User ${profile.user_id} wants SMS but is not a pro member`);
-        }
-      }
     }
 
-    console.log(`Notification summary: ${emailCount} emails, ${smsCount} SMS sent`);
+    console.log(`Notification summary: ${emailCount} emails sent`);
 
     return new Response(JSON.stringify({ 
       message: 'Notifications processed',
       notifications,
       totalUsers: profiles?.length || 0,
-      emailsSent: emailCount,
-      smsSent: smsCount
+      emailsSent: emailCount
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
