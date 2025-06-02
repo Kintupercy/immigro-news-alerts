@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { UserPlus } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const Hero = () => {
   const universities = [
@@ -113,19 +113,19 @@ const Hero = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-navy-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
-            Get 24/7 alerts and news on all US Immigration policy and law changes
+            Get instant email alerts for urgent and breaking US Immigration policy and law changes
           </p>
 
-          {/* Join Now button */}
+          {/* Subscribe button */}
           <Button asChild size="lg" className="px-8 py-3 text-base bg-navy-800 text-cream-50 hover:bg-navy-700 font-medium transition-all duration-200 rounded-full">
             <Link to="/auth" className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5" />
-              Join Now
+              <Mail className="w-5 h-5" />
+              Subscribe to Alerts
             </Link>
           </Button>
 
           <p className="text-sm text-navy-500 mt-6">
-            Join 10,000+ staying updated on US immigration law changes
+            Join 10,000+ getting urgent immigration law alerts in their inbox
           </p>
         </div>
       </div>
