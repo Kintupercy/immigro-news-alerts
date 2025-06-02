@@ -69,14 +69,14 @@ export const generateSitemap = async (): Promise<string> => {
     // Fetch categories for sitemap
     const { data: categories } = await supabase
       .from('immigration_categories')
-      .select('slug, name, updated_at')
+      .select('slug, name, created_at')
       .order('name');
 
     if (categories) {
       categories.forEach(category => {
         urls.push({
           loc: `${baseUrl}/news/category/${category.slug}`,
-          lastmod: category.updated_at ? new Date(category.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          lastmod: new Date(category.created_at).toISOString().split('T')[0],
           changefreq: 'daily',
           priority: 0.75
         });
