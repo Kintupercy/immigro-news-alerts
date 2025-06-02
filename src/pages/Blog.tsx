@@ -11,6 +11,14 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface BlogArticle {
   id: string;
@@ -27,9 +35,12 @@ interface BlogArticle {
   keywords: string[];
 }
 
+const ARTICLES_PER_PAGE = 6;
+
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: articles, isLoading, error } = useQuery({
     queryKey: ['blog-articles'],
@@ -55,12 +66,58 @@ const Blog = () => {
   const featuredArticles = articles?.filter(article => article.featured) || [];
   const categories = [...new Set(articles?.map(article => article.category) || [])];
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
+  const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+  const endIndex = startIndex + ARTICLES_PER_PAGE;
+  const currentArticles = filteredArticles.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of articles section
+    document.getElementById('articles-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const renderPaginationNumbers = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            onClick={() => handlePageChange(i)}
+            isActive={currentPage === i}
+            className="cursor-pointer"
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
   };
 
   if (isLoading) {
@@ -233,10 +290,17 @@ const Blog = () => {
         )}
 
         {/* All Articles */}
-        <section>
-          <h2 className="text-3xl font-playfair font-bold text-gray-900 mb-8">
-            {searchTerm || selectedCategory !== "all" ? "Search Results" : "All Articles"}
-          </h2>
+        <section id="articles-section">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-playfair font-bold text-gray-900">
+              {searchTerm || selectedCategory !== "all" ? "Search Results" : "All Articles"}
+            </h2>
+            {filteredArticles.length > 0 && (
+              <p className="text-gray-600">
+                Showing {startIndex + 1}-{Math.min(endIndex, filteredArticles.length)} of {filteredArticles.length} articles
+              </p>
+            )}
+          </div>
           
           {filteredArticles.length === 0 ? (
             <div className="text-center py-12">
@@ -245,47 +309,74 @@ const Blog = () => {
               <p className="text-gray-500">Try adjusting your search terms or browse all categories.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredArticles.map((article) => (
-                <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary">
-                        {article.category}
-                      </Badge>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {article.read_time}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {currentArticles.map((article) => (
+                  <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary">
+                          {article.category}
+                        </Badge>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {article.read_time}
+                        </div>
                       </div>
-                    </div>
-                    <CardTitle className="text-lg font-playfair leading-tight hover:text-emerald-600 transition-colors">
-                      <Link to={`/blog/${article.slug}`}>
-                        {article.title}
-                      </Link>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4 line-clamp-3">
-                      {article.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 mr-1" />
-                        {article.author}
+                      <CardTitle className="text-lg font-playfair leading-tight hover:text-emerald-600 transition-colors">
+                        <Link to={`/blog/${article.slug}`}>
+                          {article.title}
+                        </Link>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-1" />
+                          {article.author}
+                        </div>
+                        <span>
+                          {formatDate(article.published_at)}
+                        </span>
                       </div>
-                      <span>
-                        {formatDate(article.published_at)}
-                      </span>
-                    </div>
-                    <Button variant="outline" size="sm" asChild className="w-full">
-                      <Link to={`/blog/${article.slug}`}>
-                        Read Full Article
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <Button variant="outline" size="sm" asChild className="w-full">
+                        <Link to={`/blog/${article.slug}`}>
+                          Read Full Article
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-8">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {renderPaginationNumbers()}
+                      
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </section>
 
