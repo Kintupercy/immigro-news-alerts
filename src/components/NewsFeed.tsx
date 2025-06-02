@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ import BookmarkButton from "./BookmarkButton";
 import SocialShareButton from "./SocialShareButton";
 import LanguageToggle from "./LanguageToggle";
 import AdBanner from "./AdBanner";
+import KofiDonateButton from "./KofiDonateButton";
 import { useProMembership } from "@/hooks/useProMembership";
 import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
 import UpgradeModal from "./UpgradeModal";
@@ -460,6 +462,9 @@ const NewsFeed = () => {
   return (
     <ErrorBoundary>
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Ko-fi Donate Button - Fixed Position */}
+        <KofiDonateButton />
+
         {/* Header Section with enhanced search */}
         <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
           {/* Header Content */}
