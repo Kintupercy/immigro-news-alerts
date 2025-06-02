@@ -39,18 +39,8 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
   }, []);
 
   useEffect(() => {
-    // Mock ad configurations - in production, these would come from your database
+    // Updated ad configurations - removed Pro upgrade ads since everything is free
     const adConfigs: AdConfig[] = [
-      {
-        id: 'upgrade-pro',
-        type: 'native',
-        title: 'Upgrade to Pro',
-        description: 'Get real-time alerts, SMS notifications, and Spanish translation',
-        ctaText: 'Upgrade Now',
-        targetUrl: '/auth',
-        position: 'between-articles',
-        isActive: true
-      },
       {
         id: 'immigration-lawyer',
         type: 'banner',
@@ -71,6 +61,16 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
         targetUrl: 'https://example-visa-service.com',
         position: 'footer',
         isActive: true
+      },
+      {
+        id: 'support-immigro',
+        type: 'native',
+        title: 'Support Immigro',
+        description: 'Help us keep this platform free for everyone',
+        ctaText: 'Donate',
+        targetUrl: 'https://ko-fi.com/immigro',
+        position: 'between-articles',
+        isActive: true
       }
     ];
 
@@ -79,8 +79,8 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
     setAdConfig(config || null);
   }, [position]);
 
-  // Don't show ads to Pro members or while loading
-  if (proLoading || isProMember || !adConfig || !isVisible) {
+  // Show ads for everyone since the app is now free
+  if (proLoading || !adConfig || !isVisible) {
     return null;
   }
 
@@ -107,7 +107,9 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
     <Card className={`ad-banner ${className} border-dashed border-gray-300 bg-gray-50/50`}>
       <CardContent className="p-4 relative">
         <div className="flex items-start justify-between mb-2">
-          <span className="text-xs text-gray-500 font-medium">SPONSORED</span>
+          <span className="text-xs text-gray-500 font-medium">
+            {adConfig.id === 'support-immigro' ? 'SUPPORT US' : 'SPONSORED'}
+          </span>
           <Button
             variant="ghost"
             size="sm"
@@ -145,10 +147,10 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
             <Button
               onClick={handleAdClick}
               size="sm"
-              variant={adConfig.id === 'upgrade-pro' ? 'default' : 'outline'}
+              variant={adConfig.id === 'support-immigro' ? 'default' : 'outline'}
               className={`w-full ${
-                adConfig.id === 'upgrade-pro' 
-                  ? 'bg-emerald-600 hover:bg-emerald-700' 
+                adConfig.id === 'support-immigro' 
+                  ? 'bg-blue-600 hover:bg-blue-700' 
                   : ''
               }`}
             >

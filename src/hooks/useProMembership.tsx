@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
 interface NotificationPreferences {
@@ -11,40 +10,13 @@ interface NotificationPreferences {
 }
 
 export const useProMembership = (user: User | null) => {
-  const [isProMember, setIsProMember] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isProMember, setIsProMember] = useState(true); // Always true for free app
+  const [loading, setLoading] = useState(false); // No loading needed
 
   useEffect(() => {
-    const checkProMembership = async () => {
-      if (!user) {
-        setIsProMember(false);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // In a real app, you'd check subscription status from a payments table
-        // For now, we'll simulate Pro membership check
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('notification_preferences')
-          .eq('user_id', user.id)
-          .single();
-
-        // Simple simulation: if user has SMS notifications enabled, consider them Pro
-        // In production, you'd have a proper subscription/billing table
-        const notificationPrefs = profile?.notification_preferences as NotificationPreferences | null;
-        const hasSmsEnabled = notificationPrefs?.sms === true;
-        setIsProMember(hasSmsEnabled || false);
-      } catch (error) {
-        console.error('Error checking Pro membership:', error);
-        setIsProMember(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkProMembership();
+    // Since everything is free now, just set to true immediately
+    setIsProMember(true);
+    setLoading(false);
   }, [user]);
 
   return { isProMember, loading };
