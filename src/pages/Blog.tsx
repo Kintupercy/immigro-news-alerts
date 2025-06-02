@@ -1,210 +1,320 @@
 
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Clock, Search, BookOpen, TrendingUp, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Calendar, User, ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
-// Sample blog posts for now - these would come from your CMS/database later
-const blogPosts = [
-  {
-    id: 1,
-    title: "Understanding the New H-1B Visa Changes for 2024",
-    excerpt: "A comprehensive guide to the latest H-1B visa policy updates and what they mean for skilled workers and employers.",
-    author: "ImmigrowNews Editorial Team",
-    publishedAt: "2024-01-15",
-    category: "Visa Updates",
-    readTime: "5 min read",
-    slug: "h1b-visa-changes-2024"
-  },
-  {
-    id: 2,
-    title: "Green Card Processing Times: What to Expect in 2024",
-    excerpt: "Current processing times, delays, and tips for navigating the green card application process effectively.",
-    author: "Immigration Expert",
-    publishedAt: "2024-01-10",
-    category: "Green Card",
-    readTime: "8 min read",
-    slug: "green-card-processing-times-2024"
-  },
-  {
-    id: 3,
-    title: "Complete Guide to Student Visa Applications",
-    excerpt: "Everything international students need to know about F-1 visa applications, requirements, and common mistakes to avoid.",
-    author: "Education Specialist",
-    publishedAt: "2024-01-05",
-    category: "Student Visas",
-    readTime: "12 min read",
-    slug: "student-visa-application-guide"
-  }
-];
+interface BlogArticle {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  category: string;
+  published_at: string;
+  read_time: string;
+  featured: boolean;
+  meta_description: string;
+  keywords: string[];
+}
 
 const Blog = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const { data: articles, isLoading, error } = useQuery({
+    queryKey: ['blog-articles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+
+      if (error) throw error;
+      return data as BlogArticle[];
+    },
+  });
+
+  const filteredArticles = articles?.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         article.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || article.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  }) || [];
+
+  const featuredArticles = articles?.filter(article => article.featured) || [];
+  const categories = [...new Set(articles?.map(article => article.category) || [])];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <SEO 
+          title="Immigration Blog - Expert Guides & Resources | ImmigroNews"
+          description="Comprehensive immigration guides and expert advice. Learn about visa applications, green card processes, citizenship requirements, and immigration law updates."
+          keywords={['immigration blog', 'immigration guides', 'visa help', 'green card advice', 'citizenship tips', 'immigration law']}
+          url="https://immigronews.com/blog"
+          type="website"
+        />
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Blog</h1>
+            <p className="text-gray-600">Unable to load blog articles. Please try again later.</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <SEO 
-        title="Immigration Blog - Expert Guides & Updates | ImmigrowNews"
-        description="Expert immigration guides, visa tips, policy analysis, and practical advice for immigrants. Stay informed with our comprehensive immigration blog."
-        keywords={[
-          'immigration blog',
-          'visa guides',
-          'immigration tips',
-          'green card advice',
-          'citizenship guides',
-          'immigration law updates',
-          'visa application help',
-          'immigration expert advice'
-        ]}
+        title="Immigration Blog - Expert Guides & Resources | ImmigroNews"
+        description="Comprehensive immigration guides and expert advice. Learn about visa applications, green card processes, citizenship requirements, and immigration law updates."
+        keywords={['immigration blog', 'immigration guides', 'visa help', 'green card advice', 'citizenship tips', 'immigration law', 'USCIS guides', 'immigration attorney advice']}
         url="https://immigronews.com/blog"
+        type="website"
       />
       <Header />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-navy-800 mb-4">
-            Immigration Blog
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Expert guides, practical tips, and in-depth analysis to help you navigate 
-            your immigration journey successfully.
-          </p>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-navy-800 to-navy-900 text-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-playfair font-bold mb-6">
+              Immigration Blog & Resources
+            </h1>
+            <p className="text-xl text-cream-200 mb-8">
+              Expert guides, step-by-step instructions, and practical advice to help you navigate your immigration journey with confidence.
+            </p>
+            <div className="flex items-center justify-center space-x-6 text-cream-300">
+              <div className="flex items-center">
+                <BookOpen className="w-5 h-5 mr-2" />
+                <span>{articles?.length || 0} Articles</span>
+              </div>
+              <div className="flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2" />
+                <span>Expert Advice</span>
+              </div>
+              <div className="flex items-center">
+                <User className="w-5 h-5 mr-2" />
+                <span>Immigration Attorneys</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-12">
+        {/* Search and Filter Section */}
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                type="text"
+                placeholder="Search articles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedCategory === "all" ? "default" : "outline"}
+                onClick={() => setSelectedCategory("all")}
+                size="sm"
+              >
+                All Categories
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category)}
+                  size="sm"
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Featured Article */}
-        {blogPosts.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-navy-800 mb-6">Featured Article</h2>
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-4">
-                      <Badge variant="secondary" className="bg-navy-100 text-navy-800">
-                        {blogPosts[0].category}
+        {/* Featured Articles */}
+        {featuredArticles.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-3xl font-playfair font-bold text-gray-900 mb-8">Featured Articles</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {featuredArticles.map((article) => (
+                <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-emerald-600">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                        {article.category}
                       </Badge>
-                      <span className="text-sm text-gray-500">{blogPosts[0].readTime}</span>
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                        Featured
+                      </Badge>
                     </div>
-                    <h3 className="text-2xl font-bold text-navy-800 mb-3">
-                      {blogPosts[0].title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 text-lg">
-                      {blogPosts[0].excerpt}
+                    <CardTitle className="text-xl font-playfair leading-tight hover:text-emerald-600 transition-colors">
+                      <Link to={`/blog/${article.slug}`}>
+                        {article.title}
+                      </Link>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {article.excerpt}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          {blogPosts[0].author}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(blogPosts[0].publishedAt).toLocaleDateString()}
-                        </div>
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <div className="flex items-center">
+                        <User className="w-4 h-4 mr-1" />
+                        {article.author}
                       </div>
-                      <Button variant="outline" className="group">
-                        Read Article
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {article.read_time}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {formatDate(article.published_at)}
+                      </span>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/blog/${article.slug}`}>
+                          Read More
+                        </Link>
                       </Button>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* Blog Posts Grid */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-navy-800 mb-6">Latest Articles</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blogPosts.slice(1).map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="text-xs">
-                      {post.category}
-                    </Badge>
-                    <span className="text-xs text-gray-500">{post.readTime}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-navy-800 line-clamp-2">
-                    {post.title}
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-500">
-                      <div className="flex items-center gap-1 mb-1">
-                        <User className="w-3 h-3" />
-                        {post.author}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(post.publishedAt).toLocaleDateString()}
+        {/* All Articles */}
+        <section>
+          <h2 className="text-3xl font-playfair font-bold text-gray-900 mb-8">
+            {searchTerm || selectedCategory !== "all" ? "Search Results" : "All Articles"}
+          </h2>
+          
+          {filteredArticles.length === 0 ? (
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No articles found</h3>
+              <p className="text-gray-500">Try adjusting your search terms or browse all categories.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredArticles.map((article) => (
+                <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary">
+                        {article.category}
+                      </Badge>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {article.read_time}
                       </div>
                     </div>
-                    <Button size="sm" variant="ghost" className="text-navy-600 hover:text-navy-800">
-                      Read More
+                    <CardTitle className="text-lg font-playfair leading-tight hover:text-emerald-600 transition-colors">
+                      <Link to={`/blog/${article.slug}`}>
+                        {article.title}
+                      </Link>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {article.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <div className="flex items-center">
+                        <User className="w-4 h-4 mr-1" />
+                        {article.author}
+                      </div>
+                      <span>
+                        {formatDate(article.published_at)}
+                      </span>
+                    </div>
+                    <Button variant="outline" size="sm" asChild className="w-full">
+                      <Link to={`/blog/${article.slug}`}>
+                        Read Full Article
+                      </Link>
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
 
-        {/* Categories */}
-        <div className="bg-gray-50 rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-6 text-center">
-            Explore by Category
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              "Visa Updates",
-              "Green Card",
-              "Student Visas", 
-              "Work Permits",
-              "Citizenship",
-              "Policy Changes",
-              "Legal Guides",
-              "Success Stories"
-            ].map((category) => (
-              <Button
-                key={category}
-                variant="outline"
-                className="justify-start h-auto p-4 text-left hover:bg-navy-50 hover:border-navy-300"
-              >
-                <div>
-                  <div className="font-medium text-navy-800">{category}</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {Math.floor(Math.random() * 20) + 5} articles
-                  </div>
-                </div>
-              </Button>
-            ))}
+        {/* SEO Content Section */}
+        <section className="mt-16 bg-gray-50 rounded-lg p-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">
+              Your Trusted Source for Immigration Guidance
+            </h2>
+            <div className="prose prose-lg text-gray-700">
+              <p className="mb-4">
+                Navigate the complex world of U.S. immigration with confidence using our comprehensive guides and expert resources. 
+                Our blog covers everything from basic visa applications to advanced green card processes, citizenship requirements, 
+                and the latest immigration law updates.
+              </p>
+              <p className="mb-4">
+                Whether you're applying for your first visa, adjusting your status, or preparing for your citizenship interview, 
+                our step-by-step guides provide the clarity and direction you need. Written by immigration professionals and 
+                regularly updated to reflect current laws and procedures.
+              </p>
+              <p>
+                <strong>Popular Topics:</strong> USCIS case status tracking, green card processing times, marriage-based interviews, 
+                work authorization, visa overstays, citizenship applications, and essential document preparation.
+              </p>
+            </div>
           </div>
-        </div>
-
-        {/* Newsletter CTA */}
-        <div className="bg-navy-800 text-white rounded-lg p-8 mt-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Stay Updated with Immigration Insights
-          </h2>
-          <p className="text-navy-200 mb-6 max-w-2xl mx-auto">
-            Get the latest immigration guides, policy updates, and expert tips 
-            delivered directly to your inbox.
-          </p>
-          <Button size="lg" className="bg-white text-navy-800 hover:bg-gray-100">
-            Subscribe to Newsletter
-          </Button>
-        </div>
+        </section>
       </div>
-      
+
       <Footer />
     </div>
   );
