@@ -22,7 +22,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Newspaper, Crown, Lock } from "lucide-react";
+import { AlertTriangle, Clock, Search, ExternalLink, Shield, Newspaper, Crown } from "lucide-react";
 import { format } from "date-fns";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
@@ -638,19 +638,6 @@ const NewsFeed = () => {
                 isProMember={isProMember}
                 user={user}
               />
-              <Button 
-                onClick={() => retry(() => refreshNews(true))} 
-                disabled={refreshing || !canRetry}
-                variant="outline"
-                size="sm"
-                className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing 
-                  ? (currentLanguage === 'es' ? 'Obteniendo...' : 'Fetching...') 
-                  : (currentLanguage === 'es' ? 'Actualizar' : 'Refresh')
-                }
-              </Button>
             </div>
           </div>
 
@@ -823,8 +810,8 @@ const NewsFeed = () => {
                       description={searchTerm 
                         ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
                         : (currentLanguage === 'es' 
-                            ? 'Haz clic en actualizar para obtener las últimas noticias de fuentes oficiales.'
-                            : 'Click refresh to fetch the latest news from official sources.')
+                            ? 'Las noticias se actualizan automáticamente dos veces al día con las últimas fuentes oficiales.'
+                            : 'News is automatically updated twice daily from the latest official sources.')
                       }
                       action={!searchTerm && (
                         <Button onClick={() => retry(() => refreshNews(true))} disabled={refreshing || !canRetry}>
