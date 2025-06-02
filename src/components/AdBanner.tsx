@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, ExternalLink } from "lucide-react";
+import { useProMembership } from "@/hooks/useProMembership";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdConfig {
   id: string;
@@ -23,50 +25,50 @@ interface AdBannerProps {
 }
 
 const AdBanner = ({ position, className = "" }: AdBannerProps) => {
+  const [user, setUser] = useState<any>(null);
   const [adConfig, setAdConfig] = useState<AdConfig | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const { isProMember, loading: proLoading } = useProMembership(user);
 
   useEffect(() => {
-    // Mock ad configurations focused on immigration services
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    // Mock ad configurations - in production, these would come from your database
     const adConfigs: AdConfig[] = [
       {
-        id: 'immigration-lawyer',
+        id: 'upgrade-pro',
         type: 'native',
-        title: 'Need Immigration Legal Help?',
-        description: 'Connect with experienced immigration lawyers for your case',
-        ctaText: 'Find a Lawyer',
-        targetUrl: '#talk-to-lawyer',
-        position: 'header',
-        isActive: true
-      },
-      {
-        id: 'esl-services',
-        type: 'banner',
-        title: 'Improve Your English',
-        description: 'Online ESL classes designed for immigrants',
-        imageUrl: '/placeholder.svg',
-        ctaText: 'Start Learning',
-        targetUrl: 'https://example-esl-service.com',
+        title: 'Upgrade to Pro',
+        description: 'Get real-time alerts, SMS notifications, and Spanish translation',
+        ctaText: 'Upgrade Now',
+        targetUrl: '/auth',
         position: 'between-articles',
         isActive: true
       },
       {
-        id: 'remittance-service',
-        type: 'text',
-        title: 'Send Money Home',
-        description: 'Low-fee international money transfers',
-        ctaText: 'Compare Rates',
-        targetUrl: 'https://example-remittance.com',
+        id: 'immigration-lawyer',
+        type: 'banner',
+        title: 'Need Legal Help?',
+        description: 'Connect with experienced immigration lawyers',
+        imageUrl: '/placeholder.svg',
+        ctaText: 'Find a Lawyer',
+        targetUrl: 'https://example-law-firm.com',
         position: 'sidebar',
         isActive: true
       },
       {
-        id: 'immigration-insurance',
-        type: 'native',
-        title: 'Immigration Health Insurance',
-        description: 'Affordable health coverage during your immigration process',
-        ctaText: 'Get Quote',
-        targetUrl: 'https://example-insurance.com',
+        id: 'visa-services',
+        type: 'text',
+        title: 'Visa Application Services',
+        description: 'Professional assistance with your visa application process',
+        ctaText: 'Learn More',
+        targetUrl: 'https://example-visa-service.com',
         position: 'footer',
         isActive: true
       }
@@ -77,19 +79,14 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
     setAdConfig(config || null);
   }, [position]);
 
-  if (!adConfig || !isVisible) {
+  // Don't show ads to Pro members or while loading
+  if (proLoading || isProMember || !adConfig || !isVisible) {
     return null;
   }
 
   const handleAdClick = () => {
     if (adConfig.targetUrl) {
-      if (adConfig.targetUrl.startsWith('#')) {
-        // Scroll to section for internal links
-        const element = document.querySelector(adConfig.targetUrl);
-        element?.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.open(adConfig.targetUrl, '_blank', 'noopener,noreferrer');
-      }
+      window.open(adConfig.targetUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -148,8 +145,12 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
             <Button
               onClick={handleAdClick}
               size="sm"
-              variant="outline"
-              className="w-full hover:bg-emerald-50 hover:border-emerald-300"
+              variant={adConfig.id === 'upgrade-pro' ? 'default' : 'outline'}
+              className={`w-full ${
+                adConfig.id === 'upgrade-pro' 
+                  ? 'bg-emerald-600 hover:bg-emerald-700' 
+                  : ''
+              }`}
             >
               {adConfig.ctaText}
               <ExternalLink className="ml-2 h-3 w-3" />

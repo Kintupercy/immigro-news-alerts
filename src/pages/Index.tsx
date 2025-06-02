@@ -1,14 +1,14 @@
-
 import { useEffect } from "react";
 import Categories from "@/components/Categories";
 import Features from "@/components/Features";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import LatestNews from "@/components/LatestNews";
+import Pricing from "@/components/Pricing";
 import NewsletterSubscription from "@/components/NewsletterSubscription";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import TalkToLawyer from "@/components/TalkToLawyer";
+import AdBanner from "@/components/AdBanner";
 
 const Index = () => {
   useEffect(() => {
@@ -79,15 +79,18 @@ const Index = () => {
       />
       <Header />
       <Hero />
+      
+      {/* Ad after Hero section - responsive spacing */}
+      
+      
       <Features />
       <LatestNews />
+      
+      {/* Ad between sections - responsive spacing */}
+      
+      
       <Categories />
-      
-      {/* Talk to Lawyer section */}
-      <div id="talk-to-lawyer">
-        <TalkToLawyer />
-      </div>
-      
+      <Pricing />
       <NewsletterSubscription />
       <Footer />
     </div>
