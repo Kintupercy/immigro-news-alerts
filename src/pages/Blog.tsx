@@ -57,8 +57,10 @@ const Blog = () => {
   });
 
   const filteredArticles = articles?.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         article.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = searchTerm === "" || 
+      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || article.category === selectedCategory;
     return matchesSearch && matchesCategory;
   }) || [];
@@ -173,16 +175,16 @@ const Blog = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-navy-800 to-navy-900 text-white py-16">
+      <section className="bg-gradient-to-br from-navy-800 to-navy-900 text-white py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-playfair font-bold mb-6">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold mb-4 lg:mb-6">
               Immigration Blog & Resources
             </h1>
-            <p className="text-xl text-cream-200 mb-8">
+            <p className="text-lg md:text-xl text-cream-200 mb-6 lg:mb-8">
               Expert guides, step-by-step instructions, and practical advice to help you navigate your immigration journey with confidence.
             </p>
-            <div className="flex items-center justify-center space-x-6 text-cream-300">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 text-cream-300">
               <div className="flex items-center">
                 <BookOpen className="w-5 h-5 mr-2" />
                 <span>{articles?.length || 0} Articles</span>
@@ -200,18 +202,18 @@ const Blog = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
         {/* Search and Filter Section */}
-        <div className="mb-12">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="mb-8 lg:mb-12">
+          <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
               <Input
                 type="text"
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-12 text-base"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -219,6 +221,7 @@ const Blog = () => {
                 variant={selectedCategory === "all" ? "default" : "outline"}
                 onClick={() => setSelectedCategory("all")}
                 size="sm"
+                className="h-12 px-4"
               >
                 All Categories
               </Button>
@@ -228,6 +231,7 @@ const Blog = () => {
                   variant={selectedCategory === category ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category)}
                   size="sm"
+                  className="h-12 px-4"
                 >
                   {category}
                 </Button>
@@ -238,31 +242,31 @@ const Blog = () => {
 
         {/* Featured Articles */}
         {featuredArticles.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-3xl font-playfair font-bold text-gray-900 mb-8">Featured Articles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <section className="mb-8 lg:mb-12">
+            <h2 className="text-2xl lg:text-3xl font-playfair font-bold text-gray-900 mb-6 lg:mb-8">Featured Articles</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               {featuredArticles.map((article) => (
                 <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-emerald-600">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 w-fit">
                         {article.category}
                       </Badge>
-                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 w-fit">
                         Featured
                       </Badge>
                     </div>
-                    <CardTitle className="text-xl font-playfair leading-tight hover:text-emerald-600 transition-colors">
+                    <CardTitle className="text-lg lg:text-xl font-playfair leading-tight hover:text-emerald-600 transition-colors">
                       <Link to={`/blog/${article.slug}`}>
                         {article.title}
                       </Link>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm lg:text-base">
                       {article.excerpt}
                     </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 mb-4 gap-2">
                       <div className="flex items-center">
                         <User className="w-4 h-4 mr-1" />
                         {article.author}
@@ -272,7 +276,7 @@ const Blog = () => {
                         {article.read_time}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <span className="text-sm text-gray-500">
                         {formatDate(article.published_at)}
                       </span>
@@ -291,12 +295,12 @@ const Blog = () => {
 
         {/* All Articles */}
         <section id="articles-section">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-playfair font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
+            <h2 className="text-2xl lg:text-3xl font-playfair font-bold text-gray-900">
               {searchTerm || selectedCategory !== "all" ? "Search Results" : "All Articles"}
             </h2>
             {filteredArticles.length > 0 && (
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm lg:text-base">
                 Showing {startIndex + 1}-{Math.min(endIndex, filteredArticles.length)} of {filteredArticles.length} articles
               </p>
             )}
@@ -310,12 +314,12 @@ const Blog = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
                 {currentArticles.map((article) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                     <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+                        <Badge variant="secondary" className="w-fit">
                           {article.category}
                         </Badge>
                         <div className="flex items-center text-sm text-gray-500">
@@ -323,17 +327,17 @@ const Blog = () => {
                           {article.read_time}
                         </div>
                       </div>
-                      <CardTitle className="text-lg font-playfair leading-tight hover:text-emerald-600 transition-colors">
+                      <CardTitle className="text-base lg:text-lg font-playfair leading-tight hover:text-emerald-600 transition-colors">
                         <Link to={`/blog/${article.slug}`}>
                           {article.title}
                         </Link>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-600 mb-4 line-clamp-3">
+                      <p className="text-gray-600 mb-4 line-clamp-3 text-sm lg:text-base">
                         {article.excerpt}
                       </p>
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 mb-4 gap-2">
                         <div className="flex items-center">
                           <User className="w-4 h-4 mr-1" />
                           {article.author}
@@ -356,7 +360,7 @@ const Blog = () => {
               {totalPages > 1 && (
                 <div className="flex justify-center mt-8">
                   <Pagination>
-                    <PaginationContent>
+                    <PaginationContent className="flex-wrap gap-1">
                       <PaginationItem>
                         <PaginationPrevious
                           onClick={() => handlePageChange(currentPage - 1)}
@@ -381,12 +385,12 @@ const Blog = () => {
         </section>
 
         {/* SEO Content Section */}
-        <section className="mt-16 bg-gray-50 rounded-lg p-8">
+        <section className="mt-12 lg:mt-16 bg-gray-50 rounded-lg p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-playfair font-bold text-gray-900 mb-6">
+            <h2 className="text-xl lg:text-2xl font-playfair font-bold text-gray-900 mb-4 lg:mb-6">
               Your Trusted Source for Immigration Guidance
             </h2>
-            <div className="prose prose-lg text-gray-700">
+            <div className="prose prose-sm lg:prose-lg text-gray-700">
               <p className="mb-4">
                 Navigate the complex world of U.S. immigration with confidence using our comprehensive guides and expert resources. 
                 Our blog covers everything from basic visa applications to advanced green card processes, citizenship requirements, 

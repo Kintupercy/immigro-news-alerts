@@ -54,34 +54,13 @@ const BlogArticle = () => {
   };
 
   const formatContent = (content: string) => {
-    // Remove markdown symbols and format content properly
-    let formattedContent = content
-      // Remove # symbols for main titles (already handled in header)
-      .replace(/^# .+$/gm, '')
-      // Convert ## to h2 elements
-      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900 font-playfair">$1</h2>')
-      // Convert **bold** to strong elements
-      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
-      // Convert bullet points to proper list items
-      .replace(/^- (.+)$/gm, '<li class="mb-2">$1</li>')
-      // Wrap consecutive list items in ul elements
-      .replace(/(<li class="mb-2">.*<\/li>\s*)+/g, (match) => 
-        `<ul class="list-disc pl-6 mb-6 space-y-2">${match}</ul>`)
-      // Convert line breaks to paragraphs
-      .split('\n\n')
-      .filter(paragraph => paragraph.trim() && !paragraph.includes('<h2') && !paragraph.includes('<ul'))
-      .map(paragraph => `<p class="mb-4 leading-relaxed text-gray-700">${paragraph.trim()}</p>`)
-      .join('')
-      // Add back the h2 and ul elements
-      + content.match(/(<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900 font-playfair">.*?<\/h2>)|(<ul class="list-disc pl-6 mb-6 space-y-2">.*?<\/ul>)/g)?.join('') || '';
-
     // Clean up and properly structure the content
     return content
       .replace(/^# .+$/gm, '') // Remove main title
-      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900 font-playfair">$1</h2>')
+      .replace(/^## (.+)$/gm, '<h2 class="text-xl lg:text-2xl font-bold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-900 font-playfair">$1</h2>')
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
       .replace(/^- (.+)$/gm, '<li class="mb-2">$1</li>')
-      .replace(/(<li class="mb-2">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-6 mb-6 space-y-2">$&</ul>')
+      .replace(/(<li class="mb-2">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-4 lg:pl-6 mb-4 lg:mb-6 space-y-1 lg:space-y-2">$&</ul>')
       .split('\n\n')
       .map(paragraph => {
         paragraph = paragraph.trim();
@@ -89,7 +68,7 @@ const BlogArticle = () => {
         if (paragraph.startsWith('<h2') || paragraph.startsWith('<ul')) {
           return paragraph;
         }
-        return `<p class="mb-4 leading-relaxed text-gray-700">${paragraph}</p>`;
+        return `<p class="mb-3 lg:mb-4 leading-relaxed text-gray-700 text-sm lg:text-base">${paragraph}</p>`;
       })
       .filter(Boolean)
       .join('\n');
@@ -100,8 +79,8 @@ const BlogArticle = () => {
       <div className="min-h-screen">
         <Header />
         <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="animate-pulse max-w-4xl mx-auto">
+            <div className="h-6 lg:h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
             <div className="space-y-4">
               {[...Array(10)].map((_, i) => (
@@ -130,10 +109,10 @@ const BlogArticle = () => {
       />
       <Header />
       
-      <article className="container mx-auto px-4 py-8 max-w-4xl">
+      <article className="container mx-auto px-4 py-6 lg:py-8 max-w-4xl">
         {/* Back to Blog Button */}
-        <div className="mb-6">
-          <Button variant="outline" asChild className="mb-4">
+        <div className="mb-4 lg:mb-6">
+          <Button variant="outline" asChild className="mb-4 h-10 lg:h-12">
             <Link to="/blog">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blog
@@ -142,29 +121,29 @@ const BlogArticle = () => {
         </div>
 
         {/* Article Header */}
-        <header className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+        <header className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 lg:gap-4 mb-4">
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 w-fit">
               {article.category}
             </Badge>
             {article.featured && (
-              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 w-fit">
                 Featured
               </Badge>
             )}
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-4 leading-tight">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold text-gray-900 mb-4 leading-tight">
             {article.title}
           </h1>
           
           {article.excerpt && (
-            <p className="text-xl text-gray-600 mb-6 leading-relaxed">
+            <p className="text-lg lg:text-xl text-gray-600 mb-4 lg:mb-6 leading-relaxed">
               {article.excerpt}
             </p>
           )}
           
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 border-b border-gray-200 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6 text-sm text-gray-500 border-b border-gray-200 pb-4 lg:pb-6">
             <div className="flex items-center">
               <User className="w-4 h-4 mr-2" />
               {article.author}
@@ -181,9 +160,9 @@ const BlogArticle = () => {
         </header>
 
         {/* Article Content */}
-        <div className="prose prose-lg max-w-none">
+        <div className="prose prose-sm lg:prose-lg max-w-none">
           <div 
-            className="text-gray-800 leading-relaxed"
+            className="text-gray-800 leading-relaxed [&>h2]:scroll-mt-6 [&>h2]:lg:scroll-mt-8"
             dangerouslySetInnerHTML={{ 
               __html: formatContent(article.content)
             }} 
@@ -191,15 +170,15 @@ const BlogArticle = () => {
         </div>
 
         {/* Article Footer */}
-        <footer className="mt-12 pt-8 border-t border-gray-200">
-          <div className="bg-gray-50 rounded-lg p-6">
+        <footer className="mt-8 lg:mt-12 pt-6 lg:pt-8 border-t border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 lg:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Need Help With Your Immigration Case?
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-4 text-sm lg:text-base">
               Get expert guidance and personalized assistance with your immigration journey.
             </p>
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <Link to="/contact">
                 Contact an Immigration Expert
               </Link>
