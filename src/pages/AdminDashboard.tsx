@@ -1,7 +1,7 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Settings, Users, FileText, BarChart3, Plus, AlertTriangle, Shield } from 'lucide-react';
 import AdminRoute from '@/components/AdminRoute';
 import Header from '@/components/Header';

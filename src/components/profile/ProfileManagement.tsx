@@ -2,8 +2,7 @@
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { useProMembership } from "@/hooks/useProMembership";
-import { Loader2, Crown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useCategories } from "@/hooks/useCategories";
 import PersonalInfoSection from "./PersonalInfoSection";
@@ -64,12 +63,6 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Profile Settings</h1>
-        {isProMember && (
-          <Badge className="bg-emerald-600 text-white">
-            <Crown className="w-4 h-4 mr-1" />
-            Pro Member
-          </Badge>
-        )}
       </div>
 
       {/* Personal Information */}
