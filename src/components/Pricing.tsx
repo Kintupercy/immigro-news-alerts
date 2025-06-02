@@ -53,7 +53,6 @@ const Pricing = () => {
                   "Full news archive",
                   "Category filtering",
                   "Mobile-friendly design",
-                  "No ads or paywalls",
                   "Always up-to-date"
                 ].map((feature, index) => (
                   <li key={index} className="flex items-center">
