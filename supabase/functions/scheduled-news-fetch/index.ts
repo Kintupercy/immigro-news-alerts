@@ -8,45 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-}
-
-interface NewsItem {
-  title: string;
-  content: string;
-  summary: string;
-  source_url?: string;
-  is_urgent: boolean;
-  tags: string[];
-}
-
-// Expanded approved sources including major news outlets
-const approvedDomains = [
-  "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
-  "cnn.com", "npr.org", "nytimes.com", "cnbc.com", "foxnews.com",
-  "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
-  "abcnews.go.com", "nbcnews.com", "cbsnews.com",
-  "politico.com", "axios.com", "bloomberg.com", "wsj.com"
-];
-
-function isValidSource(url: string): boolean {
-  if (!url) return false;
-  
-  // Explicitly reject video content
-  if (url.includes('youtube.com') || url.includes('youtu.be') || 
-      url.includes('vimeo.com') || url.includes('tiktok.com') ||
-      url.includes('instagram.com') || url.includes('facebook.com')) {
-    return false;
-  }
-  
-  // Only allow approved domains
-  return approvedDomains.some(domain => url.toLowerCase().includes(domain));
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -60,165 +21,86 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
-    if (!perplexityApiKey) {
-      throw new Error('PERPLEXITY_API_KEY not found');
+    // Check which time slot this is (morning: 8am, afternoon: 2pm, evening: 6pm Central)
+    const now = new Date();
+    const centralTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Chicago"}));
+    const hour = centralTime.getHours();
+    
+    let timeSlot = 'unknown';
+    if (hour >= 7 && hour <= 9) {
+      timeSlot = 'morning';
+    } else if (hour >= 13 && hour <= 15) {
+      timeSlot = 'afternoon';
+    } else if (hour >= 17 && hour <= 19) {
+      timeSlot = 'evening';
     }
 
-    // Get all categories
-    const { data: categories, error: categoriesError } = await supabaseClient
-      .from('immigration_categories')
-      .select('*');
+    console.log(`Scheduled news fetch triggered at ${centralTime.toLocaleString()} Central (${timeSlot} slot)`);
 
-    if (categoriesError) throw categoriesError;
+    // Call the optimized news scheduler function
+    const { data: newsData, error: newsError } = await supabaseClient.functions.invoke('optimized-news-scheduler', {
+      body: { 
+        scheduledRun: true,
+        timeSlot: timeSlot,
+        centralTime: centralTime.toISOString()
+      }
+    });
 
-    let totalArticlesAdded = 0;
+    if (newsError) {
+      console.error('Error calling optimized news scheduler:', newsError);
+      throw newsError;
+    }
 
-    // Process each category with specific search terms
-    for (const category of categories as Category[]) {
-      console.log(`Fetching verified news for category: ${category.name}`);
+    console.log('Optimized news scheduler response:', newsData);
 
-      // Create category-specific search terms to avoid overlap
-      const categorySearchTerms = getCategorySearchTerms(category.slug);
+    // Call breaking news fetch
+    const { data: breakingData, error: breakingError } = await supabaseClient.functions.invoke('fetch-breaking-news', {
+      body: { 
+        scheduledRun: true,
+        timeSlot: timeSlot
+      }
+    });
 
-      const prompt = `Find the latest verified U.S. immigration law news specifically about ${categorySearchTerms} from the past 24-48 hours.
+    if (breakingError) {
+      console.error('Error calling breaking news fetch:', breakingError);
+      // Don't throw here, just log the error
+    }
 
-Search these specific trusted sources:
+    console.log('Breaking news fetch response:', breakingData);
 
-OFFICIAL GOVERNMENT SOURCES:
-- USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-
-MAJOR NEWS OUTLETS:
-- CNN.com, NPR.org, NYTimes.com, CNBC.com, FoxNews.com
-- Reuters.com, AP News, BBC.com, Washington Post
-- NBC News, ABC News, CBS News, Politico, Bloomberg
-
-Requirements:
-- Provide 3-4 distinct news items specifically about ${categorySearchTerms}
-- Focus on factual, verified information only
-- Include: headline, detailed summary, original source URL
-- Mark as urgent only for immediate policy changes or breaking developments
-- Include relevant tags
-- NO YouTube, social media, or video content
-- MUST have real source URLs from the specified outlets
-- DO NOT include general immigration news that doesn't specifically relate to ${categorySearchTerms}
-
-Format each article as:
-Title: [Clear headline about ${categorySearchTerms}]
-Summary: [Brief 2-3 sentence summary]
-Content: [Detailed content 3-4 paragraphs]
-Source: [Full URL to original verified source]
-Urgent: [true/false]
-Tags: [relevant tags separated by commas]`;
-
+    // Optionally send notifications for urgent news (only during business hours)
+    if (timeSlot === 'morning' || timeSlot === 'afternoon' || timeSlot === 'evening') {
       try {
-        console.log(`Making Perplexity API request for: ${category.name}`);
-        
-        const response = await fetch('https://api.perplexity.ai/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${perplexityApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'llama-3.1-sonar-large-128k-online',
-            messages: [
-              {
-                role: 'system',
-                content: `You are an expert immigration law researcher. Provide accurate, up-to-date information from verified sources only: CNN, NPR, NYTimes, CNBC, FOX News, Reuters, AP, government sites. Focus ONLY on ${categorySearchTerms}. Never include YouTube, video content, or social media. Always return information with source URLs from approved domains.`
-              },
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            max_tokens: 4000,
-            temperature: 0.1,
-            top_p: 0.9,
-            return_citations: true
-          }),
+        const { data: notificationData, error: notificationError } = await supabaseClient.functions.invoke('send-notifications', {
+          body: { 
+            type: 'scheduled_update',
+            timeSlot: timeSlot
+          }
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Perplexity API error for ${category.name}: ${response.status} - ${errorText}`);
-          continue;
+        if (notificationError) {
+          console.error('Error sending notifications:', notificationError);
+        } else {
+          console.log('Notifications sent:', notificationData);
         }
-
-        const data = await response.json();
-        const content = data.choices[0]?.message?.content;
-
-        if (!content) {
-          console.error(`No content received for category: ${category.name}`);
-          continue;
-        }
-
-        console.log(`Processing content for ${category.name}:`, content.substring(0, 200));
-
-        // Parse the content to extract news items
-        const newsItems = parseNewsContent(content, category.slug);
-
-        // Insert verified news items
-        for (const item of newsItems) {
-          try {
-            // Validate source URL
-            if (!item.source_url || !isValidSource(item.source_url)) {
-              console.log(`Skipping article with invalid source: ${item.source_url || 'no source'}`);
-              continue;
-            }
-
-            // Check for duplicates
-            const { data: existing } = await supabaseClient
-              .from('immigration_news')
-              .select('id')
-              .eq('title', item.title)
-              .eq('category', category.slug)
-              .limit(1);
-
-            if (existing && existing.length > 0) {
-              console.log(`Duplicate article found: ${item.title}`);
-              continue;
-            }
-
-            const { error: insertError } = await supabaseClient
-              .from('immigration_news')
-              .insert({
-                title: item.title,
-                content: item.content,
-                summary: item.summary,
-                category: category.slug,
-                source_url: item.source_url,
-                is_urgent: item.is_urgent || false,
-                tags: item.tags || [],
-                status: 'published',
-                published_at: new Date().toISOString()
-              });
-
-            if (insertError) {
-              console.error(`Error inserting article: ${insertError.message}`);
-            } else {
-              totalArticlesAdded++;
-              console.log(`Added verified article: ${item.title}`);
-            }
-          } catch (insertError) {
-            console.error(`Error processing article ${item.title}:`, insertError);
-          }
-        }
-
-        // Delay between API calls to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 4000));
-
-      } catch (apiError) {
-        console.error(`Error fetching news for ${category.name}:`, apiError);
+      } catch (notificationError) {
+        console.error('Failed to send notifications:', notificationError);
       }
     }
 
+    const totalArticles = (newsData?.articlesAdded || 0) + (breakingData?.articlesAdded || 0);
+    const urgentCount = breakingData?.urgentNewsFound || 0;
+
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        articlesAdded: totalArticlesAdded,
-        categoriesProcessed: categories.length,
-        message: `Added ${totalArticlesAdded} verified articles from consolidated categories`
+        success: true,
+        timeSlot: timeSlot,
+        centralTime: centralTime.toISOString(),
+        articlesAdded: totalArticles,
+        regularNews: newsData?.articlesAdded || 0,
+        breakingNews: breakingData?.articlesAdded || 0,
+        urgentNews: urgentCount,
+        message: `Scheduled news fetch completed for ${timeSlot} slot: ${totalArticles} total articles added${urgentCount > 0 ? ` (${urgentCount} urgent)` : ''}`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -227,9 +109,12 @@ Tags: [relevant tags separated by commas]`;
     );
 
   } catch (error) {
-    console.error('Error in scheduled-news-fetch function:', error);
+    console.error('Error in scheduled news fetch:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        timestamp: new Date().toISOString()
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
@@ -237,108 +122,3 @@ Tags: [relevant tags separated by commas]`;
     );
   }
 });
-
-function getCategorySearchTerms(categorySlug: string): string {
-  const searchTermsMap: Record<string, string> = {
-    'work-visas-employment': 'H-1B visas, L-1 visas, employment-based visas, work permits, specialty occupation visas',
-    'green-card': 'green card applications, permanent residence, green card lottery, employment-based green cards',
-    'citizenship': 'citizenship applications, naturalization, citizenship test, oath ceremonies',
-    'student-visas': 'F-1 student visas, J-1 exchange programs, student visa policies, international students',
-    'family-based-immigration': 'family reunification, spouse visas, family-based green cards, K-1 fiancé visas',
-    'investor-entrepreneur-visas': 'EB-5 investor visas, E-1 E-2 visas, entrepreneur programs, investment immigration',
-    'asylum-refugee': 'asylum applications, refugee programs, humanitarian protection, asylum seekers',
-    'deportation-removal': 'deportation proceedings, removal orders, ICE enforcement, detention centers',
-    'daca-dreamer': 'DACA renewals, Dreamers, childhood arrivals, DACA policy changes',
-    'border-enforcement': 'border security, border wall, CBP enforcement, border crossings',
-    'breaking-news': 'breaking immigration news, urgent immigration updates, immediate policy changes',
-    'policy-updates': 'immigration policy changes, new regulations, executive orders, immigration reform'
-  };
-  
-  return searchTermsMap[categorySlug] || categorySlug;
-}
-
-function parseNewsContent(content: string, categorySlug: string): NewsItem[] {
-  const articles: NewsItem[] = [];
-  const lines = content.split('\n').filter(line => line.trim());
-  
-  let currentArticle: Partial<NewsItem> = {};
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    
-    if (!trimmedLine || trimmedLine.match(/^[-=*]+$/)) continue;
-    
-    // Look for titles
-    if (trimmedLine.toLowerCase().startsWith('title:') || 
-        (trimmedLine.includes('**') && trimmedLine.length < 200)) {
-      
-      // Save previous article if valid
-      if (currentArticle.title && currentArticle.source_url && isValidSource(currentArticle.source_url)) {
-        articles.push({
-          title: currentArticle.title,
-          content: currentArticle.content || currentArticle.summary || '',
-          summary: currentArticle.summary || '',
-          source_url: currentArticle.source_url,
-          is_urgent: currentArticle.is_urgent || false,
-          tags: currentArticle.tags || [categorySlug]
-        });
-      }
-      
-      // Start new article
-      currentArticle = {
-        title: trimmedLine.replace(/^title:\s*/i, '').replace(/[*#]/g, '').trim(),
-        tags: [categorySlug]
-      };
-    } 
-    else if (currentArticle.title) {
-      // Parse other fields
-      if (trimmedLine.toLowerCase().startsWith('summary:')) {
-        currentArticle.summary = trimmedLine.replace(/^summary:\s*/i, '').trim();
-      }
-      else if (trimmedLine.toLowerCase().startsWith('content:')) {
-        currentArticle.content = trimmedLine.replace(/^content:\s*/i, '').trim();
-      }
-      else if (trimmedLine.toLowerCase().startsWith('source:') || trimmedLine.startsWith('http')) {
-        const urlMatch = trimmedLine.match(/(https?:\/\/[^\s]+)/);
-        if (urlMatch && isValidSource(urlMatch[1])) {
-          currentArticle.source_url = urlMatch[1];
-        }
-      }
-      else if (trimmedLine.toLowerCase().startsWith('urgent:')) {
-        currentArticle.is_urgent = trimmedLine.toLowerCase().includes('true');
-      }
-      else if (trimmedLine.toLowerCase().startsWith('tags:')) {
-        const tagsText = trimmedLine.replace(/^tags:\s*/i, '').trim();
-        currentArticle.tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag);
-        if (!currentArticle.tags.includes(categorySlug)) {
-          currentArticle.tags.push(categorySlug);
-        }
-      }
-      // Add to content if it's substantial text
-      else if (trimmedLine.length > 30 && !trimmedLine.includes(':')) {
-        if (!currentArticle.content) {
-          currentArticle.content = trimmedLine;
-        } else {
-          currentArticle.content += ' ' + trimmedLine;
-        }
-        if (!currentArticle.summary) {
-          currentArticle.summary = trimmedLine;
-        }
-      }
-    }
-  }
-  
-  // Don't forget the last article
-  if (currentArticle.title && currentArticle.source_url && isValidSource(currentArticle.source_url)) {
-    articles.push({
-      title: currentArticle.title,
-      content: currentArticle.content || currentArticle.summary || '',
-      summary: currentArticle.summary || '',
-      source_url: currentArticle.source_url,
-      is_urgent: currentArticle.is_urgent || false,
-      tags: currentArticle.tags || [categorySlug]
-    });
-  }
-  
-  return articles;
-}
