@@ -1,5 +1,4 @@
 
-import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 
 const Categories = () => {
@@ -46,14 +45,6 @@ const Categories = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <Link to="/signup">
-            <button className="bg-emerald-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors duration-200 transform hover:scale-105">
-              Get Started - Choose Your Categories
-            </button>
-          </Link>
         </div>
       </div>
     </section>
