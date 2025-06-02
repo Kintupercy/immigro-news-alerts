@@ -199,7 +199,7 @@ const Resources = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="situation" className="text-base font-medium text-gray-900">
-                    ❓ What's your situation? <span className="text-red-500">*</span>
+                    What's your situation? <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="situation"
@@ -213,7 +213,7 @@ const Resources = () => {
 
                 <div>
                   <Label htmlFor="visaType" className="text-base font-medium text-gray-900">
-                    🛂 Visa or Status Type
+                    Visa or Status Type
                   </Label>
                   <select
                     id="visaType"
@@ -230,7 +230,7 @@ const Resources = () => {
 
                 <div>
                   <Label htmlFor="countryOfOrigin" className="text-base font-medium text-gray-900">
-                    🌍 Country of Origin
+                    Country of Origin
                   </Label>
                   <div className="relative mt-2">
                     <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -247,7 +247,7 @@ const Resources = () => {
 
                 <div>
                   <Label htmlFor="location" className="text-base font-medium text-gray-900">
-                    📍 City/State (optional)
+                    City/State (optional)
                   </Label>
                   <div className="relative mt-2">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -264,7 +264,7 @@ const Resources = () => {
 
                 <div>
                   <Label htmlFor="email" className="text-base font-medium text-gray-900">
-                    📧 Email (optional, for reply)
+                    Email (optional, for reply)
                   </Label>
                   <div className="relative mt-2">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -294,7 +294,7 @@ const Resources = () => {
                       }}
                     />
                     <Label htmlFor="anonymous" className="text-sm">
-                      🔒 I'd prefer to stay anonymous
+                      I'd prefer to stay anonymous
                     </Label>
                   </div>
 
@@ -305,7 +305,7 @@ const Resources = () => {
                       onCheckedChange={(checked) => setFormData({...formData, freeConsult: checked as boolean})}
                     />
                     <Label htmlFor="freeConsult" className="text-sm">
-                      📞 I'd like to request a free 10-minute consultation (via secure email only)
+                      I'd like to request a free 10-minute consultation (via secure email only)
                     </Label>
                   </div>
                 </div>
@@ -334,10 +334,10 @@ const Resources = () => {
                   <div>
                     <h3 className="font-semibold text-blue-900 mb-2">Your Privacy & Safety Come First</h3>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>💬 We don't collect or share your personal information</li>
-                      <li>🧑‍⚖️ You can stay completely anonymous and still get connected to helpful, vetted legal experts</li>
-                      <li>🔒 All communications are secure and confidential</li>
-                      <li>📝 You can check your request status anytime with your case ID</li>
+                      <li>We don't collect or share your personal information</li>
+                      <li>You can stay completely anonymous and still get connected to helpful, vetted legal experts</li>
+                      <li>All communications are secure and confidential</li>
+                      <li>You can check your request status anytime with your case ID</li>
                     </ul>
                   </div>
                 </div>
