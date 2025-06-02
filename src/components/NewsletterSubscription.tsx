@@ -23,14 +23,32 @@ const NewsletterSubscription = () => {
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error } = await supabase
         .from('email_subscriptions')
-        .insert([{ email }]);
+        .insert([{ 
+          email: email.toLowerCase().trim(),
+          preferences: {
+            source: 'newsletter_subscription',
+            subscribed_from: 'home_page'
+          }
+        }]);
 
       if (error) {
+        console.error('Subscription error details:', error);
         if (error.code === '23505') {
           toast({
             title: "Already subscribed",
@@ -51,7 +69,7 @@ const NewsletterSubscription = () => {
       console.error('Subscription error:', error);
       toast({
         title: "Subscription failed",
-        description: "Please try again later.",
+        description: "Please try again later. If the problem persists, contact support.",
         variant: "destructive",
       });
     } finally {
@@ -87,7 +105,7 @@ const NewsletterSubscription = () => {
           <Button
             type="submit"
             size="lg"
-            disabled={isLoading}
+            disabled={isLoading || !email.trim()}
             className="px-8 py-3 text-base bg-cream-50 text-navy-800 hover:bg-cream-100 font-medium transition-all duration-200 rounded-full disabled:opacity-50"
           >
             {isLoading ? "Subscribing..." : "Subscribe"}
