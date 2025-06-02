@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Signup from "./pages/Signup";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -15,10 +13,6 @@ import Terms from "./pages/Terms";
 import News from "./pages/News";
 import Resources from "./pages/Resources";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/AdminDashboard";
-import EmailVerification from "./pages/EmailVerification";
-import PasswordReset from "./pages/PasswordReset";
-import Payment from "./pages/Payment";
 
 const queryClient = new QueryClient();
 
@@ -31,18 +25,12 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/signup" element={<Signup />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/news" element={<News />} />
             <Route path="/resources" element={<Resources />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/email-verification" element={<EmailVerification />} />
-            <Route path="/password-reset" element={<PasswordReset />} />
-            <Route path="/payment" element={<Payment />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

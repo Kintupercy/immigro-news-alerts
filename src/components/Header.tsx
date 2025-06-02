@@ -1,64 +1,13 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Globe, Crown } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import UrgentNewsAlert from "./UrgentNewsAlert";
-import { Badge } from "@/components/ui/badge";
-import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
-import UpgradeModal from "./UpgradeModal";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('Header - Current user:', user?.email);
-      return user;
-    },
-  });
-
-  // Check if user is admin
-  const { data: isAdmin } = useQuery({
-    queryKey: ['isAdmin', user?.id],
-    queryFn: async () => {
-      if (!user?.id) {
-        console.log('Header - No user ID for admin check');
-        return false;
-      }
-      
-      console.log('Header - Checking admin status for user:', user.email, user.id);
-      
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .single();
-      
-      console.log('Header - Admin check result:', { data, error });
-      
-      if (error) {
-        console.log('Header - Admin check error:', error.message);
-        return false;
-      }
-      return !!data;
-    },
-    enabled: !!user?.id,
-  });
-
-  const { isProMember, upgradeModalOpen, setUpgradeModalOpen } = useFreemiumFeatures(user);
-
-  console.log('Header - Is admin:', isAdmin, 'for user:', user?.email);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setIsMenuOpen(false);
-  };
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -66,7 +15,6 @@ const Header = () => {
 
   return (
     <>
-      {/* Keep only urgent news alert for critical notifications */}
       <UrgentNewsAlert />
       
       <header className="bg-navy-800 text-cream-50 sticky top-0 z-50 shadow-lg">
@@ -121,71 +69,18 @@ const Header = () => {
                 >
                   Contact
                 </Link>
-
-                {/* Admin Link - Only show for admins */}
-                {isAdmin && (
-                  <Link 
-                    to="/admin" 
-                    className={`flex items-center h-full transition-colors duration-200 ${
-                      isActive('/admin') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                    }`}
-                  >
-                    <Badge variant="secondary" className="bg-red-100 text-red-800">Admin</Badge>
-                  </Link>
-                )}
               </div>
 
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-cream-300">Welcome back!</span>
-                    {isProMember ? (
-                      <Badge className="bg-emerald-600 text-white">
-                        <Crown className="w-3 h-3 mr-1" />
-                        Pro
-                      </Badge>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setUpgradeModalOpen(true)}
-                        className="border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
-                      >
-                        <Crown className="w-3 h-3 mr-1" />
-                        Upgrade to Pro
-                      </Button>
-                    )}
-                  </div>
+              <div className="flex items-center space-x-4">
+                <Link to="/news">
                   <Button 
-                    onClick={handleSignOut}
-                    variant="outline" 
                     size="sm"
-                    className="border-cream-300 text-cream-300 hover:bg-cream-300 hover:text-navy-800"
+                    className="bg-cream-300 text-navy-800 hover:bg-cream-200"
                   >
-                    Sign Out
+                    Read News
                   </Button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <Link to="/auth">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-cream-300 hover:bg-cream-700/20 hover:text-cream-100"
-                    >
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link to="/signup">
-                    <Button 
-                      size="sm"
-                      className="bg-cream-300 text-navy-800 hover:bg-cream-200"
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
-              )}
+                </Link>
+              </div>
             </nav>
 
             {/* Mobile menu button */}
@@ -249,81 +144,21 @@ const Header = () => {
                   Contact
                 </Link>
 
-                {/* Admin Link for Mobile - Only show for admins */}
-                {isAdmin && (
-                  <Link 
-                    to="/admin" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                      isActive('/admin') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
-                    }`}
-                  >
-                    <Badge variant="secondary" className="bg-red-100 text-red-800 mr-2">Admin</Badge>
-                    Dashboard
-                  </Link>
-                )}
-
-                {user ? (
-                  <div className="px-3 py-2 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-cream-300 text-sm">Welcome back!</p>
-                      {isProMember ? (
-                        <Badge className="bg-emerald-600 text-white">
-                          <Crown className="w-3 h-3 mr-1" />
-                          Pro
-                        </Badge>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setUpgradeModalOpen(true)}
-                          className="border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
-                        >
-                          <Crown className="w-3 h-3 mr-1" />
-                          Upgrade
-                        </Button>
-                      )}
-                    </div>
+                <div className="px-3 py-2">
+                  <Link to="/news" onClick={() => setIsMenuOpen(false)}>
                     <Button 
-                      onClick={handleSignOut}
-                      variant="outline" 
                       size="sm"
-                      className="w-full border-cream-300 text-cream-300 hover:bg-cream-300 hover:text-navy-800"
+                      className="w-full bg-cream-300 text-navy-800 hover:bg-cream-200"
                     >
-                      Sign Out
+                      Read News
                     </Button>
-                  </div>
-                ) : (
-                  <div className="px-3 py-2 space-y-2">
-                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="w-full text-cream-300 hover:bg-cream-700/20 hover:text-cream-100"
-                      >
-                        Sign In
-                      </Button>
-                    </Link>
-                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                      <Button 
-                        size="sm"
-                        className="w-full bg-cream-300 text-navy-800 hover:bg-cream-200"
-                      >
-                        Get Started
-                      </Button>
-                    </Link>
-                  </div>
-                )}
+                  </Link>
+                </div>
               </div>
             </div>
           )}
         </div>
       </header>
-
-      <UpgradeModal 
-        open={upgradeModalOpen}
-        onOpenChange={setUpgradeModalOpen}
-      />
     </>
   );
 };

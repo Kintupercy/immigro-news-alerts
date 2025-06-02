@@ -1,3 +1,4 @@
+
 import { Check, Heart, Zap, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ const Pricing = () => {
             Free for Everyone
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-            All immigration news features are completely free. Help us keep it that way.
+            All immigration news features are completely free and accessible to everyone.
           </p>
           <div className="flex items-center justify-center gap-2">
             <Heart className="w-5 h-5 text-red-500" />
@@ -21,7 +22,7 @@ const Pricing = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Free Plan */}
+          {/* Free Access */}
           <div className="relative bg-white rounded-lg shadow-sm border-2 border-emerald-500 p-8 transition-all duration-300 hover:shadow-lg">
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
               <Badge className="bg-emerald-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
@@ -33,7 +34,7 @@ const Pricing = () => {
             <div className="relative z-10">
               <div className="text-center mb-8">
                 <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-2">
-                  Immigro
+                  Immigro News
                 </h3>
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-emerald-600">Free</span>
@@ -46,14 +47,14 @@ const Pricing = () => {
                 {[
                   "Real-time immigration alerts",
                   "All 13+ immigration categories",
-                  "Email notifications",
+                  "Breaking news coverage",
                   "Weekly news digest",
                   "Spanish translation",
                   "Full news archive",
-                  "Breaking news alerts",
                   "Category filtering",
                   "Mobile-friendly design",
-                  "Community support"
+                  "No ads or paywalls",
+                  "Always up-to-date"
                 ].map((feature, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="w-5 h-5 mr-3 flex-shrink-0 text-emerald-500" />
@@ -63,13 +64,13 @@ const Pricing = () => {
               </ul>
 
               <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 transition-all duration-300">
-                <Link to="/auth">
-                  Get Started Free
+                <Link to="/news">
+                  Start Reading News
                 </Link>
               </Button>
 
               <p className="text-xs text-gray-500 text-center mt-3">
-                No credit card required • No hidden fees
+                No signup required • No hidden fees
               </p>
             </div>
           </div>
@@ -131,7 +132,7 @@ const Pricing = () => {
             </p>
             <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
               <span>✓ No paywalls</span>
-              <span>✓ No premium tiers</span>
+              <span>✓ No signup required</span>
               <span>✓ Always free</span>
             </div>
           </div>
