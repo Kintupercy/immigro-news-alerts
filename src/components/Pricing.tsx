@@ -65,7 +65,7 @@ const Pricing = () => {
 
               <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 transition-all duration-300">
                 <Link to="/news">
-                  Start Reading News
+                  Stay Informed Now
                 </Link>
               </Button>
 
