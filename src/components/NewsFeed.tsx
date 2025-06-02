@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { AlertTriangle, Clock, Search, ExternalLink, RefreshCw, Shield, Newspaper, Crown, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
@@ -43,6 +51,8 @@ interface Category {
   slug: string;
 }
 
+const ARTICLES_PER_PAGE = 10;
+
 const NewsFeed = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -55,6 +65,8 @@ const NewsFeed = () => {
   const [userPreferredCategories, setUserPreferredCategories] = useState<string[]>([]);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalArticles, setTotalArticles] = useState(0);
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
   const { isProMember } = useProMembership(user);
@@ -63,6 +75,9 @@ const NewsFeed = () => {
   // Free tier: limit to 3 categories
   const FREE_CATEGORIES_LIMIT = 3;
   const FREE_TIER_CATEGORIES = ['green-card', 'citizenship', 'work-visas-employment'];
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalArticles / ARTICLES_PER_PAGE);
 
   // Add the missing handleLanguageChange function
   const handleLanguageChange = async (language: 'en' | 'es') => {
@@ -156,7 +171,7 @@ const NewsFeed = () => {
     }
   };
 
-  const fetchArticles = async () => {
+  const fetchArticles = async (page: number = currentPage) => {
     try {
       setLoading(true);
       
@@ -169,18 +184,33 @@ const NewsFeed = () => {
         return;
       }
 
-      const cacheKey = cacheKeys.news(selectedCategory, searchTerm);
+      const cacheKey = cacheKeys.news(selectedCategory, searchTerm, page);
       
       // Use background refresh for better UX
-      const articles = await enhancedCache.backgroundRefresh(
+      const result = await enhancedCache.backgroundRefresh(
         cacheKey,
         async () => {
+          // First get the total count
+          let countQuery = supabase
+            .from('immigration_news')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'published')
+            .not('source_url', 'is', null);
+
+          if (selectedCategory !== 'all') {
+            countQuery = countQuery.eq('category', selectedCategory);
+          }
+
+          const { count } = await countQuery;
+
+          // Then get the paginated data
           let query = supabase
             .from('immigration_news')
             .select('*')
             .eq('status', 'published')
             .not('source_url', 'is', null)
-            .order('published_at', { ascending: false });
+            .order('published_at', { ascending: false })
+            .range((page - 1) * ARTICLES_PER_PAGE, page * ARTICLES_PER_PAGE - 1);
 
           if (selectedCategory !== 'all') {
             query = query.eq('category', selectedCategory);
@@ -188,24 +218,30 @@ const NewsFeed = () => {
 
           // For free users, limit results
           if (!isProMember) {
-            query = query.limit(10); // Limit articles for free users
+            query = query.limit(10);
           }
 
           const { data, error } = await query;
           if (error) throw error;
           
-          return (data || []).filter(article => 
+          const filteredData = (data || []).filter(article => 
             article.source_url && 
             !article.source_url.includes('youtube.com') &&
             !article.source_url.includes('youtu.be')
           );
+
+          return {
+            articles: filteredData,
+            total: count || 0
+          };
         },
         5 // Cache for 5 minutes
       );
       
-      setArticles(articles);
+      setArticles(result.articles);
+      setTotalArticles(result.total);
 
-      if (articles.length === 0) {
+      if (result.articles.length === 0 && page === 1) {
         console.log('No articles found, fetching fresh news...');
         await refreshNews(false);
       }
@@ -230,7 +266,7 @@ const NewsFeed = () => {
       }
 
       if (forceRefresh) {
-        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
+        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm, currentPage));
       }
       
       toast({
@@ -257,8 +293,9 @@ const NewsFeed = () => {
           title: "News updated!",
           description: `Successfully fetched ${totalArticlesAdded} new articles${urgentNewsFound > 0 ? ` (${urgentNewsFound} urgent)` : ''}.`,
         });
-        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
-        await fetchArticles();
+        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm, currentPage));
+        await fetchArticles(1);
+        setCurrentPage(1);
       } else {
         toast({
           title: "No new articles",
@@ -273,9 +310,14 @@ const NewsFeed = () => {
   };
 
   useEffect(() => {
-    enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm));
-    fetchArticles();
+    enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm, currentPage));
+    setCurrentPage(1);
+    fetchArticles(1);
   }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchArticles(currentPage);
+  }, [currentPage]);
 
   const filteredArticles = articles.filter(article =>
     article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -455,6 +497,77 @@ const NewsFeed = () => {
     return categories.filter(cat => FREE_TIER_CATEGORIES.includes(cat.slug));
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+      const delta = 2;
+      const range = [];
+      const rangeWithDots = [];
+
+      for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+        range.push(i);
+      }
+
+      if (currentPage - delta > 2) {
+        rangeWithDots.push(1, '...');
+      } else {
+        rangeWithDots.push(1);
+      }
+
+      rangeWithDots.push(...range);
+
+      if (currentPage + delta < totalPages - 1) {
+        rangeWithDots.push('...', totalPages);
+      } else {
+        rangeWithDots.push(totalPages);
+      }
+
+      return rangeWithDots;
+    };
+
+    return (
+      <Pagination className="mt-8">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+          
+          {getPageNumbers().map((page, index) => (
+            <PaginationItem key={index}>
+              {page === '...' ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  onClick={() => handlePageChange(page as number)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          
+          <PaginationItem>
+            <PaginationNext 
+              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
+
   if (loading) {
     return <NewsLoadingState />;
   }
@@ -612,6 +725,14 @@ const NewsFeed = () => {
           </div>
         )}
 
+        {/* Results Summary */}
+        <div className="mb-4 text-sm text-muted-foreground">
+          {currentLanguage === 'es' 
+            ? `Mostrando ${filteredArticles.length} de ${totalArticles} artículos (Página ${currentPage} de ${totalPages})`
+            : `Showing ${filteredArticles.length} of ${totalArticles} articles (Page ${currentPage} of ${totalPages})`
+          }
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-3">
@@ -670,6 +791,9 @@ const NewsFeed = () => {
                       </div>
                     ))
                   )}
+                  
+                  {/* Pagination */}
+                  {renderPagination()}
                 </div>
               </TabsContent>
 

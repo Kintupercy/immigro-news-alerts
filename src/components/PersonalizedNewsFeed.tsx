@@ -7,6 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Clock, ExternalLink, RefreshCw, AlertCircle, Newspaper } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
@@ -32,24 +41,27 @@ interface PersonalizedNewsFeedProps {
   user: User;
 }
 
+const ARTICLES_PER_PAGE = 10;
+
 const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
   const { isProMember } = useProMembership(user);
 
   const { 
-    data: articles, 
+    data: result, 
     isLoading, 
     error, 
     refetch 
   } = useQuery({
-    queryKey: ['personalized-news', user.id],
+    queryKey: ['personalized-news', user.id, currentPage],
     queryFn: async () => {
       return await enhancedCache.getOrFetch(
-        cacheKeys.personalizedNews(user.id, []),
+        cacheKeys.personalizedNews(user.id, [], currentPage),
         async () => {
           const { data: profile } = await supabase
             .from('user_profiles')
@@ -59,12 +71,25 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
 
           const preferences = profile?.preferred_categories || [];
           
+          // Get total count first
+          let countQuery = supabase
+            .from('immigration_news')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'published');
+
+          if (preferences.length > 0) {
+            countQuery = countQuery.in('category', preferences);
+          }
+
+          const { count } = await countQuery;
+
+          // Get paginated data
           let query = supabase
             .from('immigration_news')
             .select('*')
             .eq('status', 'published')
             .order('published_at', { ascending: false })
-            .limit(20);
+            .range((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE - 1);
 
           if (preferences.length > 0) {
             query = query.in('category', preferences);
@@ -72,7 +97,11 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
 
           const { data: news, error } = await query;
           if (error) throw error;
-          return news as NewsArticle[];
+          
+          return {
+            articles: news as NewsArticle[],
+            total: count || 0
+          };
         },
         5 // Cache for 5 minutes
       );
@@ -81,6 +110,10 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
   });
+
+  const articles = result?.articles || [];
+  const totalArticles = result?.total || 0;
+  const totalPages = Math.ceil(totalArticles / ARTICLES_PER_PAGE);
 
   const handleLanguageChange = async (language: 'en' | 'es') => {
     setCurrentLanguage(language);
@@ -117,7 +150,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     setRefreshing(true);
     try {
       // Clear cache before refetching
-      enhancedCache.delete(cacheKeys.personalizedNews(user.id, []));
+      enhancedCache.delete(cacheKeys.personalizedNews(user.id, [], currentPage));
       await refetch();
       toast({
         title: currentLanguage === 'es' ? "Noticias actualizadas" : "News updated",
@@ -130,6 +163,11 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
     } finally {
       setRefreshing(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const formatDate = (dateString: string) => {
@@ -147,6 +185,72 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
       return translatedContent[articleId][field] || text;
     }
     return text;
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+      const delta = 2;
+      const range = [];
+      const rangeWithDots = [];
+
+      for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+        range.push(i);
+      }
+
+      if (currentPage - delta > 2) {
+        rangeWithDots.push(1, '...');
+      } else {
+        rangeWithDots.push(1);
+      }
+
+      rangeWithDots.push(...range);
+
+      if (currentPage + delta < totalPages - 1) {
+        rangeWithDots.push('...', totalPages);
+      } else {
+        rangeWithDots.push(totalPages);
+      }
+
+      return rangeWithDots;
+    };
+
+    return (
+      <Pagination className="mt-8">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+          
+          {getPageNumbers().map((page, index) => (
+            <PaginationItem key={index}>
+              {page === '...' ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  onClick={() => handlePageChange(page as number)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          
+          <PaginationItem>
+            <PaginationNext 
+              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
   };
 
   if (isLoading) {
@@ -280,6 +384,14 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
           </div>
         </div>
 
+        {/* Results Summary */}
+        <div className="text-sm text-muted-foreground">
+          {currentLanguage === 'es' 
+            ? `Mostrando ${articles.length} de ${totalArticles} artículos (Página ${currentPage} de ${totalPages})`
+            : `Showing ${articles.length} of ${totalArticles} articles (Page ${currentPage} of ${totalPages})`
+          }
+        </div>
+
         <div className="grid gap-4 md:gap-6">
           {articles.map((article) => (
             <Card key={article.id} className="hover:shadow-md transition-shadow duration-200">
@@ -340,6 +452,9 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
             </Card>
           ))}
         </div>
+
+        {/* Pagination */}
+        {renderPagination()}
       </div>
     </ErrorBoundary>
   );
