@@ -69,7 +69,7 @@ const Header = () => {
                     size="sm"
                     className="bg-cream-300 text-navy-800 hover:bg-cream-200"
                   >
-                    Read News
+                    Get Started
                   </Button>
                 </Link>
               </div>
@@ -133,7 +133,7 @@ const Header = () => {
                       size="sm"
                       className="w-full bg-cream-300 text-navy-800 hover:bg-cream-200"
                     >
-                      Read News
+                      Get Started
                     </Button>
                   </Link>
                 </div>
