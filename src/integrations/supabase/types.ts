@@ -288,6 +288,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      get_scheduled_jobs: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          jobname: string
+          schedule: string
+          command: string
+          active: boolean
+        }[]
+      }
       get_user_role: {
         Args: { target_user_id: string }
         Returns: string

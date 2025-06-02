@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import Categories from "@/components/Categories";
 import Features from "@/components/Features";
@@ -8,7 +9,6 @@ import Pricing from "@/components/Pricing";
 import NewsletterSubscription from "@/components/NewsletterSubscription";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import AdBanner from "@/components/AdBanner";
 
 const Index = () => {
   useEffect(() => {
@@ -95,16 +95,8 @@ const Index = () => {
       />
       <Header />
       <Hero />
-      
-      {/* Ad after Hero section - responsive spacing */}
-      
-      
       <Features />
       <LatestNews />
-      
-      {/* Ad between sections - responsive spacing */}
-      
-      
       <Categories />
       <Pricing />
       <NewsletterSubscription />
