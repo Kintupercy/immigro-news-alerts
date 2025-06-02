@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -597,11 +604,11 @@ const NewsFeed = () => {
         <KofiDonateButton />
 
         {/* Header Section with enhanced search */}
-        <div className="bg-navy-800 text-cream-50 p-6 rounded-lg mb-6">
+        <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
           {/* Header Content */}
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2">
                 {currentLanguage === 'es' ? 'ACTUALIZACIONES DE INMIGRACIÓN VERIFICADAS' : 'VERIFIED IMMIGRATION UPDATES'}
               </h1>
               <p className="text-cream-200 text-sm uppercase tracking-wide">
@@ -618,7 +625,7 @@ const NewsFeed = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setUpgradeModalOpen(true)}
-                    className="ml-2 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
+                    className="ml-2 mt-2 lg:mt-0 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
                   >
                     Unlock All 12+ Categories
                   </Button>
@@ -641,13 +648,14 @@ const NewsFeed = () => {
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                 {refreshing 
-                  ? (currentLanguage === 'es' ? 'Obteniendo Últimas...' : 'Fetching Latest...') 
+                  ? (currentLanguage === 'es' ? 'Obteniendo...' : 'Fetching...') 
                   : (currentLanguage === 'es' ? 'Actualizar' : 'Refresh')
                 }
               </Button>
             </div>
           </div>
 
+          {/* Search Bar */}
           <div className="mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-600 w-5 h-5" />
@@ -663,77 +671,105 @@ const NewsFeed = () => {
             </div>
           </div>
 
-          {loading ? (
-            <CategoriesSkeleton />
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleCategoryClick('all')}
-                className={selectedCategory === 'all' 
-                  ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                  : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-                }
-              >
-                {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
-              </Button>
-              <Button
-                variant={selectedCategory === 'breaking-news' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleCategoryClick('breaking-news')}
-                className={selectedCategory === 'breaking-news' 
-                  ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                  : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-                }
-              >
-                {currentLanguage === 'es' ? 'Noticias de Última Hora' : 'Breaking News'}
-              </Button>
-              
-              {/* Show user's selected categories or default free categories */}
-              {getCategoriesToDisplay().map((category) => {
-                const isLocked = isCategoryLocked(category.slug);
-                return (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.slug ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleCategoryClick(category.slug)}
-                    disabled={isLocked}
-                    className={`relative ${selectedCategory === category.slug 
-                      ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                      : isLocked
-                      ? 'bg-transparent text-cream-400 border-cream-400 opacity-60 cursor-not-allowed'
-                      : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-                    }`}
-                  >
-                    {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
-                    {isLocked && (
-                      <Crown className="w-3 h-3 ml-1 text-yellow-400" />
-                    )}
-                  </Button>
-                );
-              })}
-              
-              {/* Show additional categories indicator for free users */}
-              {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setUpgradeModalOpen(true)}
-                  className="bg-transparent text-cream-400 border-cream-400 hover:bg-cream-50 hover:text-navy-800"
+          {/* Mobile-Friendly Category Selector */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Category Dropdown */}
+              <div className="flex-1">
+                <Select
+                  value={selectedCategory}
+                  onValueChange={(value) => handleCategoryClick(value)}
                 >
-                  <Crown className="w-3 h-3 mr-1" />
-                  +{categories.length - getCategoriesToDisplay().length - 2} More
+                  <SelectTrigger className="bg-cream-50 text-navy-800 border-cream-200">
+                    <SelectValue placeholder={currentLanguage === 'es' ? 'Seleccionar categoría' : 'Select category'} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px] overflow-y-auto">
+                    <SelectItem value="all">
+                      {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
+                    </SelectItem>
+                    <SelectItem value="breaking-news">
+                      {currentLanguage === 'es' ? 'Noticias de Última Hora' : 'Breaking News'}
+                    </SelectItem>
+                    
+                    {/* Show user's selected categories or default free categories */}
+                    {getCategoriesToDisplay().map((category) => {
+                      const isLocked = isCategoryLocked(category.slug);
+                      return (
+                        <SelectItem 
+                          key={category.id} 
+                          value={category.slug}
+                          disabled={isLocked}
+                          className={isLocked ? 'opacity-60' : ''}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span>
+                              {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
+                            </span>
+                            {isLocked && (
+                              <Crown className="w-3 h-3 ml-2 text-yellow-600" />
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                    
+                    {/* Show upgrade option for free users */}
+                    {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
+                      <SelectItem value="upgrade" disabled>
+                        <div className="flex items-center text-gray-500">
+                          <Crown className="w-3 h-3 mr-2" />
+                          +{categories.length - getCategoriesToDisplay().length - 2} More Categories (Pro)
+                        </div>
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Quick Filter Buttons - Only show on larger screens */}
+              <div className="hidden sm:flex gap-2">
+                <Button
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleCategoryClick('all')}
+                  className={selectedCategory === 'all' 
+                    ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                    : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+                  }
+                >
+                  {currentLanguage === 'es' ? 'Todas' : 'All'}
                 </Button>
-              )}
+                <Button
+                  variant={selectedCategory === 'breaking-news' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleCategoryClick('breaking-news')}
+                  className={selectedCategory === 'breaking-news' 
+                    ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
+                    : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
+                  }
+                >
+                  {currentLanguage === 'es' ? 'Breaking' : 'Breaking'}
+                </Button>
+              </div>
             </div>
-          )}
+
+            {/* Show additional categories info for free users */}
+            {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
+              <div className="text-cream-200 text-sm">
+                <Crown className="inline w-4 h-4 mr-1" />
+                {currentLanguage === 'es' 
+                  ? `${categories.length - getCategoriesToDisplay().length - 2} categorías más disponibles con Pro`
+                  : `${categories.length - getCategoriesToDisplay().length - 2} more categories available with Pro`
+                }
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Ad Banner - Header Position (only for free users) */}
         {!isProMember && <AdBanner position="header" className="mb-6" />}
 
+        {/* Search Results Info */}
         {searchTerm && (
           <div className="mb-4 text-sm text-muted-foreground">
             {currentLanguage === 'es' 
@@ -755,19 +791,19 @@ const NewsFeed = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                 {/* Tabs List */}
-                <TabsTrigger value="all">
+                <TabsTrigger value="all" className="text-xs sm:text-sm">
                   {currentLanguage === 'es' ? `Todas (${filteredArticles.length})` : `All (${filteredArticles.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="urgent" className="text-red-600">
-                  <AlertTriangle className="w-4 h-4 mr-1" />
+                <TabsTrigger value="urgent" className="text-red-600 text-xs sm:text-sm">
+                  <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="breaking" className="text-orange-600">
+                <TabsTrigger value="breaking" className="text-orange-600 text-xs sm:text-sm">
                   {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="regular">
+                <TabsTrigger value="regular" className="text-xs sm:text-sm">
                   {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
                 </TabsTrigger>
               </TabsList>
