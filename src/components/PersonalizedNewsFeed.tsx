@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Clock, ExternalLink, RefreshCw, AlertCircle, Newspaper } from "lucide-react";
+import { Clock, ExternalLink, RefreshCw, AlertCircle, Newspaper, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
@@ -185,6 +184,22 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
       return translatedContent[articleId][field] || text;
     }
     return text;
+  };
+
+  const getSourceDomain = (url: string | null) => {
+    if (!url) return 'Unknown';
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      return domain;
+    } catch {
+      return 'Unknown';
+    }
+  };
+
+  const isOfficialSource = (url: string | null) => {
+    if (!url) return false;
+    const officialDomains = ['uscis.gov', 'dhs.gov', 'state.gov', 'ice.gov', 'cbp.gov'];
+    return officialDomains.some(domain => url.includes(domain));
   };
 
   const renderPagination = () => {
@@ -393,64 +408,92 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
         </div>
 
         <div className="grid gap-4 md:gap-6">
-          {articles.map((article) => (
-            <Card key={article.id} className="hover:shadow-md transition-shadow duration-200">
-              <CardHeader className="pb-3">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                  <div className="space-y-2 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge 
-                        variant={article.is_urgent ? "destructive" : "secondary"}
-                        className="text-xs"
-                      >
-                        {currentLanguage === 'es' 
-                          ? translateCategory(article.category.toUpperCase())
-                          : article.category.toUpperCase()
-                        }
-                      </Badge>
-                      {article.is_urgent && (
-                        <Badge variant="destructive" className="text-xs">
-                          {currentLanguage === 'es' ? 'URGENTE' : 'URGENT'}
+          {articles.map((article) => {
+            const sourceDomain = getSourceDomain(article.source_url);
+            const isOfficial = isOfficialSource(article.source_url);
+            
+            return (
+              <Card key={article.id} className="hover:shadow-md transition-shadow duration-200">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                    <div className="space-y-2 flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge 
+                          variant={article.is_urgent ? "destructive" : "secondary"}
+                          className="text-xs"
+                        >
+                          {currentLanguage === 'es' 
+                            ? translateCategory(article.category.toUpperCase())
+                            : article.category.toUpperCase()
+                          }
                         </Badge>
-                      )}
+                        {article.is_urgent && (
+                          <Badge variant="destructive" className="text-xs">
+                            {currentLanguage === 'es' ? 'URGENTE' : 'URGENT'}
+                          </Badge>
+                        )}
+                        <Badge 
+                          variant={isOfficial ? "default" : "outline"} 
+                          className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
+                        >
+                          {isOfficial && <Shield className="w-3 h-3 mr-1" />}
+                          Source: {sourceDomain}
+                        </Badge>
+                      </div>
+                      <CardTitle className="text-lg sm:text-xl leading-tight break-words">
+                        {getDisplayText(article.title, article.id, 'title')}
+                      </CardTitle>
                     </div>
-                    <CardTitle className="text-lg sm:text-xl leading-tight break-words">
-                      {getDisplayText(article.title, article.id, 'title')}
-                    </CardTitle>
+                    <div className="flex items-center text-sm text-muted-foreground whitespace-nowrap">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {formatDate(article.published_at)}
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground whitespace-nowrap">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {formatDate(article.published_at)}
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-muted-foreground mb-4 leading-relaxed break-words">
+                    {getDisplayText(
+                      article.summary || article.content.substring(0, 200) + '...',
+                      article.id,
+                      'summary'
+                    )}
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    <span className="text-sm font-medium text-navy-600 break-all">
+                      {currentLanguage === 'es' ? 'Artículo Original' : 'Original Article'}
+                    </span>
+                    <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+                      <a 
+                        href={article.source_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        {currentLanguage === 'es' ? 'Leer Original' : 'Read Original'}
+                      </a>
+                    </Button>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-muted-foreground mb-4 leading-relaxed break-words">
-                  {getDisplayText(
-                    article.summary || article.content.substring(0, 200) + '...',
-                    article.id,
-                    'summary'
-                  )}
-                </p>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-navy-600 break-all">
-                    {currentLanguage === 'es' ? 'Artículo Fuente' : 'Source Article'}
-                  </span>
-                  <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <a 
-                      href={article.source_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-1" />
-                      {currentLanguage === 'es' ? 'Leer Más' : 'Read More'}
-                    </a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  {/* Enhanced Attribution */}
+                  <div className="text-xs text-muted-foreground border-t pt-2">
+                    <p>
+                      Originally published by{' '}
+                      <a 
+                        href={article.source_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-600 hover:underline font-medium"
+                      >
+                        {sourceDomain}
+                      </a>
+                      . Content aggregated for educational purposes under fair use.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Pagination */}

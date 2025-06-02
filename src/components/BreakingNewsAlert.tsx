@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, X, ExternalLink } from "lucide-react";
+import { AlertTriangle, X, ExternalLink, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -122,6 +122,22 @@ const BreakingNewsAlert = () => {
     }
   };
 
+  const getSourceDomain = (url: string | null) => {
+    if (!url) return 'Unknown';
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      return domain;
+    } catch {
+      return 'Unknown';
+    }
+  };
+
+  const isOfficialSource = (url: string | null) => {
+    if (!url) return false;
+    const officialDomains = ['uscis.gov', 'dhs.gov', 'state.gov', 'ice.gov', 'cbp.gov'];
+    return officialDomains.some(domain => url.includes(domain));
+  };
+
   const visibleNews = breakingNews.filter(news => !dismissedNews.includes(news.id));
 
   if (loading || visibleNews.length === 0) {
@@ -151,56 +167,77 @@ const BreakingNewsAlert = () => {
         </div>
         
         <div className="space-y-2">
-          {visibleNews.map((news) => (
-            <Card key={news.id} className="bg-white border-red-200 shadow-sm">
-              <div className="flex items-start gap-3 p-3">
-                {news.is_urgent && (
-                  <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-red-900 text-sm leading-tight">
-                    {news.title}
-                  </h4>
-                  {news.summary && (
-                    <p className="text-red-700 text-xs mt-1 line-clamp-2">
-                      {news.summary}
-                    </p>
+          {visibleNews.map((news) => {
+            const sourceDomain = getSourceDomain(news.source_url);
+            const isOfficial = isOfficialSource(news.source_url);
+            
+            return (
+              <Card key={news.id} className="bg-white border-red-200 shadow-sm">
+                <div className="flex items-start gap-3 p-3">
+                  {news.is_urgent && (
+                    <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
                   )}
-                  <div className="flex items-center gap-2 mt-2">
-                    {news.source_url && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        asChild
-                        className="text-red-600 hover:text-red-800 h-auto p-0 text-xs"
-                      >
-                        <a 
-                          href={news.source_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Read Full Story
-                        </a>
-                      </Button>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-red-900 text-sm leading-tight">
+                      {news.title}
+                    </h4>
+                    {news.summary && (
+                      <p className="text-red-700 text-xs mt-1 line-clamp-2">
+                        {news.summary}
+                      </p>
                     )}
-                    <span className="text-red-600 text-xs">
-                      {new Date(news.published_at).toLocaleTimeString()}
-                    </span>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {/* Source Attribution */}
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${isOfficial ? 'border-green-300 text-green-700' : 'border-blue-300 text-blue-700'}`}
+                      >
+                        {isOfficial && <Shield className="w-3 h-3 mr-1" />}
+                        Source: {sourceDomain}
+                      </Badge>
+                      
+                      {news.source_url && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          asChild
+                          className="text-red-600 hover:text-red-800 h-auto p-0 text-xs"
+                        >
+                          <a 
+                            href={news.source_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Read Full Story
+                          </a>
+                        </Button>
+                      )}
+                      <span className="text-red-600 text-xs">
+                        {new Date(news.published_at).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    
+                    {/* Attribution Footer */}
+                    {news.source_url && (
+                      <div className="text-xs text-red-600/70 mt-2 border-t border-red-100 pt-1">
+                        Originally published by {sourceDomain}. Content aggregated for breaking news alerts.
+                      </div>
+                    )}
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => dismissNews(news.id)}
+                    className="text-red-600 hover:text-red-800 hover:bg-red-100 flex-shrink-0 h-auto p-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => dismissNews(news.id)}
-                  className="text-red-600 hover:text-red-800 hover:bg-red-100 flex-shrink-0 h-auto p-1"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

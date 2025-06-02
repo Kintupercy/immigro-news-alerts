@@ -395,7 +395,7 @@ const NewsFeed = () => {
               className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
             >
               {isOfficial && <Shield className="w-3 h-3 mr-1" />}
-              {sourceDomain}
+              Source: {sourceDomain}
             </Badge>
             
             {article.tags?.map((tag, index) => (
@@ -421,7 +421,7 @@ const NewsFeed = () => {
             </div>
           )}
           
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap mb-3">
             <Button
               variant="outline"
               size="sm"
@@ -447,7 +447,7 @@ const NewsFeed = () => {
                   className="flex items-center gap-1"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  {currentLanguage === 'es' ? 'Fuente' : 'Source'}
+                  {currentLanguage === 'es' ? 'Leer Original' : 'Read Original'}
                 </a>
               </Button>
             )}
@@ -462,6 +462,24 @@ const NewsFeed = () => {
               </>
             )}
           </div>
+
+          {/* Enhanced Attribution Section */}
+          {article.source_url && (
+            <div className="text-xs text-muted-foreground border-t pt-2">
+              <p>
+                Originally published by{' '}
+                <a 
+                  href={article.source_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  {sourceDomain}
+                </a>
+                . Content aggregated for educational purposes under fair use.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     );

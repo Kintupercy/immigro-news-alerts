@@ -66,39 +66,59 @@ const Disclaimer = () => {
             </div>
           </section>
 
-          {/* News Aggregation */}
+          {/* Enhanced News Aggregation & Attribution */}
           <section className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-4">
               <Globe className="h-6 w-6 text-blue-500 mr-2" />
-              <h2 className="text-2xl font-semibold text-navy-800">News Aggregation & Sources</h2>
+              <h2 className="text-2xl font-semibold text-navy-800">News Aggregation & Content Attribution</h2>
             </div>
             <div className="prose prose-gray max-w-none">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Sources</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Sources & Attribution</h3>
               <p className="text-gray-700 mb-4">
-                ImmigrowNews aggregates immigration-related news from various publicly available sources, 
-                including but not limited to:
+                ImmigrowNews aggregates immigration-related news from various publicly available sources under fair use principles. 
+                All content is properly attributed to its original source, including:
               </p>
               <ul className="text-gray-700 space-y-1 mb-4">
-                <li>• Government websites and official announcements</li>
+                <li>• Government websites and official announcements (USCIS, DHS, State Department, etc.)</li>
                 <li>• Reputable news organizations and media outlets</li>
                 <li>• Legal publications and industry resources</li>
                 <li>• Public statements from immigration authorities</li>
               </ul>
               
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Attribution</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Attribution Standards</h3>
               <p className="text-gray-700 mb-4">
-                We strive to properly attribute all content to its original sources. If you believe 
-                your content has been used inappropriately, please contact us immediately at 
-                contact@immigronews.com.
+                We maintain strict attribution standards for all aggregated content:
               </p>
+              <ul className="text-gray-700 space-y-1 mb-4">
+                <li>• All articles clearly display the original source domain</li>
+                <li>• Direct links to original articles are always provided</li>
+                <li>• "Originally published by [Source]" attribution is included</li>
+                <li>• Fair use statements accompany aggregated content</li>
+                <li>• Copyright information is preserved and respected</li>
+              </ul>
               
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Accuracy</h3>
-              <p className="text-gray-700">
-                While we make every effort to ensure accuracy, we cannot guarantee that all 
-                aggregated information is current, complete, or error-free. Immigration policies 
-                and procedures change frequently, and users should verify information with official 
-                government sources.
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Copyright & Fair Use</h3>
+              <p className="text-gray-700 mb-4">
+                Our content aggregation operates under the fair use provisions of copyright law for:
               </p>
+              <ul className="text-gray-700 space-y-1 mb-4">
+                <li>• Educational and informational purposes</li>
+                <li>• News reporting and commentary</li>
+                <li>• Public interest immigration information</li>
+                <li>• Non-commercial educational use</li>
+              </ul>
+              
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Removal Requests</h3>
+              <p className="text-gray-700">
+                If you are a copyright holder and believe your content has been used inappropriately, 
+                please contact us immediately at legal@immigronews.com with:
+              </p>
+              <ul className="text-gray-700 space-y-1 mt-2">
+                <li>• Identification of the copyrighted work</li>
+                <li>• Location of the allegedly infringing material</li>
+                <li>• Your contact information and copyright ownership proof</li>
+                <li>• A statement of good faith belief that use is not authorized</li>
+              </ul>
             </div>
           </section>
 
@@ -107,7 +127,7 @@ const Disclaimer = () => {
             <h2 className="text-2xl font-semibold text-navy-800 mb-4">Third-Party Links and Content</h2>
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-700 mb-4">
-                Our website may contain links to third-party websites and resources. These links 
+                Our website contains links to third-party websites and resources. These links 
                 are provided for convenience and informational purposes only. We have no control 
                 over the content, privacy policies, or practices of third-party sites.
               </p>
@@ -155,11 +175,11 @@ const Disclaimer = () => {
           <section className="bg-blue-50 rounded-lg border border-blue-200 p-6">
             <h2 className="text-2xl font-semibold text-blue-800 mb-4">Questions or Concerns</h2>
             <p className="text-blue-700">
-              If you have any questions about this disclaimer or concerns about content on our website, 
+              If you have any questions about this disclaimer, copyright concerns, or content attribution issues, 
               please contact us at:
             </p>
             <div className="mt-4 text-blue-700">
-              <p><strong>Email:</strong> legal@immigronews.com</p>
+              <p><strong>Legal/Copyright Issues:</strong> legal@immigronews.com</p>
               <p><strong>General Contact:</strong> contact@immigronews.com</p>
             </div>
           </section>
