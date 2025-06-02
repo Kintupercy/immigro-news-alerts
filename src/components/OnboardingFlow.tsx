@@ -48,13 +48,32 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
 
   const totalSteps = 3;
   const progress = (currentStep / totalSteps) * 100;
+  
+  // Maximum categories for free users
+  const FREE_USER_CATEGORY_LIMIT = 3;
 
   const toggleCategory = (categorySlug: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categorySlug)
-        ? prev.filter(cat => cat !== categorySlug)
-        : [...prev, categorySlug]
-    );
+    setSelectedCategories(prev => {
+      const isSelected = prev.includes(categorySlug);
+      
+      if (isSelected) {
+        // Remove if already selected
+        return prev.filter(cat => cat !== categorySlug);
+      } else {
+        // Check if we're at the limit for free users
+        if (!isProMember && prev.length >= FREE_USER_CATEGORY_LIMIT) {
+          toast({
+            title: "Category limit reached",
+            description: `Free users can select up to ${FREE_USER_CATEGORY_LIMIT} categories. Upgrade to Pro to unlock all categories.`,
+            variant: "default"
+          });
+          setUpgradeModalOpen(true);
+          return prev;
+        }
+        // Add if not selected
+        return [...prev, categorySlug];
+      }
+    });
   };
 
   const handleSMSToggle = (checked: boolean) => {
@@ -259,30 +278,61 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
                     What immigration topics interest you?
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Select all categories that apply to you. We'll send you relevant news and updates.
+                    {!isProMember ? (
+                      <>Select up to {FREE_USER_CATEGORY_LIMIT} categories that apply to you. <span className="font-medium text-emerald-600">Upgrade to Pro to unlock all categories.</span></>
+                    ) : (
+                      "Select all categories that apply to you. We'll send you relevant news and updates."
+                    )}
                   </p>
+                  {!isProMember && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge variant="outline" className="text-emerald-600 border-emerald-600">
+                        Free Plan: {selectedCategories.length}/{FREE_USER_CATEGORY_LIMIT} selected
+                      </Badge>
+                      <Button 
+                        onClick={handleUpgradeClick}
+                        variant="outline"
+                        size="sm"
+                        className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                      >
+                        <Crown className="w-3 h-3 mr-1" />
+                        Upgrade to Pro
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="grid grid-cols-1 gap-3">
-                  {immigrationCategories.map((category) => (
-                    <div
-                      key={category.slug}
-                      className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
-                        selectedCategories.includes(category.slug) 
-                          ? 'border-navy-500 bg-navy-50' 
-                          : 'border-gray-200'
-                      }`}
-                      onClick={() => toggleCategory(category.slug)}
-                    >
-                      <Checkbox
-                        checked={selectedCategories.includes(category.slug)}
-                        onChange={() => toggleCategory(category.slug)}
-                      />
-                      <Label className="cursor-pointer font-medium">
-                        {category.name}
-                      </Label>
-                    </div>
-                  ))}
+                  {immigrationCategories.map((category) => {
+                    const isSelected = selectedCategories.includes(category.slug);
+                    const isDisabled = !isProMember && !isSelected && selectedCategories.length >= FREE_USER_CATEGORY_LIMIT;
+                    
+                    return (
+                      <div
+                        key={category.slug}
+                        className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'border-navy-500 bg-navy-50' 
+                            : isDisabled
+                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                        onClick={() => !isDisabled && toggleCategory(category.slug)}
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          disabled={isDisabled}
+                          onChange={() => !isDisabled && toggleCategory(category.slug)}
+                        />
+                        <Label className={`cursor-pointer font-medium ${isDisabled ? 'text-gray-400' : ''}`}>
+                          {category.name}
+                        </Label>
+                        {isDisabled && (
+                          <Crown className="w-4 h-4 text-yellow-500 ml-auto" />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 
                 {selectedCategories.length > 0 && (

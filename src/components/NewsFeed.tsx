@@ -50,6 +50,7 @@ const NewsFeed = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [userPreferredCategories, setUserPreferredCategories] = useState<string[]>([]);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const { toast } = useToast();
@@ -104,6 +105,19 @@ const NewsFeed = () => {
         // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
+
+        // Get user's preferred categories if they exist
+        if (user) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('preferred_categories')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profile?.preferred_categories) {
+            setUserPreferredCategories(profile.preferred_categories);
+          }
+        }
 
         // Load categories and articles in parallel with enhanced caching
         await Promise.all([
@@ -424,6 +438,21 @@ const NewsFeed = () => {
     return !FREE_TIER_CATEGORIES.includes(categorySlug);
   };
 
+  // Get categories to display based on user preferences and membership
+  const getCategoriesToDisplay = () => {
+    if (isProMember) {
+      return categories;
+    }
+    
+    // For free users, show their selected categories from onboarding
+    if (userPreferredCategories.length > 0) {
+      return categories.filter(cat => userPreferredCategories.includes(cat.slug));
+    }
+    
+    // Fallback to default free categories
+    return categories.filter(cat => FREE_TIER_CATEGORIES.includes(cat.slug));
+  };
+
   if (loading) {
     return <NewsLoadingState />;
   }
@@ -447,7 +476,7 @@ const NewsFeed = () => {
                 <div className="mt-2">
                   <Badge className="bg-emerald-600 text-white">
                     <Crown className="w-3 h-3 mr-1" />
-                    Free Plan: 3 Categories
+                    Free Plan: {userPreferredCategories.length > 0 ? `${userPreferredCategories.length} Selected Categories` : '3 Categories'}
                   </Badge>
                   <Button
                     variant="outline"
@@ -524,7 +553,9 @@ const NewsFeed = () => {
               >
                 {currentLanguage === 'es' ? 'Noticias de Última Hora' : 'Breaking News'}
               </Button>
-              {categories.map((category) => {
+              
+              {/* Show user's selected categories or default free categories */}
+              {getCategoriesToDisplay().map((category) => {
                 const isLocked = isCategoryLocked(category.slug);
                 return (
                   <Button
@@ -547,6 +578,19 @@ const NewsFeed = () => {
                   </Button>
                 );
               })}
+              
+              {/* Show additional categories indicator for free users */}
+              {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setUpgradeModalOpen(true)}
+                  className="bg-transparent text-cream-400 border-cream-400 hover:bg-cream-50 hover:text-navy-800"
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  +{categories.length - getCategoriesToDisplay().length - 2} More
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -615,7 +659,7 @@ const NewsFeed = () => {
                       <div key={article.id}>
                         <ArticleCard article={article} />
                         {/* Insert ad every 3 articles for free users */}
-                        {(index + 1) % 3 === 0 && (
+                        {!isProMember && (index + 1) % 3 === 0 && (
                           <AdBanner position="between-articles" className="my-6" />
                         )}
                       </div>
@@ -635,7 +679,7 @@ const NewsFeed = () => {
                     urgentArticles.map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
-                        {(index + 1) % 3 === 0 && (
+                        {!isProMember && (index + 1) % 3 === 0 && (
                           <AdBanner position="between-articles" className="my-6" />
                         )}
                       </div>
@@ -655,7 +699,7 @@ const NewsFeed = () => {
                     breakingNewsArticles.map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
-                        {(index + 1) % 3 === 0 && (
+                        {!isProMember && (index + 1) % 3 === 0 && (
                           <AdBanner position="between-articles" className="my-6" />
                         )}
                       </div>
@@ -675,7 +719,7 @@ const NewsFeed = () => {
                     regularArticles.map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
-                        {(index + 1) % 3 === 0 && (
+                        {!isProMember && (index + 1) % 3 === 0 && (
                           <AdBanner position="between-articles" className="my-6" />
                         )}
                       </div>
