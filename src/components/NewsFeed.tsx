@@ -599,8 +599,8 @@ const NewsFeed = () => {
   return (
     <ErrorBoundary>
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Ko-fi Donate Button - Fixed Position */}
-        <KofiDonateButton />
+        {/* Ko-fi Donate Banner - New Position */}
+        <KofiDonateButton variant="banner" className="mb-6" />
 
         {/* Header Section with enhanced search */}
         <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
