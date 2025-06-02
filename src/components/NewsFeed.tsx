@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -61,7 +62,7 @@ interface Category {
 const ARTICLES_PER_PAGE = 10;
 
 const NewsFeed = () => {
-  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [allArticles, setAllArticles] = useState<NewsArticle[]>([]); // Store all loaded articles
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -73,7 +74,6 @@ const NewsFeed = () => {
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalArticles, setTotalArticles] = useState(0);
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
   const { isProMember } = useProMembership(user);
@@ -83,8 +83,46 @@ const NewsFeed = () => {
   const FREE_CATEGORIES_LIMIT = 3;
   const FREE_TIER_CATEGORIES = ['green-card', 'citizenship', 'work-visas-employment'];
 
-  // Calculate total pages
-  const totalPages = Math.ceil(totalArticles / ARTICLES_PER_PAGE);
+  // Filter articles based on selected category and search term
+  const getFilteredArticles = () => {
+    let filtered = allArticles;
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      if (selectedCategory === 'breaking-news') {
+        filtered = filtered.filter(article => article.category === 'breaking-news');
+      } else {
+        filtered = filtered.filter(article => article.category === selectedCategory);
+      }
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.content.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  };
+
+  const filteredArticles = getFilteredArticles();
+
+  // Paginate the filtered articles
+  const getPaginatedArticles = () => {
+    const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+    const endIndex = startIndex + ARTICLES_PER_PAGE;
+    return filteredArticles.slice(startIndex, endIndex);
+  };
+
+  const paginatedArticles = getPaginatedArticles();
+  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
+
+  const urgentArticles = filteredArticles.filter(article => article.is_urgent);
+  const regularArticles = filteredArticles.filter(article => !article.is_urgent);
+  const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news');
 
   // Add the missing handleLanguageChange function
   const handleLanguageChange = async (language: 'en' | 'es') => {
@@ -99,7 +137,7 @@ const NewsFeed = () => {
       // Translate current articles if switching to Spanish
       const newTranslatedContent: Record<string, any> = {};
       
-      for (const article of articles) {
+      for (const article of paginatedArticles) {
         if (!translatedContent[article.id]) {
           try {
             const [translatedTitle, translatedSummary, translatedContent] = await Promise.all([
@@ -146,7 +184,7 @@ const NewsFeed = () => {
         // Load categories and articles in parallel with enhanced caching
         await Promise.all([
           fetchCategories(),
-          fetchArticles()
+          fetchAllArticles()
         ]);
       } catch (error) {
         handleError(error as Error, 'initialization');
@@ -178,7 +216,8 @@ const NewsFeed = () => {
     }
   };
 
-  const fetchArticles = async (page: number = currentPage) => {
+  // Fetch all articles once and store them
+  const fetchAllArticles = async () => {
     try {
       setLoading(true);
       
@@ -191,41 +230,24 @@ const NewsFeed = () => {
         return;
       }
 
-      const cacheKey = cacheKeys.news(selectedCategory, searchTerm, page);
+      const cacheKey = cacheKeys.news('all', '', 1);
       
       // Use background refresh for better UX
       const result = await enhancedCache.backgroundRefresh(
         cacheKey,
         async () => {
-          // First get the total count
-          let countQuery = supabase
-            .from('immigration_news')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'published')
-            .not('source_url', 'is', null);
-
-          if (selectedCategory !== 'all') {
-            countQuery = countQuery.eq('category', selectedCategory);
-          }
-
-          const { count } = await countQuery;
-
-          // Then get the paginated data
           let query = supabase
             .from('immigration_news')
             .select('*')
             .eq('status', 'published')
             .not('source_url', 'is', null)
-            .order('published_at', { ascending: false })
-            .range((page - 1) * ARTICLES_PER_PAGE, page * ARTICLES_PER_PAGE - 1);
-
-          if (selectedCategory !== 'all') {
-            query = query.eq('category', selectedCategory);
-          }
+            .order('published_at', { ascending: false });
 
           // For free users, limit results
           if (!isProMember) {
-            query = query.limit(10);
+            query = query.limit(100); // Load more articles but still limit for free users
+          } else {
+            query = query.limit(500); // Load more articles for pro users
           }
 
           const { data, error } = await query;
@@ -239,16 +261,15 @@ const NewsFeed = () => {
 
           return {
             articles: filteredData,
-            total: count || 0
+            total: filteredData.length
           };
         },
         5 // Cache for 5 minutes
       );
       
-      setArticles(result.articles);
-      setTotalArticles(result.total);
+      setAllArticles(result.articles);
 
-      if (result.articles.length === 0 && page === 1) {
+      if (result.articles.length === 0) {
         console.log('No articles found, fetching fresh news...');
         await refreshNews(false);
       }
@@ -273,7 +294,7 @@ const NewsFeed = () => {
       }
 
       if (forceRefresh) {
-        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm, currentPage));
+        enhancedCache.delete(cacheKeys.news('all', '', 1));
       }
       
       toast({
@@ -285,7 +306,7 @@ const NewsFeed = () => {
       const [regularNewsResponse, breakingNewsResponse] = await Promise.all([
         supabase.functions.invoke('fetch-immigration-news', {
           body: { 
-            category: selectedCategory,
+            category: 'all',
             forceRefresh: forceRefresh
           }
         }),
@@ -300,8 +321,8 @@ const NewsFeed = () => {
           title: "News updated!",
           description: `Successfully fetched ${totalArticlesAdded} new articles${urgentNewsFound > 0 ? ` (${urgentNewsFound} urgent)` : ''}.`,
         });
-        enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm, currentPage));
-        await fetchArticles(1);
+        enhancedCache.delete(cacheKeys.news('all', '', 1));
+        await fetchAllArticles();
         setCurrentPage(1);
       } else {
         toast({
@@ -316,25 +337,10 @@ const NewsFeed = () => {
     }
   };
 
+  // Reset page when category or search changes
   useEffect(() => {
-    enhancedCache.delete(cacheKeys.news(selectedCategory, searchTerm, currentPage));
     setCurrentPage(1);
-    fetchArticles(1);
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    fetchArticles(currentPage);
-  }, [currentPage]);
-
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const urgentArticles = filteredArticles.filter(article => article.is_urgent);
-  const regularArticles = filteredArticles.filter(article => !article.is_urgent);
-  const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news');
+  }, [selectedCategory, searchTerm]);
 
   const getSourceDomain = (url: string | null) => {
     if (!url) return 'Unknown';
@@ -683,7 +689,7 @@ const NewsFeed = () => {
                   <SelectTrigger className="bg-cream-50 text-navy-800 border-cream-200">
                     <SelectValue placeholder={currentLanguage === 'es' ? 'Seleccionar categoría' : 'Select category'} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px] overflow-y-auto">
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px] overflow-y-auto z-50">
                     <SelectItem value="all">
                       {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
                     </SelectItem>
@@ -782,8 +788,8 @@ const NewsFeed = () => {
         {/* Results Summary */}
         <div className="mb-4 text-sm text-muted-foreground">
           {currentLanguage === 'es' 
-            ? `Mostrando ${filteredArticles.length} de ${totalArticles} artículos (Página ${currentPage} de ${totalPages})`
-            : `Showing ${filteredArticles.length} of ${totalArticles} articles (Page ${currentPage} of ${totalPages})`
+            ? `Mostrando ${paginatedArticles.length} de ${filteredArticles.length} artículos (Página ${currentPage} de ${totalPages})`
+            : `Showing ${paginatedArticles.length} of ${filteredArticles.length} articles (Page ${currentPage} of ${totalPages})`
           }
         </div>
 
@@ -810,7 +816,7 @@ const NewsFeed = () => {
 
               <TabsContent value="all" className="mt-6">
                 <div className="space-y-4">
-                  {filteredArticles.length === 0 ? (
+                  {paginatedArticles.length === 0 ? (
                     <EmptyState
                       icon={Newspaper}
                       title={searchTerm 
@@ -835,7 +841,7 @@ const NewsFeed = () => {
                       )}
                     />
                   ) : (
-                    filteredArticles.map((article, index) => (
+                    paginatedArticles.map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
                         {/* Insert ad every 3 articles for free users */}
@@ -859,7 +865,7 @@ const NewsFeed = () => {
                       title={currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time'}
                     />
                   ) : (
-                    urgentArticles.map((article, index) => (
+                    urgentArticles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
                         {!isProMember && (index + 1) % 3 === 0 && (
@@ -879,7 +885,7 @@ const NewsFeed = () => {
                       title={currentLanguage === 'es' ? 'No hay noticias de última hora en este momento' : 'No breaking news at this time'}
                     />
                   ) : (
-                    breakingNewsArticles.map((article, index) => (
+                    breakingNewsArticles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
                         {!isProMember && (index + 1) % 3 === 0 && (
@@ -899,7 +905,7 @@ const NewsFeed = () => {
                       title={currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found'}
                     />
                   ) : (
-                    regularArticles.map((article, index) => (
+                    regularArticles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
                       <div key={article.id}>
                         <ArticleCard article={article} />
                         {!isProMember && (index + 1) % 3 === 0 && (
