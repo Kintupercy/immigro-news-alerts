@@ -8,7 +8,6 @@ import LatestNews from "@/components/LatestNews";
 import NewsletterSubscription from "@/components/NewsletterSubscription";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import AdBanner from "@/components/AdBanner";
 import TalkToLawyer from "@/components/TalkToLawyer";
 
 const Index = () => {
@@ -80,20 +79,8 @@ const Index = () => {
       />
       <Header />
       <Hero />
-      
-      {/* Ad after Hero section */}
-      <div className="py-4">
-        <AdBanner position="header" className="max-w-4xl mx-auto px-4" />
-      </div>
-      
       <Features />
       <LatestNews />
-      
-      {/* Ad between sections */}
-      <div className="py-4">
-        <AdBanner position="between-articles" className="max-w-4xl mx-auto px-4" />
-      </div>
-      
       <Categories />
       
       {/* Talk to Lawyer section */}
