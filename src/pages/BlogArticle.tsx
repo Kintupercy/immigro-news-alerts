@@ -74,6 +74,42 @@ const BlogArticle = () => {
       .join('\n');
   };
 
+  // Generate enhanced SEO data
+  const generateSEOData = (article: BlogArticle) => {
+    const baseKeywords = [
+      'immigration',
+      'visa',
+      'green card',
+      'citizenship',
+      'USCIS',
+      'immigration law',
+      'immigration attorney',
+      'immigration guide'
+    ];
+
+    const enhancedKeywords = [
+      ...baseKeywords,
+      ...(article.keywords || []),
+      article.category.toLowerCase(),
+      'immigration help',
+      'visa application',
+      'immigration process'
+    ];
+
+    const metaDescription = article.meta_description || 
+      `${article.excerpt?.substring(0, 150)}... Expert immigration guidance and step-by-step instructions for your immigration journey.`;
+
+    return {
+      title: `${article.title} - Complete Immigration Guide`,
+      description: metaDescription,
+      keywords: enhancedKeywords,
+      publishedTime: article.published_at,
+      author: article.author,
+      section: article.category,
+      tags: article.keywords || []
+    };
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
@@ -98,18 +134,89 @@ const BlogArticle = () => {
     return <Navigate to="/404" replace />;
   }
 
+  const seoData = generateSEOData(article);
+
   return (
     <div className="min-h-screen">
       <SEO 
-        title={`${article.title} | ImmigroNews`}
-        description={article.meta_description || article.excerpt}
-        keywords={article.keywords || []}
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
         url={`https://immigronews.com/blog/${article.slug}`}
         type="article"
+        publishedTime={seoData.publishedTime}
+        author={seoData.author}
+        section={seoData.section}
+        tags={seoData.tags}
+        canonicalUrl={`https://immigronews.com/blog/${article.slug}`}
       />
       <Header />
       
       <article className="container mx-auto px-4 py-6 lg:py-8 max-w-4xl">
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://immigronews.com"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "https://immigronews.com/blog"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": article.title,
+                "item": `https://immigronews.com/blog/${article.slug}`
+              }
+            ]
+          })}
+        </script>
+
+        {/* Article Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": article.title,
+            "description": article.excerpt,
+            "image": "https://immigronews.com/og-image.jpg",
+            "url": `https://immigronews.com/blog/${article.slug}`,
+            "datePublished": article.published_at,
+            "dateModified": article.published_at,
+            "author": {
+              "@type": "Organization",
+              "name": article.author,
+              "url": "https://immigronews.com"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "ImmigroNews",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://immigronews.com/logo.png"
+              }
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `https://immigronews.com/blog/${article.slug}`
+            },
+            "articleSection": article.category,
+            "keywords": seoData.keywords.join(", "),
+            "wordCount": article.content.split(' ').length,
+            "timeRequired": article.read_time,
+            "inLanguage": "en-US"
+          })}
+        </script>
+
         {/* Back to Blog Button */}
         <div className="mb-4 lg:mb-6">
           <Button variant="outline" asChild className="mb-4 h-10 lg:h-12">

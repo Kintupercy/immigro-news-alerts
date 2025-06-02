@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -127,8 +126,13 @@ const Blog = () => {
       <div className="min-h-screen">
         <SEO 
           title="Immigration Blog - Expert Guides & Resources | ImmigroNews"
-          description="Comprehensive immigration guides and expert advice. Learn about visa applications, green card processes, citizenship requirements, and immigration law updates."
-          keywords={['immigration blog', 'immigration guides', 'visa help', 'green card advice', 'citizenship tips', 'immigration law']}
+          description="Comprehensive immigration guides and expert advice. Learn about visa applications, green card processes, citizenship requirements, and immigration law updates from trusted professionals."
+          keywords={[
+            'immigration blog', 'immigration guides', 'visa help', 'green card advice', 
+            'citizenship tips', 'immigration law', 'USCIS guides', 'immigration attorney advice',
+            'visa application process', 'green card timeline', 'citizenship test preparation',
+            'immigration forms help', 'H1B visa guide', 'family immigration', 'work permits'
+          ]}
           url="https://immigronews.com/blog"
           type="website"
         />
@@ -166,23 +170,52 @@ const Blog = () => {
   return (
     <div className="min-h-screen">
       <SEO 
-        title="Immigration Blog - Expert Guides & Resources | ImmigroNews"
-        description="Comprehensive immigration guides and expert advice. Learn about visa applications, green card processes, citizenship requirements, and immigration law updates."
-        keywords={['immigration blog', 'immigration guides', 'visa help', 'green card advice', 'citizenship tips', 'immigration law', 'USCIS guides', 'immigration attorney advice']}
+        title="Immigration Blog - Expert Guides & Step-by-Step Instructions | ImmigroNews"
+        description="Access comprehensive immigration guides, expert advice, and step-by-step instructions for visa applications, green card processes, citizenship requirements, and immigration law updates. Trusted by thousands of immigrants worldwide."
+        keywords={[
+          'immigration blog', 'immigration guides', 'visa application help', 'green card advice', 
+          'citizenship tips', 'immigration law updates', 'USCIS guides', 'immigration attorney advice',
+          'visa processing times', 'green card timeline', 'citizenship test preparation',
+          'immigration forms assistance', 'H1B visa guide', 'family immigration process', 'work permits',
+          'student visa guide', 'tourist visa tips', 'immigration interview preparation',
+          'immigration document checklist', 'USCIS case status', 'immigration news updates'
+        ]}
         url="https://immigronews.com/blog"
         type="website"
+        canonicalUrl="https://immigronews.com/blog"
       />
       <Header />
       
+      {/* Enhanced structured data for blog */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          "name": "ImmigroNews Immigration Blog",
+          "description": "Expert immigration guides and resources for visa applications, green cards, and citizenship processes",
+          "url": "https://immigronews.com/blog",
+          "publisher": {
+            "@type": "Organization",
+            "name": "ImmigroNews",
+            "logo": "https://immigronews.com/logo.png"
+          },
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://immigronews.com/blog"
+          },
+          "inLanguage": "en-US"
+        })}
+      </script>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-navy-800 to-navy-900 text-white py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold mb-4 lg:mb-6">
-              Immigration Blog & Resources
+              Immigration Blog & Expert Resources
             </h1>
             <p className="text-lg md:text-xl text-cream-200 mb-6 lg:mb-8">
-              Expert guides, step-by-step instructions, and practical advice to help you navigate your immigration journey with confidence.
+              Comprehensive immigration guides, step-by-step instructions, and expert advice to help you navigate your immigration journey with confidence. Trusted by thousands worldwide.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 text-cream-300">
               <div className="flex items-center">
@@ -243,7 +276,7 @@ const Blog = () => {
         {/* Featured Articles */}
         {featuredArticles.length > 0 && (
           <section className="mb-8 lg:mb-12">
-            <h2 className="text-2xl lg:text-3xl font-playfair font-bold text-gray-900 mb-6 lg:mb-8">Featured Articles</h2>
+            <h2 className="text-2xl lg:text-3xl font-playfair font-bold text-gray-900 mb-6 lg:mb-8">Featured Immigration Guides</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               {featuredArticles.map((article) => (
                 <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-emerald-600">
@@ -297,7 +330,7 @@ const Blog = () => {
         <section id="articles-section">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
             <h2 className="text-2xl lg:text-3xl font-playfair font-bold text-gray-900">
-              {searchTerm || selectedCategory !== "all" ? "Search Results" : "All Articles"}
+              {searchTerm || selectedCategory !== "all" ? "Search Results" : "Latest Immigration Guides"}
             </h2>
             {filteredArticles.length > 0 && (
               <p className="text-gray-600 text-sm lg:text-base">
@@ -388,22 +421,28 @@ const Blog = () => {
         <section className="mt-12 lg:mt-16 bg-gray-50 rounded-lg p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl lg:text-2xl font-playfair font-bold text-gray-900 mb-4 lg:mb-6">
-              Your Trusted Source for Immigration Guidance
+              Your Trusted Source for U.S. Immigration Guidance
             </h2>
             <div className="prose prose-sm lg:prose-lg text-gray-700">
               <p className="mb-4">
                 Navigate the complex world of U.S. immigration with confidence using our comprehensive guides and expert resources. 
-                Our blog covers everything from basic visa applications to advanced green card processes, citizenship requirements, 
-                and the latest immigration law updates.
+                Our immigration blog covers everything from basic visa applications to advanced green card processes, citizenship requirements, 
+                and the latest immigration law updates. Each article is written by immigration professionals and regularly updated to reflect current laws and procedures.
               </p>
               <p className="mb-4">
-                Whether you're applying for your first visa, adjusting your status, or preparing for your citizenship interview, 
-                our step-by-step guides provide the clarity and direction you need. Written by immigration professionals and 
-                regularly updated to reflect current laws and procedures.
+                Whether you're applying for your first visa, adjusting your status, preparing for your citizenship interview, or helping a family member immigrate, 
+                our step-by-step guides provide the clarity and direction you need. We break down complex immigration processes into manageable steps, 
+                helping thousands of immigrants achieve their American dreams.
               </p>
               <p>
-                <strong>Popular Topics:</strong> USCIS case status tracking, green card processing times, marriage-based interviews, 
-                work authorization, visa overstays, citizenship applications, and essential document preparation.
+                <strong>Popular Immigration Topics:</strong> USCIS case status tracking, green card processing times, marriage-based interviews, 
+                work authorization (EAD), visa overstays, citizenship applications, essential document preparation, H1B visa process, 
+                family-based immigration, student visas (F-1), tourist visas (B-2), and immigration interview preparation.
+              </p>
+              <p>
+                <strong>Expert Resources:</strong> Immigration forms guidance, document checklists, processing time updates, 
+                policy changes analysis, and practical tips from experienced immigration attorneys. Stay informed with real-time updates 
+                and expert insights that matter to your immigration journey.
               </p>
             </div>
           </div>
