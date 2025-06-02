@@ -1,6 +1,5 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { validateSession } from '@/utils/authSecurity';
 import { useToast } from '@/hooks/use-toast';
 
 interface SecurityContextType {
@@ -28,16 +27,8 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
   const { toast } = useToast();
 
   const checkSession = async () => {
-    const { valid } = await validateSession();
-    setSessionValid(valid);
-    
-    if (!valid) {
-      toast({
-        title: "Session Expired",
-        description: "Please sign in again for security.",
-        variant: "destructive",
-      });
-    }
+    // Simplified session check since we don't use authentication
+    setSessionValid(true);
   };
 
   const securityWarning = (message: string) => {
@@ -49,25 +40,7 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
   };
 
   useEffect(() => {
-    // Check session on mount
     checkSession();
-
-    // Check session every 5 minutes
-    const interval = setInterval(checkSession, 5 * 60 * 1000);
-
-    // Check session when window becomes visible
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkSession();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, []);
 
   return (

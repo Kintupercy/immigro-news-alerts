@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,9 +15,24 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Save, AlertTriangle } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
-import { articleSchema, sanitizeInput, logSecurityEvent } from "@/utils/securityValidation";
+
+// Simplified article schema without complex validation
+const articleSchema = z.object({
+  title: z.string().min(10, "Title must be at least 10 characters"),
+  content: z.string().min(100, "Content must be at least 100 characters"),
+  summary: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  source_url: z.string().url().optional().or(z.literal("")),
+  tags: z.array(z.string()).default([]),
+  is_urgent: z.boolean().default(false)
+});
 
 type FormData = z.infer<typeof articleSchema>;
+
+// Simple input sanitization
+const sanitizeInput = (input: string): string => {
+  return input.trim().replace(/[<>]/g, "");
+};
 
 const ManualNewsUpload = () => {
   const [tags, setTags] = useState<string[]>([]);
@@ -60,13 +76,6 @@ const ManualNewsUpload = () => {
     try {
       setIsSubmitting(true);
 
-      // Get current user for admin validation
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      // Additional validation and sanitization
       const sanitizedData = {
         title: sanitizeInput(data.title),
         content: sanitizeInput(data.content),
@@ -76,7 +85,6 @@ const ManualNewsUpload = () => {
         tags: tags.map(tag => sanitizeInput(tag)),
         is_urgent: data.is_urgent || false,
         manually_created: true,
-        created_by_admin: user.id,
         status: 'published'
       };
 
@@ -86,20 +94,11 @@ const ManualNewsUpload = () => {
 
       if (error) throw error;
 
-      // Log the security event
-      await logSecurityEvent('MANUAL_ARTICLE_CREATED', {
-        articleTitle: sanitizedData.title,
-        category: sanitizedData.category,
-        isUrgent: sanitizedData.is_urgent,
-        adminUserId: user.id
-      }, 'article');
-
       toast({
         title: "Article uploaded successfully",
         description: "The news article has been published.",
       });
 
-      // Reset form
       reset();
       setTags([]);
 
@@ -110,15 +109,6 @@ const ManualNewsUpload = () => {
         description: error instanceof Error ? error.message : "Failed to upload article",
         variant: "destructive",
       });
-
-      // Log the security event for failed upload
-      await logSecurityEvent('MANUAL_ARTICLE_UPLOAD_FAILED', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        attemptedData: {
-          title: data.title,
-          category: data.category
-        }
-      }, 'article');
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +122,7 @@ const ManualNewsUpload = () => {
           Manual News Upload
         </CardTitle>
         <CardDescription>
-          Create and publish immigration news articles manually with enhanced security validation
+          Create and publish immigration news articles manually
         </CardDescription>
       </CardHeader>
       <CardContent>
