@@ -813,12 +813,6 @@ const NewsFeed = () => {
                             ? 'Las noticias se actualizan automáticamente dos veces al día con las últimas fuentes oficiales.'
                             : 'News is automatically updated twice daily from the latest official sources.')
                       }
-                      action={!searchTerm && (
-                        <Button onClick={() => retry(() => refreshNews(true))} disabled={refreshing || !canRetry}>
-                          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                          {currentLanguage === 'es' ? 'Obtener Últimas Noticias' : 'Fetch Latest News'}
-                        </Button>
-                      )}
                     />
                   ) : (
                     paginatedArticles.map((article, index) => (
