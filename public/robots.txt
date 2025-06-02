@@ -1,4 +1,6 @@
 
+# Robots.txt for ImmigrowNews - Immigration News Platform
+
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 1
@@ -13,9 +15,26 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
 User-agent: *
 Allow: /
 Crawl-delay: 2
+
+# Explicitly allow important content for SEO
+Allow: /news/
+Allow: /resources/
+Allow: /about/
+Allow: /contact/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp
 
 # Disallow admin and user-specific areas
 Disallow: /admin/
@@ -24,12 +43,13 @@ Disallow: /auth/
 Disallow: /signup/
 Disallow: /email-verification/
 Disallow: /password-reset/
-
-# Allow important content
-Allow: /news/
-Allow: /resources/
-Allow: /about/
-Allow: /contact/
+Disallow: /payment/
+Disallow: /*?*utm_source=
+Disallow: /*?*utm_medium=
+Disallow: /*?*utm_campaign=
+Disallow: /*?*fbclid=
+Disallow: /*?*gclid=
 
 # Sitemap location
-Sitemap: https://immigro.app/sitemap.xml
+Sitemap: https://immigronews.com/sitemap.xml
+
