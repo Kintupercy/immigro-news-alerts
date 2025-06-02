@@ -196,6 +196,10 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
     }
   };
 
+  const handleUpgradeClick = () => {
+    setUpgradeModalOpen(true);
+  };
+
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
     const cleaned = value.replace(/\D/g, '');
@@ -328,6 +332,30 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
                       }
                     />
                   </div>
+
+                  {/* Pro Features Section */}
+                  {!isProMember && (
+                    <div className="p-4 border-2 border-emerald-200 rounded-lg bg-emerald-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Crown className="w-5 h-5 text-emerald-600" />
+                          <span className="font-semibold text-emerald-800">Unlock Pro Features</span>
+                          <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">$4.99/month</Badge>
+                        </div>
+                        <Button 
+                          onClick={handleUpgradeClick}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          size="sm"
+                        >
+                          <Crown className="w-4 h-4 mr-1" />
+                          Upgrade to Pro
+                        </Button>
+                      </div>
+                      <p className="text-sm text-emerald-700 mb-2">
+                        Get SMS notifications, urgent news filtering, and more premium features!
+                      </p>
+                    </div>
+                  )}
 
                   <div className={`flex items-center justify-between p-4 border rounded-lg ${!isProMember ? 'opacity-50 bg-gray-50' : ''}`}>
                     <div className="flex items-center space-x-3">

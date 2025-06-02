@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Zap, Globe, Shield, Bell } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -12,6 +12,8 @@ interface UpgradeModalProps {
 }
 
 const UpgradeModal = ({ open, onOpenChange, feature }: UpgradeModalProps) => {
+  const navigate = useNavigate();
+
   const proFeatures = [
     {
       icon: <Zap className="w-5 h-5 text-emerald-600" />,
@@ -34,6 +36,11 @@ const UpgradeModal = ({ open, onOpenChange, feature }: UpgradeModalProps) => {
       description: "Access every immigration topic and specialty area"
     }
   ];
+
+  const handleUpgradeClick = () => {
+    onOpenChange(false);
+    navigate('/payment');
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,10 +81,12 @@ const UpgradeModal = ({ open, onOpenChange, feature }: UpgradeModalProps) => {
           </div>
 
           <div className="space-y-2">
-            <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700">
-              <Link to="/auth">
-                Start Pro Trial
-              </Link>
+            <Button 
+              onClick={handleUpgradeClick}
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Start Pro Trial
             </Button>
             <Button 
               variant="ghost" 
