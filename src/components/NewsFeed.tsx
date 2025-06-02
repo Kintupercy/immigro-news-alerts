@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { 
   Pagination,
   PaginationContent,
@@ -22,22 +13,20 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { AlertTriangle, Clock, Search, ExternalLink, Shield, Newspaper, Crown } from "lucide-react";
-import { format } from "date-fns";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import ErrorBoundary from "./ErrorBoundary";
-import { NewsLoadingState, NewsCardSkeleton, EmptyState, CategoriesSkeleton } from "./LoadingStates";
-import BookmarkButton from "./BookmarkButton";
-import SocialShareButton from "./SocialShareButton";
-import LanguageToggle from "./LanguageToggle";
+import { NewsLoadingState } from "./LoadingStates";
 import AdBanner from "./AdBanner";
 import KofiDonateButton from "./KofiDonateButton";
 import { useProMembership } from "@/hooks/useProMembership";
 import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
 import UpgradeModal from "./UpgradeModal";
-import { translateText, translateCategory } from "@/utils/translation";
+import { translateText } from "@/utils/translation";
+import NewsHeader from "./news/NewsHeader";
+import NewsFilters from "./news/NewsFilters";
+import NewsTabs from "./news/NewsTabs";
 
 interface NewsArticle {
   id: string;
@@ -61,7 +50,7 @@ interface Category {
 const ARTICLES_PER_PAGE = 10;
 
 const NewsFeed = () => {
-  const [allArticles, setAllArticles] = useState<NewsArticle[]>([]); // Store all loaded articles
+  const [allArticles, setAllArticles] = useState<NewsArticle[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -358,139 +347,6 @@ const NewsFeed = () => {
     return text;
   };
 
-  const ArticleCard = ({ article }: { article: NewsArticle }) => {
-    const isExpanded = expandedArticle === article.id;
-    const sourceDomain = getSourceDomain(article.source_url);
-    const isOfficial = isOfficialSource(article.source_url);
-    const isBreakingNews = article.category === 'breaking-news';
-    
-    return (
-      <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${
-        article.is_urgent ? 'border-red-200 bg-red-50' : 
-        isBreakingNews ? 'border-orange-200 bg-orange-50' : ''
-      }`}>
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-3">
-            <CardTitle className="text-lg leading-tight flex-1">
-              {article.is_urgent && (
-                <AlertTriangle className="inline-block w-5 h-5 text-red-500 mr-2" />
-              )}
-              {isBreakingNews && !article.is_urgent && (
-                <span className="inline-block bg-orange-500 text-white text-xs px-2 py-1 rounded mr-2">
-                  BREAKING
-                </span>
-              )}
-              {getDisplayText(article.title, article.id, 'title')}
-            </CardTitle>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
-              <Clock className="w-4 h-4" />
-              {format(new Date(article.published_at), 'MMM dd, yyyy')}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "default" : "secondary"}>
-              {currentLanguage === 'es' 
-                ? translateCategory(categories.find(cat => cat.slug === article.category)?.name || article.category)
-                : categories.find(cat => cat.slug === article.category)?.name || article.category
-              }
-            </Badge>
-            
-            <Badge 
-              variant={isOfficial ? "default" : "outline"} 
-              className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
-            >
-              {isOfficial && <Shield className="w-3 h-3 mr-1" />}
-              Source: {sourceDomain}
-            </Badge>
-            
-            {article.tags?.map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardHeader>
-        
-        <CardContent className="pt-0">
-          {article.summary && (
-            <p className="text-muted-foreground mb-3">
-              {getDisplayText(article.summary, article.id, 'summary')}
-            </p>
-          )}
-          
-          {isExpanded && (
-            <div className="prose max-w-none mb-4">
-              <p className="whitespace-pre-wrap">
-                {getDisplayText(article.content, article.id, 'content')}
-              </p>
-            </div>
-          )}
-          
-          <div className="flex items-center gap-2 flex-wrap mb-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setExpandedArticle(isExpanded ? null : article.id)}
-            >
-              {isExpanded 
-                ? (currentLanguage === 'es' ? 'Mostrar Menos' : 'Show Less')
-                : (currentLanguage === 'es' ? 'Leer Más' : 'Read More')
-              }
-            </Button>
-            
-            {article.source_url && (
-              <Button
-                variant="default"
-                size="sm"
-                asChild
-                className="bg-navy-800 hover:bg-navy-700"
-              >
-                <a 
-                  href={article.source_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  {currentLanguage === 'es' ? 'Leer Original' : 'Read Original'}
-                </a>
-              </Button>
-            )}
-
-            {user && (
-              <>
-                <BookmarkButton articleId={article.id} user={user} />
-                <SocialShareButton 
-                  title={article.title}
-                  url={article.source_url || window.location.href}
-                />
-              </>
-            )}
-          </div>
-
-          {/* Enhanced Attribution Section */}
-          {article.source_url && (
-            <div className="text-xs text-muted-foreground border-t pt-2">
-              <p>
-                Originally published by{' '}
-                <a 
-                  href={article.source_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  {sourceDomain}
-                </a>
-                . Content aggregated for educational purposes under fair use.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
   const handleCategoryClick = (categorySlug: string) => {
     if (!isProMember && categorySlug !== 'all' && categorySlug !== 'breaking-news' && !FREE_TIER_CATEGORIES.includes(categorySlug)) {
       showUpgradePrompt('allCategories');
@@ -602,155 +458,29 @@ const NewsFeed = () => {
         {/* Ko-fi Donate Banner - New Position */}
         <KofiDonateButton variant="banner" className="mb-6" />
 
-        {/* Header Section with enhanced search */}
-        <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
-          {/* Header Content */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl lg:text-3xl font-bold mb-2">
-                {currentLanguage === 'es' ? 'ACTUALIZACIONES DE INMIGRACIÓN VERIFICADAS' : 'VERIFIED IMMIGRATION UPDATES'}
-              </h1>
-              <p className="text-cream-200 text-sm uppercase tracking-wide">
-                <Shield className="inline w-4 h-4 mr-1" />
-                {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS + BREAKING NEWS' : 'SEARCH, SAVE & SHARE NEWS + BREAKING NEWS'}
-              </p>
-              {!isProMember && (
-                <div className="mt-2">
-                  <Badge className="bg-emerald-600 text-white">
-                    <Crown className="w-3 h-3 mr-1" />
-                    Free Plan: {userPreferredCategories.length > 0 ? `${userPreferredCategories.length} Selected Categories` : '3 Categories'}
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setUpgradeModalOpen(true)}
-                    className="ml-2 mt-2 lg:mt-0 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
-                  >
-                    Unlock All 12+ Categories
-                  </Button>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <LanguageToggle 
-                currentLanguage={currentLanguage}
-                onLanguageChange={handleLanguageChange}
-                isProMember={isProMember}
-                user={user}
-              />
-            </div>
-          </div>
+        {/* Header Section */}
+        <NewsHeader
+          currentLanguage={currentLanguage}
+          onLanguageChange={handleLanguageChange}
+          isProMember={isProMember}
+          user={user}
+          userPreferredCategories={userPreferredCategories}
+          setUpgradeModalOpen={setUpgradeModalOpen}
+        />
 
-          {/* Search Bar */}
-          <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-navy-600 w-5 h-5" />
-              <Input
-                placeholder={currentLanguage === 'es' 
-                  ? "Buscar noticias, alertas y actualizaciones de inmigración..."
-                  : "Search immigration news, alerts, and breaking news updates..."
-                }
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 bg-cream-50 text-navy-800 border-cream-200 placeholder:text-navy-600/70"
-              />
-            </div>
-          </div>
-
-          {/* Mobile-Friendly Category Selector */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* Category Dropdown */}
-              <div className="flex-1">
-                <Select
-                  value={selectedCategory}
-                  onValueChange={(value) => handleCategoryClick(value)}
-                >
-                  <SelectTrigger className="bg-cream-50 text-navy-800 border-cream-200">
-                    <SelectValue placeholder={currentLanguage === 'es' ? 'Seleccionar categoría' : 'Select category'} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px] overflow-y-auto z-50">
-                    <SelectItem value="all">
-                      {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
-                    </SelectItem>
-                    <SelectItem value="breaking-news">
-                      {currentLanguage === 'es' ? 'Noticias de Última Hora' : 'Breaking News'}
-                    </SelectItem>
-                    
-                    {/* Show user's selected categories or default free categories */}
-                    {getCategoriesToDisplay().map((category) => {
-                      const isLocked = isCategoryLocked(category.slug);
-                      return (
-                        <SelectItem 
-                          key={category.id} 
-                          value={category.slug}
-                          disabled={isLocked}
-                          className={isLocked ? 'opacity-60' : ''}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <span>
-                              {currentLanguage === 'es' ? translateCategory(category.name) : category.name}
-                            </span>
-                            {isLocked && (
-                              <Crown className="w-3 h-3 ml-2 text-yellow-600" />
-                            )}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                    
-                    {/* Show upgrade option for free users */}
-                    {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
-                      <SelectItem value="upgrade" disabled>
-                        <div className="flex items-center text-gray-500">
-                          <Crown className="w-3 h-3 mr-2" />
-                          +{categories.length - getCategoriesToDisplay().length - 2} More Categories (Pro)
-                        </div>
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Quick Filter Buttons - Only show on larger screens */}
-              <div className="hidden sm:flex gap-2">
-                <Button
-                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleCategoryClick('all')}
-                  className={selectedCategory === 'all' 
-                    ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                    : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-                  }
-                >
-                  {currentLanguage === 'es' ? 'Todas' : 'All'}
-                </Button>
-                <Button
-                  variant={selectedCategory === 'breaking-news' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleCategoryClick('breaking-news')}
-                  className={selectedCategory === 'breaking-news' 
-                    ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                    : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-                  }
-                >
-                  {currentLanguage === 'es' ? 'Breaking' : 'Breaking'}
-                </Button>
-              </div>
-            </div>
-
-            {/* Show additional categories info for free users */}
-            {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
-              <div className="text-cream-200 text-sm">
-                <Crown className="inline w-4 h-4 mr-1" />
-                {currentLanguage === 'es' 
-                  ? `${categories.length - getCategoriesToDisplay().length - 2} categorías más disponibles con Pro`
-                  : `${categories.length - getCategoriesToDisplay().length - 2} more categories available with Pro`
-                }
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Filters Section */}
+        <NewsFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCategory={selectedCategory}
+          handleCategoryClick={handleCategoryClick}
+          categories={categories}
+          currentLanguage={currentLanguage}
+          isProMember={isProMember}
+          userPreferredCategories={userPreferredCategories}
+          getCategoriesToDisplay={getCategoriesToDisplay}
+          isCategoryLocked={isCategoryLocked}
+        />
 
         {/* Ad Banner - Header Position (only for free users) */}
         {!isProMember && <AdBanner position="header" className="mb-6" />}
@@ -776,121 +506,28 @@ const NewsFeed = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6">
-                {/* Tabs List */}
-                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">
-                  {currentLanguage === 'es' ? `Todas (${filteredArticles.length})` : `All (${filteredArticles.length})`}
-                </TabsTrigger>
-                <TabsTrigger value="urgent" className="text-red-600 text-xs sm:text-sm px-2 py-2">
-                  <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
-                </TabsTrigger>
-                <TabsTrigger value="breaking" className="text-orange-600 text-xs sm:text-sm px-2 py-2">
-                  {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
-                </TabsTrigger>
-                <TabsTrigger value="regular" className="text-xs sm:text-sm px-2 py-2">
-                  {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="all" className="mt-0">
-                <div className="space-y-4">
-                  {paginatedArticles.length === 0 ? (
-                    <EmptyState
-                      icon={Newspaper}
-                      title={searchTerm 
-                        ? (currentLanguage === 'es' 
-                            ? `No se encontraron artículos que coincidan con "${searchTerm}"`
-                            : `No articles found matching "${searchTerm}"`)
-                        : (currentLanguage === 'es' 
-                            ? 'No se encontraron artículos verificados'
-                            : 'No verified articles found')
-                      }
-                      description={searchTerm 
-                        ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
-                        : (currentLanguage === 'es' 
-                            ? 'Las noticias se actualizan automáticamente dos veces al día con las últimas fuentes oficiales.'
-                            : 'News is automatically updated twice daily from the latest official sources.')
-                      }
-                    />
-                  ) : (
-                    paginatedArticles.map((article, index) => (
-                      <div key={article.id}>
-                        <ArticleCard article={article} />
-                        {/* Insert ad every 3 articles for free users */}
-                        {!isProMember && (index + 1) % 3 === 0 && (
-                          <AdBanner position="between-articles" className="my-6" />
-                        )}
-                      </div>
-                    ))
-                  )}
-                  
-                  {/* Pagination */}
-                  {renderPagination()}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="urgent" className="mt-0">
-                <div className="space-y-4">
-                  {urgentArticles.length === 0 ? (
-                    <EmptyState
-                      icon={AlertTriangle}
-                      title={currentLanguage === 'es' ? 'No hay alertas urgentes en este momento' : 'No urgent alerts at this time'}
-                    />
-                  ) : (
-                    urgentArticles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
-                      <div key={article.id}>
-                        <ArticleCard article={article} />
-                        {!isProMember && (index + 1) % 3 === 0 && (
-                          <AdBanner position="between-articles" className="my-6" />
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="breaking" className="mt-0">
-                <div className="space-y-4">
-                  {breakingNewsArticles.length === 0 ? (
-                    <EmptyState
-                      icon={Newspaper}
-                      title={currentLanguage === 'es' ? 'No hay noticias de última hora en este momento' : 'No breaking news at this time'}
-                    />
-                  ) : (
-                    breakingNewsArticles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
-                      <div key={article.id}>
-                        <ArticleCard article={article} />
-                        {!isProMember && (index + 1) % 3 === 0 && (
-                          <AdBanner position="between-articles" className="my-6" />
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="regular" className="mt-0">
-                <div className="space-y-4">
-                  {regularArticles.length === 0 ? (
-                    <EmptyState
-                      icon={Newspaper}
-                      title={currentLanguage === 'es' ? 'No se encontraron artículos de noticias regulares' : 'No regular news articles found'}
-                    />
-                  ) : (
-                    regularArticles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
-                      <div key={article.id}>
-                        <ArticleCard article={article} />
-                        {!isProMember && (index + 1) % 3 === 0 && (
-                          <AdBanner position="between-articles" className="my-6" />
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
+            <NewsTabs
+              paginatedArticles={paginatedArticles}
+              urgentArticles={urgentArticles}
+              breakingNewsArticles={breakingNewsArticles}
+              regularArticles={regularArticles}
+              categories={categories}
+              currentLanguage={currentLanguage}
+              translatedContent={translatedContent}
+              expandedArticle={expandedArticle}
+              setExpandedArticle={setExpandedArticle}
+              user={user}
+              isProMember={isProMember}
+              searchTerm={searchTerm}
+              getDisplayText={getDisplayText}
+              getSourceDomain={getSourceDomain}
+              isOfficialSource={isOfficialSource}
+              ARTICLES_PER_PAGE={ARTICLES_PER_PAGE}
+              currentPage={currentPage}
+            />
+            
+            {/* Pagination */}
+            {renderPagination()}
           </div>
 
           {/* Sidebar with ads (only for free users) */}
