@@ -17,21 +17,23 @@ export const useAdminAccess = () => {
     queryFn: async () => {
       if (!user?.id) return false;
       
+      // Use maybeSingle to avoid errors when no admin role exists
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
         .eq('role', 'admin')
-        .single();
+        .maybeSingle();
       
       if (error) {
-        console.log('No admin role found:', error.message);
+        console.error('Admin role check error:', error);
         return false;
       }
       
       return !!data;
     },
     enabled: !!user?.id,
+    retry: false, // Don't retry on failure to avoid loops
   });
 
   return {

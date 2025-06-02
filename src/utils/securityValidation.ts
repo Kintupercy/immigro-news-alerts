@@ -38,16 +38,22 @@ export const validateAdminAccess = async (): Promise<boolean> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
+    // Use direct query without RLS to avoid recursion
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
-      .single();
+      .maybeSingle();
 
-    if (error) return false;
+    if (error) {
+      console.error('Admin access validation error:', error);
+      return false;
+    }
+    
     return !!data;
-  } catch {
+  } catch (error) {
+    console.error('Admin access validation failed:', error);
     return false;
   }
 };
@@ -96,11 +102,6 @@ export const validateSessionSecurity = async (): Promise<{
       return { valid: false, reason: 'Session expired' };
     }
 
-    // Additional security checks could be added here
-    // - Check for suspicious activity
-    // - Validate session integrity
-    // - Check rate limits
-
     return { valid: true };
   } catch (error) {
     return { valid: false, reason: 'Session validation error' };
@@ -117,7 +118,7 @@ export const checkRateLimit = async (identifier: string, maxAttempts: number = 5
       .from('auth_rate_limits')
       .select('*')
       .eq('identifier', identifier)
-      .single();
+      .maybeSingle();
 
     if (!data) {
       return { allowed: true, remaining: maxAttempts - 1 };
