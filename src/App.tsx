@@ -18,7 +18,6 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import EmailVerification from "./pages/EmailVerification";
 import PasswordReset from "./pages/PasswordReset";
-import Payment from "./pages/Payment";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +41,6 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/email-verification" element={<EmailVerification />} />
             <Route path="/password-reset" element={<PasswordReset />} />
-            <Route path="/payment" element={<Payment />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
