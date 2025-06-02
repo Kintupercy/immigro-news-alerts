@@ -17,6 +17,21 @@ const Footer = () => {
               Your trusted source for personalized immigration news and updates. 
               Stay informed about the policies and changes that matter to your journey.
             </p>
+            
+            {/* Social Links */}
+            <div className="flex items-center space-x-4 mt-6">
+              <a 
+                href="https://twitter.com/immigronews" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-white transition-colors"
+                aria-label="Follow us on X (Twitter)"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -26,6 +41,11 @@ const Footer = () => {
               <li>
                 <Link to="/news" className="text-gray-300 hover:text-white transition-colors">
                   Latest News
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+                  Blog
                 </Link>
               </li>
               <li>
