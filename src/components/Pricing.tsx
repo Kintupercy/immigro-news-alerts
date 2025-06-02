@@ -1,4 +1,3 @@
-
 import { Check, Heart, Zap, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,23 +108,13 @@ const Pricing = () => {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Button 
-                onClick={() => window.open('https://ko-fi.com/immigro', '_blank')}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Donate via Ko-fi
-              </Button>
-              
-              <Button 
-                onClick={() => window.open('https://buymeacoffee.com/immigro', '_blank')}
-                variant="outline" 
-                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
-              >
-                ☕ Buy Me a Coffee
-              </Button>
-            </div>
+            <Button 
+              onClick={() => window.open('https://ko-fi.com/immigro', '_blank')}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Donate via Ko-fi
+            </Button>
 
             <p className="text-xs text-gray-500 text-center mt-4">
               Every contribution helps keep Immigro free for students and immigrants worldwide
