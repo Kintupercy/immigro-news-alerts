@@ -53,6 +53,48 @@ const BlogArticle = () => {
     });
   };
 
+  const formatContent = (content: string) => {
+    // Remove markdown symbols and format content properly
+    let formattedContent = content
+      // Remove # symbols for main titles (already handled in header)
+      .replace(/^# .+$/gm, '')
+      // Convert ## to h2 elements
+      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900 font-playfair">$1</h2>')
+      // Convert **bold** to strong elements
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+      // Convert bullet points to proper list items
+      .replace(/^- (.+)$/gm, '<li class="mb-2">$1</li>')
+      // Wrap consecutive list items in ul elements
+      .replace(/(<li class="mb-2">.*<\/li>\s*)+/g, (match) => 
+        `<ul class="list-disc pl-6 mb-6 space-y-2">${match}</ul>`)
+      // Convert line breaks to paragraphs
+      .split('\n\n')
+      .filter(paragraph => paragraph.trim() && !paragraph.includes('<h2') && !paragraph.includes('<ul'))
+      .map(paragraph => `<p class="mb-4 leading-relaxed text-gray-700">${paragraph.trim()}</p>`)
+      .join('')
+      // Add back the h2 and ul elements
+      + content.match(/(<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900 font-playfair">.*?<\/h2>)|(<ul class="list-disc pl-6 mb-6 space-y-2">.*?<\/ul>)/g)?.join('') || '';
+
+    // Clean up and properly structure the content
+    return content
+      .replace(/^# .+$/gm, '') // Remove main title
+      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900 font-playfair">$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+      .replace(/^- (.+)$/gm, '<li class="mb-2">$1</li>')
+      .replace(/(<li class="mb-2">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-6 mb-6 space-y-2">$&</ul>')
+      .split('\n\n')
+      .map(paragraph => {
+        paragraph = paragraph.trim();
+        if (!paragraph) return '';
+        if (paragraph.startsWith('<h2') || paragraph.startsWith('<ul')) {
+          return paragraph;
+        }
+        return `<p class="mb-4 leading-relaxed text-gray-700">${paragraph}</p>`;
+      })
+      .filter(Boolean)
+      .join('\n');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
@@ -143,7 +185,7 @@ const BlogArticle = () => {
           <div 
             className="text-gray-800 leading-relaxed"
             dangerouslySetInnerHTML={{ 
-              __html: article.content.replace(/\n/g, '<br />').replace(/##\s+(.+)/g, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900">$1</h2>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/- (.+)/g, '<li>$1</li>').replace(/(<li>.*<\/li>)/g, '<ul class="list-disc pl-6 mb-4">$1</ul>')
+              __html: formatContent(article.content)
             }} 
           />
         </div>
