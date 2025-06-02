@@ -235,44 +235,71 @@ const Blog = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8 lg:py-12">
-        {/* Search and Filter Section */}
-        <div className="mb-8 lg:mb-12">
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
-              <Input
-                type="text"
-                placeholder="Search articles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 text-base"
-              />
+      {/* Enhanced Central Search Section */}
+      <section className="bg-white border-b border-gray-200 py-8 lg:py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-6 lg:mb-8">
+              <h2 className="text-2xl lg:text-3xl font-playfair font-bold text-gray-900 mb-3">
+                Find Immigration Guides & Resources
+              </h2>
+              <p className="text-gray-600 text-base lg:text-lg">
+                Search through our comprehensive library of immigration articles, guides, and expert advice
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={selectedCategory === "all" ? "default" : "outline"}
-                onClick={() => setSelectedCategory("all")}
-                size="sm"
-                className="h-12 px-4"
-              >
-                All Categories
-              </Button>
-              {categories.map((category) => (
+            
+            {/* Central Search Box */}
+            <div className="bg-gray-50 rounded-2xl p-6 lg:p-8 shadow-sm border border-gray-100">
+              <div className="relative mb-6">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6 z-10" />
+                <Input
+                  type="text"
+                  placeholder="Search immigration articles, visa guides, green card processes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 pr-4 h-14 text-base lg:text-lg rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 bg-white shadow-sm"
+                />
+              </div>
+              
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap justify-center gap-2 lg:gap-3">
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category)}
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  onClick={() => setSelectedCategory("all")}
                   size="sm"
-                  className="h-12 px-4"
+                  className="h-10 px-4 rounded-full bg-white border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
                 >
-                  {category}
+                  All Categories
                 </Button>
-              ))}
+                {categories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category)}
+                    size="sm"
+                    className="h-10 px-4 rounded-full bg-white border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+              
+              {/* Search Stats */}
+              {(searchTerm || selectedCategory !== "all") && (
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-600">
+                    Found <span className="font-semibold text-emerald-600">{filteredArticles.length}</span> articles
+                    {searchTerm && <span> matching "{searchTerm}"</span>}
+                    {selectedCategory !== "all" && <span> in {selectedCategory}</span>}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
+      </section>
 
+      <div className="container mx-auto px-4 py-8 lg:py-12">
         {/* Featured Articles */}
         {featuredArticles.length > 0 && (
           <section className="mb-8 lg:mb-12">
