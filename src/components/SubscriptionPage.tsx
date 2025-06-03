@@ -131,17 +131,30 @@ const SubscriptionPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-stone-100 to-amber-50">
       <Header />
-      <div className="py-16 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="font-playfair text-4xl font-bold text-navy-800 mb-4">
-              Subscribe to Immigration Alerts
-            </h1>
-            <p className="text-lg text-navy-600">
-              Get instant email notifications for urgent and breaking US Immigration law changes
-            </p>
-          </div>
+      
+      {/* Hero section with hands image */}
+      <div className="relative py-16 px-4 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/a36972b3-15b7-449d-83ad-6973d47b689f.png" 
+            alt="Diverse hands raised together" 
+            className="w-full max-w-4xl h-auto opacity-20 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-transparent to-stone-50 opacity-70"></div>
+        </div>
+        
+        <div className="relative z-10 max-w-2xl mx-auto text-center">
+          <h1 className="font-playfair text-4xl font-bold text-navy-800 mb-4">
+            Subscribe to Immigration Alerts
+          </h1>
+          <p className="text-lg text-navy-600">
+            Get instant email notifications for urgent and breaking US Immigration law changes
+          </p>
+        </div>
+      </div>
 
+      <div className="pb-16 px-4">
+        <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
