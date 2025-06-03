@@ -135,7 +135,7 @@ const Hero = () => {
           </div>
 
           <p className="text-sm text-navy-500 mt-6">
-            Join 10,000+ getting urgent immigration law alerts in their inbox
+            Join 3,000+ getting urgent immigration law alerts in their inbox
           </p>
         </div>
       </div>
