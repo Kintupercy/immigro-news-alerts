@@ -40,10 +40,10 @@ const SubscriptionPage = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !firstName || !lastName) {
+    if (!email) {
       toast({
         title: "Missing information",
-        description: "Please fill in all required fields.",
+        description: "Please enter your email address.",
         variant: "destructive",
       });
       return;
@@ -167,7 +167,7 @@ const SubscriptionPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-navy-700 mb-2">
-                      First Name *
+                      First Name (Optional)
                     </label>
                     <Input
                       id="firstName"
@@ -175,12 +175,11 @@ const SubscriptionPage = () => {
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       placeholder="Enter your first name"
-                      required
                     />
                   </div>
                   <div>
                     <label htmlFor="lastName" className="block text-sm font-medium text-navy-700 mb-2">
-                      Last Name *
+                      Last Name (Optional)
                     </label>
                     <Input
                       id="lastName"
@@ -188,7 +187,6 @@ const SubscriptionPage = () => {
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       placeholder="Enter your last name"
-                      required
                     />
                   </div>
                 </div>

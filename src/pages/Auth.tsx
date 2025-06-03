@@ -20,10 +20,10 @@ const Auth = () => {
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !firstName || !lastName) {
+    if (!email) {
       toast({
         title: "Missing information",
-        description: "Please fill in all required fields.",
+        description: "Please enter your email address.",
         variant: "destructive",
       });
       return;
@@ -118,7 +118,7 @@ const Auth = () => {
                 <form onSubmit={handleNewsletterSignup} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name *</Label>
+                      <Label htmlFor="firstName">First Name (Optional)</Label>
                       <Input
                         id="firstName"
                         type="text"
@@ -126,11 +126,10 @@ const Auth = () => {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         disabled={loading}
-                        required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Label htmlFor="lastName">Last Name (Optional)</Label>
                       <Input
                         id="lastName"
                         type="text"
@@ -138,7 +137,6 @@ const Auth = () => {
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         disabled={loading}
-                        required
                       />
                     </div>
                   </div>
