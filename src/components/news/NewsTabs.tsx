@@ -65,19 +65,51 @@ const NewsTabs = ({
 }: NewsTabsProps) => {
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6">
-        <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">
-          {currentLanguage === 'es' ? `Todas (${paginatedArticles.length})` : `All (${paginatedArticles.length})`}
+      <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6 h-auto p-1 bg-muted">
+        <TabsTrigger 
+          value="all" 
+          className="text-xs sm:text-sm px-2 py-3 md:py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-foreground"
+        >
+          <span className="block sm:inline">
+            {currentLanguage === 'es' ? 'Todas' : 'All'}
+          </span>
+          <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
+            ({paginatedArticles.length})
+          </span>
         </TabsTrigger>
-        <TabsTrigger value="urgent" className="text-red-600 text-xs sm:text-sm px-2 py-2">
-          <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-          {currentLanguage === 'es' ? `Urgente (${urgentArticles.length})` : `Urgent (${urgentArticles.length})`}
+        <TabsTrigger 
+          value="urgent" 
+          className="text-red-600 text-xs sm:text-sm px-2 py-3 md:py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-red-600"
+        >
+          <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
+          <span className="block sm:inline">
+            {currentLanguage === 'es' ? 'Urgente' : 'Urgent'}
+          </span>
+          <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
+            ({urgentArticles.length})
+          </span>
         </TabsTrigger>
-        <TabsTrigger value="breaking" className="text-orange-600 text-xs sm:text-sm px-2 py-2">
-          {currentLanguage === 'es' ? `Breaking (${breakingNewsArticles.length})` : `Breaking (${breakingNewsArticles.length})`}
+        <TabsTrigger 
+          value="breaking" 
+          className="text-orange-600 text-xs sm:text-sm px-2 py-3 md:py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-orange-600"
+        >
+          <span className="block sm:inline">
+            {currentLanguage === 'es' ? 'Breaking' : 'Breaking'}
+          </span>
+          <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
+            ({breakingNewsArticles.length})
+          </span>
         </TabsTrigger>
-        <TabsTrigger value="regular" className="text-xs sm:text-sm px-2 py-2">
-          {currentLanguage === 'es' ? `Regular (${regularArticles.length})` : `Regular (${regularArticles.length})`}
+        <TabsTrigger 
+          value="regular" 
+          className="text-xs sm:text-sm px-2 py-3 md:py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-foreground"
+        >
+          <span className="block sm:inline">
+            {currentLanguage === 'es' ? 'Regular' : 'Regular'}
+          </span>
+          <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
+            ({regularArticles.length})
+          </span>
         </TabsTrigger>
       </TabsList>
 
