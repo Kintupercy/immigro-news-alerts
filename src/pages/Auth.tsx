@@ -7,14 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MessageSquare, GraduationCap } from "lucide-react";
+import { Mail, Phone, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [university, setUniversity] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -40,7 +39,6 @@ const Auth = () => {
           preferences: {
             firstName,
             lastName,
-            university: university || null,
             urgentOnly: false,
           }
         }]);
@@ -63,7 +61,6 @@ const Auth = () => {
         setEmail("");
         setFirstName("");
         setLastName("");
-        setUniversity("");
       }
     } catch (error) {
       console.error('Subscription error:', error);
@@ -159,20 +156,6 @@ const Auth = () => {
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="university">
-                      <GraduationCap className="w-4 h-4 inline mr-1" />
-                      University/College (Optional)
-                    </Label>
-                    <Input
-                      id="university"
-                      type="text"
-                      placeholder="Enter your university or college name"
-                      value={university}
-                      onChange={(e) => setUniversity(e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
 
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Subscribing..." : "Subscribe to Newsletter"}
