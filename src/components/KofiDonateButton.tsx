@@ -10,7 +10,7 @@ interface KofiDonateButtonProps {
 
 const KofiDonateButton = ({ className = '', variant = 'fixed' }: KofiDonateButtonProps) => {
   const handleDonate = () => {
-    window.open('https://ko-fi.com/immigrownews', '_blank', 'noopener,noreferrer');
+    window.open('https://ko-fi.com/immigro', '_blank', 'noopener,noreferrer');
   };
 
   if (variant === 'banner') {
