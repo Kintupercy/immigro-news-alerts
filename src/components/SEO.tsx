@@ -21,7 +21,7 @@ const SEO = ({
   title = 'ImmigroNews - Latest Immigration News, Visa Updates & Legal Help',
   description = 'Stay updated with breaking immigration news, visa policy changes, green card updates, and citizenship information. Get expert legal help and real-time alerts trusted by thousands.',
   keywords = ['immigration news', 'visa updates', 'green card news', 'citizenship process', 'immigration lawyer', 'USCIS updates', 'immigration policy'],
-  image = '/og-hero-preview.jpg',
+  image = '/lovable-uploads/eb1aea6b-9f1d-437a-867c-c5027cbaacd2.png',
   url = 'https://immigronews.com',
   type = 'website',
   publishedTime,
