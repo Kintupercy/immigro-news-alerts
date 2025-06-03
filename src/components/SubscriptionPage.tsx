@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Check } from "lucide-react";
+import { Mail, Check, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "./Header";
@@ -13,6 +13,7 @@ const SubscriptionPage = () => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [university, setUniversity] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -68,6 +69,7 @@ const SubscriptionPage = () => {
           preferences: {
             firstName,
             lastName,
+            university: university || null,
             categories,
             urgentOnly: false,
           }
@@ -204,6 +206,20 @@ const SubscriptionPage = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="university" className="block text-sm font-medium text-navy-700 mb-2">
+                    <GraduationCap className="w-4 h-4 inline mr-1" />
+                    University/College (Optional)
+                  </label>
+                  <Input
+                    id="university"
+                    type="text"
+                    value={university}
+                    onChange={(e) => setUniversity(e.target.value)}
+                    placeholder="Enter your university or college name"
                   />
                 </div>
 
