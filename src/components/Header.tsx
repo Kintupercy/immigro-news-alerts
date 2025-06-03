@@ -38,6 +38,14 @@ const Header = () => {
                   Home
                 </Link>
                 <Link 
+                  to="/blog" 
+                  className={`flex items-center h-full transition-colors duration-200 ${
+                    isActive('/blog') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                  }`}
+                >
+                  Blog
+                </Link>
+                <Link 
                   to="/resources" 
                   className={`flex items-center h-full transition-colors duration-200 ${
                     isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
@@ -98,6 +106,15 @@ const Header = () => {
                   }`}
                 >
                   Home
+                </Link>
+                <Link 
+                  to="/blog" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive('/blog') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
+                  }`}
+                >
+                  Blog
                 </Link>
                 <Link 
                   to="/resources" 
