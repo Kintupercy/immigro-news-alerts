@@ -21,7 +21,7 @@ const SEO = ({
   title = 'ImmigroNews - Latest Immigration News, Visa Updates & Legal Help',
   description = 'Stay updated with breaking immigration news, visa policy changes, green card updates, and citizenship information. Get expert legal help and real-time alerts trusted by thousands.',
   keywords = ['immigration news', 'visa updates', 'green card news', 'citizenship process', 'immigration lawyer', 'USCIS updates', 'immigration policy'],
-  image = 'https://immigronews.com/og-image.jpg',
+  image = '/og-hero-preview.jpg',
   url = 'https://immigronews.com',
   type = 'website',
   publishedTime,
@@ -36,6 +36,7 @@ const SEO = ({
   const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
   const keywordString = [...keywords, ...tags].join(', ');
   const canonical = canonicalUrl || url;
+  const fullImageUrl = image.startsWith('http') ? image : `${url}${image}`;
 
   // Enhanced description for SEO
   const enhancedDescription = type === 'article' 
@@ -70,10 +71,10 @@ const SEO = ({
       <meta property="og:type" content={type} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={enhancedDescription} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={fullImageUrl} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={`${fullTitle} - Immigration Guide`} />
+      <meta property="og:image:alt" content={`${fullTitle} - Immigration News & Legal Help`} />
       <meta property="og:url" content={url} />
       <meta property="og:site_name" content={siteTitle} />
       <meta property="og:locale" content="en_US" />
@@ -84,8 +85,8 @@ const SEO = ({
       <meta name="twitter:creator" content="@ImmigroNews" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={enhancedDescription} />
-      <meta name="twitter:image" content={image} />
-      <meta name="twitter:image:alt" content={`${fullTitle} - Immigration Guide`} />
+      <meta name="twitter:image" content={fullImageUrl} />
+      <meta name="twitter:image:alt" content={`${fullTitle} - Immigration News & Legal Help`} />
       
       {/* Article specific meta tags */}
       {type === 'article' && (
