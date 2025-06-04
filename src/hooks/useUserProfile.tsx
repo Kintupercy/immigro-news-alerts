@@ -20,6 +20,7 @@ export interface UserProfile {
     email: boolean;
     push: boolean;
     urgent_only: boolean;
+    newsletter: boolean;
   };
   onboarding_completed: boolean;
 }
@@ -38,7 +39,8 @@ export const useUserProfile = (user: User) => {
       notification_preferences: {
         email: notificationPrefs?.email ?? true,
         push: notificationPrefs?.push ?? true,
-        urgent_only: notificationPrefs?.urgent_only ?? false
+        urgent_only: notificationPrefs?.urgent_only ?? false,
+        newsletter: notificationPrefs?.newsletter ?? true
       }
     };
   };
@@ -68,7 +70,8 @@ export const useUserProfile = (user: User) => {
           notification_preferences: {
             email: true,
             push: true,
-            urgent_only: false
+            urgent_only: false,
+            newsletter: true
           },
           onboarding_completed: false
         };

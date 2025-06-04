@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Bell, Mail, Crown } from "lucide-react";
+import { Bell, Mail, Crown, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
@@ -10,9 +10,10 @@ interface NotificationPreferences {
   email: boolean;
   push: boolean;
   urgent_only: boolean;
+  newsletter: boolean;
 }
 
-type NotificationPreferenceKey = 'email' | 'push' | 'urgent_only';
+type NotificationPreferenceKey = 'email' | 'push' | 'urgent_only' | 'newsletter';
 
 interface NotificationPreferencesSectionProps {
   preferences: NotificationPreferences;
@@ -64,6 +65,23 @@ const NotificationPreferencesSection = ({
             <Checkbox
               checked={preferences.email}
               onCheckedChange={(checked) => onUpdate('email', checked as boolean)}
+              disabled={saving}
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center space-x-3">
+              <FileText className="w-5 h-5 text-navy-600" />
+              <div>
+                <Label className="font-medium">Weekly Newsletter</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive weekly roundup of immigration news
+                </p>
+              </div>
+            </div>
+            <Checkbox
+              checked={preferences.newsletter}
+              onCheckedChange={(checked) => onUpdate('newsletter', checked as boolean)}
               disabled={saving}
             />
           </div>
