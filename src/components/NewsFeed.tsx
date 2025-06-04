@@ -559,6 +559,7 @@ const NewsFeed = () => {
           <div className="lg:col-span-3">
             <NewsTabs
               paginatedArticles={paginatedArticles}
+              filteredArticles={filteredArticles}
               urgentArticles={urgentArticles}
               breakingNewsArticles={breakingNewsArticles}
               regularArticles={regularArticles}

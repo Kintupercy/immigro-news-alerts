@@ -26,6 +26,7 @@ interface Category {
 
 interface NewsTabsProps {
   paginatedArticles: NewsArticle[];
+  filteredArticles: NewsArticle[];
   urgentArticles: NewsArticle[];
   breakingNewsArticles: NewsArticle[];
   regularArticles: NewsArticle[];
@@ -46,6 +47,7 @@ interface NewsTabsProps {
 
 const NewsTabs = ({
   paginatedArticles,
+  filteredArticles,
   urgentArticles,
   breakingNewsArticles,
   regularArticles,
@@ -74,7 +76,7 @@ const NewsTabs = ({
             {currentLanguage === 'es' ? 'Todas' : 'All'}
           </span>
           <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
-            ({paginatedArticles.length})
+            ({filteredArticles.length})
           </span>
         </TabsTrigger>
         <TabsTrigger 
