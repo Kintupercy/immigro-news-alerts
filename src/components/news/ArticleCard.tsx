@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, ExternalLink, Shield, Facebook, X } from "lucide-react";
+import { AlertTriangle, Clock, ExternalLink, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { translateCategory } from "@/utils/translation";
 import BookmarkButton from "../BookmarkButton";
@@ -57,19 +57,6 @@ const ArticleCard = ({
   const sourceDomain = getSourceDomain(article.source_url);
   const isOfficial = isOfficialSource(article.source_url);
   const isBreakingNews = article.category === 'breaking-news';
-
-  const shareOnFacebook = () => {
-    const shareUrl = article.source_url || window.location.href;
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-    window.open(facebookUrl, '_blank', 'width=550,height=420');
-  };
-
-  const shareOnX = () => {
-    const shareUrl = article.source_url || window.location.href;
-    const text = `${article.title} #ImmigrationNews #Immigro`;
-    const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
-    window.open(xUrl, '_blank', 'width=550,height=420');
-  };
   
   return (
     <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${
@@ -165,35 +152,13 @@ const ArticleCard = ({
             </Button>
           )}
 
+          <SocialShareButton 
+            title={article.title}
+            url={article.source_url || window.location.href}
+          />
+
           {user && (
-            <>
-              <BookmarkButton articleId={article.id} user={user} />
-              <SocialShareButton 
-                title={article.title}
-                url={article.source_url || window.location.href}
-              />
-              
-              {/* Direct social media sharing buttons */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={shareOnFacebook}
-                className="p-2"
-                title="Share on Facebook"
-              >
-                <Facebook className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={shareOnX}
-                className="p-2"
-                title="Share on X (Twitter)"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </>
+            <BookmarkButton articleId={article.id} user={user} />
           )}
         </div>
 

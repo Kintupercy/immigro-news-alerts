@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Share2, MessageSquare, Facebook } from "lucide-react";
+import { Share2, MessageSquare, Facebook, Linkedin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SocialShareButtonProps {
@@ -22,6 +22,17 @@ const SocialShareButton = ({ title, url, className }: SocialShareButtonProps) =>
   const shareOnFacebook = () => {
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     window.open(facebookUrl, '_blank', 'width=550,height=420');
+  };
+
+  const shareOnLinkedIn = () => {
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+    window.open(linkedinUrl, '_blank', 'width=550,height=420');
+  };
+
+  const shareOnWhatsApp = () => {
+    const text = `${title} - ${url}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const shareViaText = async () => {
@@ -71,9 +82,17 @@ const SocialShareButton = ({ title, url, className }: SocialShareButtonProps) =>
           <Facebook className="w-4 h-4 mr-2" />
           Share on Facebook
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={shareOnLinkedIn}>
+          <Linkedin className="w-4 h-4 mr-2" />
+          Share on LinkedIn
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={shareOnWhatsApp}>
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Share on WhatsApp
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={shareViaText}>
           <MessageSquare className="w-4 h-4 mr-2" />
-          Share via Text
+          Copy Link
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
