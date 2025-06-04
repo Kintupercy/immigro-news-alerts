@@ -79,52 +79,58 @@ const NewsFeed = () => {
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'breaking-news') {
         filtered = filtered.filter(article => article.category === 'breaking-news');
-      } else if (selectedCategory === 'f1-student-visa') {
-        // Special handling for F-1 Student Visa category
-        filtered = filtered.filter(article => 
-          article.category === 'f1-student-visa' ||
-          article.category === 'student-visas' ||
-          article.category === 'international-students' ||
-          article.category === 'exchange-visitors' ||
-          (article.tags && (
-            article.tags.some(tag => 
-              tag.toLowerCase().includes('student') ||
-              tag.toLowerCase().includes('f-1') ||
-              tag.toLowerCase().includes('f1') ||
-              tag.toLowerCase().includes('international-students') ||
-              tag.toLowerCase().includes('student visa') ||
-              tag.toLowerCase().includes('university') ||
-              tag.toLowerCase().includes('college') ||
-              tag.toLowerCase().includes('academic') ||
-              tag.toLowerCase().includes('opt') ||
-              tag.toLowerCase().includes('cpt') ||
-              tag.toLowerCase().includes('stem')
-            )
-          )) ||
-          article.title.toLowerCase().includes('student visa') ||
-          article.title.toLowerCase().includes('f-1') ||
-          article.title.toLowerCase().includes('f1') ||
-          article.title.toLowerCase().includes('international student') ||
-          article.title.toLowerCase().includes('university') ||
-          article.title.toLowerCase().includes('college') ||
-          article.title.toLowerCase().includes('opt') ||
-          article.title.toLowerCase().includes('cpt') ||
-          article.title.toLowerCase().includes('stem') ||
-          article.content.toLowerCase().includes('student visa') ||
-          article.content.toLowerCase().includes('f-1 visa') ||
-          article.content.toLowerCase().includes('f1 visa') ||
-          article.content.toLowerCase().includes('international student') ||
-          article.content.toLowerCase().includes('optional practical training') ||
-          article.content.toLowerCase().includes('curricular practical training') ||
-          article.summary?.toLowerCase().includes('student visa') ||
-          article.summary?.toLowerCase().includes('f-1') ||
-          article.summary?.toLowerCase().includes('f1') ||
-          article.summary?.toLowerCase().includes('international student') ||
-          article.summary?.toLowerCase().includes('opt') ||
-          article.summary?.toLowerCase().includes('cpt')
-        );
       } else {
-        filtered = filtered.filter(article => article.category === selectedCategory);
+        // Enhanced filtering for all categories
+        filtered = filtered.filter(article => {
+          // Direct category match
+          if (article.category === selectedCategory) return true;
+          
+          // Define keywords for each category
+          const categoryKeywords: Record<string, string[]> = {
+            'f1-student-visa': ['f-1', 'f1', 'student visa', 'international student', 'university', 'college', 'opt', 'cpt', 'stem', 'academic', 'optional practical training', 'curricular practical training'],
+            'h1b-visa': ['h-1b', 'h1b', 'specialty occupation', 'skilled worker', 'professional', 'cap', 'lottery'],
+            'green-card': ['green card', 'permanent residence', 'permanent resident', 'pr', 'adjustment of status', 'aos', 'priority date', 'perm'],
+            'citizenship': ['citizenship', 'naturalization', 'naturalize', 'citizen', 'civics test', 'oath ceremony', 'n-400'],
+            'employment-based': ['employment based', 'work visa', 'work permit', 'ead', 'employment authorization', 'labor certification', 'eb-1', 'eb-2', 'eb-3'],
+            'family-based': ['family based', 'family reunification', 'spouse visa', 'parent visa', 'sibling visa', 'fiancé', 'k-1', 'ir-1', 'f1', 'f2', 'f3', 'f4'],
+            'daca': ['daca', 'deferred action', 'childhood arrivals', 'dreamer', 'dreamers'],
+            'tps': ['tps', 'temporary protected status', 'protected status'],
+            'refugees-asylees': ['refugee', 'asylum', 'asylee', 'persecution', 'withholding of removal'],
+            'l1-visa': ['l-1', 'l1', 'intracompany transfer', 'multinational company', 'manager', 'executive'],
+            'eb5-investor-visa': ['eb-5', 'eb5', 'investor visa', 'investment', 'regional center', 'job creation'],
+            'investors': ['investor', 'e-1', 'e-2', 'treaty trader', 'treaty investor', 'entrepreneur'],
+            'religious-workers': ['r-1', 'religious worker', 'minister', 'missionary', 'religious occupation'],
+            'temporary-visitors': ['b-1', 'b-2', 'tourist', 'visitor', 'business visitor', 'tourism'],
+            'specialty-occupations': ['nafta', 'usmca', 'tn', 'specialty occupation', 'canadian', 'mexican'],
+            'exchange-visitors': ['j-1', 'exchange visitor', 'cultural exchange', 'au pair', 'intern', 'trainee'],
+            'undocumented': ['undocumented', 'mixed status', 'deportation', 'removal proceedings', 'ice raid']
+          };
+
+          const keywords = categoryKeywords[selectedCategory] || [];
+          
+          // Check tags
+          if (article.tags && article.tags.some(tag => 
+            keywords.some(keyword => tag.toLowerCase().includes(keyword.toLowerCase())))) {
+            return true;
+          }
+          
+          // Check title
+          if (keywords.some(keyword => article.title.toLowerCase().includes(keyword.toLowerCase()))) {
+            return true;
+          }
+          
+          // Check content
+          if (keywords.some(keyword => article.content.toLowerCase().includes(keyword.toLowerCase()))) {
+            return true;
+          }
+          
+          // Check summary
+          if (article.summary && keywords.some(keyword => article.summary.toLowerCase().includes(keyword.toLowerCase()))) {
+            return true;
+          }
+          
+          return false;
+        });
       }
     }
 
