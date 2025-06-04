@@ -79,26 +79,49 @@ const NewsFeed = () => {
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'breaking-news') {
         filtered = filtered.filter(article => article.category === 'breaking-news');
-      } else if (selectedCategory === 'student-visas') {
+      } else if (selectedCategory === 'f1-student-visa') {
         // Special handling for F-1 Student Visa category
         filtered = filtered.filter(article => 
+          article.category === 'f1-student-visa' ||
           article.category === 'student-visas' ||
           article.category === 'international-students' ||
+          article.category === 'exchange-visitors' ||
           (article.tags && (
             article.tags.some(tag => 
               tag.toLowerCase().includes('student') ||
               tag.toLowerCase().includes('f-1') ||
+              tag.toLowerCase().includes('f1') ||
               tag.toLowerCase().includes('international-students') ||
-              tag.toLowerCase().includes('student visa')
+              tag.toLowerCase().includes('student visa') ||
+              tag.toLowerCase().includes('university') ||
+              tag.toLowerCase().includes('college') ||
+              tag.toLowerCase().includes('academic') ||
+              tag.toLowerCase().includes('opt') ||
+              tag.toLowerCase().includes('cpt') ||
+              tag.toLowerCase().includes('stem')
             )
           )) ||
           article.title.toLowerCase().includes('student visa') ||
           article.title.toLowerCase().includes('f-1') ||
+          article.title.toLowerCase().includes('f1') ||
           article.title.toLowerCase().includes('international student') ||
+          article.title.toLowerCase().includes('university') ||
+          article.title.toLowerCase().includes('college') ||
+          article.title.toLowerCase().includes('opt') ||
+          article.title.toLowerCase().includes('cpt') ||
+          article.title.toLowerCase().includes('stem') ||
           article.content.toLowerCase().includes('student visa') ||
           article.content.toLowerCase().includes('f-1 visa') ||
+          article.content.toLowerCase().includes('f1 visa') ||
+          article.content.toLowerCase().includes('international student') ||
+          article.content.toLowerCase().includes('optional practical training') ||
+          article.content.toLowerCase().includes('curricular practical training') ||
           article.summary?.toLowerCase().includes('student visa') ||
-          article.summary?.toLowerCase().includes('f-1')
+          article.summary?.toLowerCase().includes('f-1') ||
+          article.summary?.toLowerCase().includes('f1') ||
+          article.summary?.toLowerCase().includes('international student') ||
+          article.summary?.toLowerCase().includes('opt') ||
+          article.summary?.toLowerCase().includes('cpt')
         );
       } else {
         filtered = filtered.filter(article => article.category === selectedCategory);
