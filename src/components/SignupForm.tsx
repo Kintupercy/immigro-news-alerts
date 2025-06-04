@@ -16,7 +16,8 @@ const SignupForm = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    // Enhanced validation
+    if (!email?.trim()) {
       toast({
         title: "Email required",
         description: "Please enter your email address.",
@@ -25,12 +26,26 @@ const SignupForm = () => {
       return;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Sanitize email input
+      const sanitizedEmail = email.trim().toLowerCase();
+
       const { error } = await supabase
         .from('email_subscriptions')
-        .insert([{ email }]);
+        .insert([{ email: sanitizedEmail }]);
 
       if (error) {
         if (error.code === '23505') {

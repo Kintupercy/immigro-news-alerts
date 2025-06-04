@@ -40,10 +40,42 @@ const SubscriptionPage = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    // Enhanced validation
+    if (!email?.trim()) {
       toast({
         title: "Missing information",
         description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Name validation (if provided)
+    const nameRegex = /^[a-zA-Z\s'-]{1,50}$/;
+    if (firstName && !nameRegex.test(firstName.trim())) {
+      toast({
+        title: "Invalid first name",
+        description: "First name can only contain letters, spaces, hyphens, and apostrophes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (lastName && !nameRegex.test(lastName.trim())) {
+      toast({
+        title: "Invalid last name",
+        description: "Last name can only contain letters, spaces, hyphens, and apostrophes.",
         variant: "destructive",
       });
       return;
@@ -61,14 +93,26 @@ const SubscriptionPage = () => {
     setIsLoading(true);
 
     try {
+      // Sanitize inputs
+      const sanitizedEmail = email.trim().toLowerCase();
+      const sanitizedFirstName = firstName?.trim().slice(0, 50) || '';
+      const sanitizedLastName = lastName?.trim().slice(0, 50) || '';
+      
+      // Validate categories
+      const allowedCategories = [
+        'international-students', 'employment-based', 'family-based', 
+        'green-card', 'citizenship', 'refugees-asylees', 'investors', 'temporary-visitors'
+      ];
+      const validCategories = categories.filter(cat => allowedCategories.includes(cat));
+
       const { error } = await supabase
         .from('email_subscriptions')
         .insert([{
-          email,
+          email: sanitizedEmail,
           preferences: {
-            firstName,
-            lastName,
-            categories,
+            firstName: sanitizedFirstName,
+            lastName: sanitizedLastName,
+            categories: validCategories,
             urgentOnly: false,
           }
         }]);

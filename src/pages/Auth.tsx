@@ -20,7 +20,8 @@ const Auth = () => {
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    // Enhanced validation
+    if (!email?.trim()) {
       toast({
         title: "Missing information",
         description: "Please enter your email address.",
@@ -29,16 +30,52 @@ const Auth = () => {
       return;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Name validation (if provided)
+    const nameRegex = /^[a-zA-Z\s'-]{1,50}$/;
+    if (firstName && !nameRegex.test(firstName.trim())) {
+      toast({
+        title: "Invalid first name",
+        description: "First name can only contain letters, spaces, hyphens, and apostrophes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (lastName && !nameRegex.test(lastName.trim())) {
+      toast({
+        title: "Invalid last name",
+        description: "Last name can only contain letters, spaces, hyphens, and apostrophes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Sanitize inputs
+      const sanitizedEmail = email.trim().toLowerCase();
+      const sanitizedFirstName = firstName?.trim().slice(0, 50) || '';
+      const sanitizedLastName = lastName?.trim().slice(0, 50) || '';
+
       const { error } = await supabase
         .from('email_subscriptions')
         .insert([{ 
-          email,
+          email: sanitizedEmail,
           preferences: {
-            firstName,
-            lastName,
+            firstName: sanitizedFirstName,
+            lastName: sanitizedLastName,
             urgentOnly: false,
           }
         }]);
