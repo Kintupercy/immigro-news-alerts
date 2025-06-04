@@ -154,7 +154,7 @@ const ArticleCard = ({
 
           <SocialShareButton 
             title={article.title}
-            url={window.location.href}
+            url={`https://immigronews.com/news`}
           />
 
           {user && (
