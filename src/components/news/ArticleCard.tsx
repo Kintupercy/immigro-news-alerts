@@ -154,7 +154,7 @@ const ArticleCard = ({
 
           <SocialShareButton 
             title={article.title}
-            url={article.source_url || window.location.href}
+            url={window.location.href}
           />
 
           {user && (
