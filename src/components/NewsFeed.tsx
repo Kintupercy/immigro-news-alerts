@@ -129,6 +129,7 @@ const NewsFeed = () => {
   const paginatedArticles = getPaginatedArticles();
   const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
 
+  // Urgent articles should respect the selected category filter
   const urgentArticles = filteredArticles.filter(article => article.is_urgent);
   const regularArticles = filteredArticles.filter(article => !article.is_urgent);
   const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news');
