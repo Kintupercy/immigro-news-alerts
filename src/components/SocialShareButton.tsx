@@ -36,32 +36,44 @@ const SocialShareButton = ({ title, url, className }: SocialShareButtonProps) =>
   };
 
   const shareViaText = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title,
-          text: `Check out this immigration news: ${title}`,
-          url: url,
-        });
-      } catch (error) {
-        console.error('Error sharing:', error);
+    const shareText = `Check out this immigration news: ${title}\n\n${url}`;
+    const smsUrl = `sms:?body=${encodeURIComponent(shareText)}`;
+    
+    // Try to open SMS app directly
+    try {
+      window.open(smsUrl, '_self');
+    } catch (error) {
+      // Fallback: use Web Share API or copy to clipboard
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: title,
+            text: `Check out this immigration news: ${title}`,
+            url: url,
+          });
+        } catch (shareError) {
+          console.error('Error sharing:', shareError);
+          copyToClipboard(shareText);
+        }
+      } else {
+        copyToClipboard(shareText);
       }
-    } else {
-      // Fallback: copy to clipboard
-      const shareText = `${title}\n${url}`;
-      try {
-        await navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Copied to clipboard",
-          description: "Article link copied! You can now share it via text message.",
-        });
-      } catch (error) {
-        toast({
-          title: "Copy failed",
-          description: "Unable to copy link. Please try again.",
-          variant: "destructive",
-        });
-      }
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied to clipboard",
+        description: "Article link copied! You can now share it via text message.",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Unable to copy link. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -92,6 +104,10 @@ const SocialShareButton = ({ title, url, className }: SocialShareButtonProps) =>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={shareViaText}>
           <MessageSquare className="w-4 h-4 mr-2" />
+          Send via Text
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => copyToClipboard(`${title}\n\n${url}`)}>
+          <Share2 className="w-4 h-4 mr-2" />
           Copy Link
         </DropdownMenuItem>
       </DropdownMenuContent>
