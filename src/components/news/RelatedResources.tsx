@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ExternalLink } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { BookOpen, ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface BlogArticle {
@@ -28,6 +29,7 @@ const RelatedResources = ({
 }: RelatedResourcesProps) => {
   const [relatedArticles, setRelatedArticles] = useState<BlogArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchRelatedArticles();
@@ -95,64 +97,81 @@ const RelatedResources = ({
 
   return (
     <div className="border-t pt-4 mt-4">
-      <div className="flex items-center gap-2 mb-3">
-        <BookOpen className="w-4 h-4 text-blue-600" />
-        <h4 className="font-semibold text-sm text-gray-900">
-          {currentLanguage === 'es' ? 'Recursos Relacionados' : 'Related Resources'}
-        </h4>
-      </div>
-      
-      <div className="space-y-3">
-        {relatedArticles.map((article) => (
-          <Card key={article.id} className="border border-gray-200 hover:border-blue-300 transition-colors">
-            <CardContent className="p-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <h5 className="font-medium text-sm text-gray-900 leading-tight mb-1">
-                    {article.title}
-                  </h5>
-                  {article.excerpt && (
-                    <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                      {article.excerpt}
-                    </p>
-                  )}
-                  <span className="text-xs text-blue-600 font-medium">
-                    {article.category}
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 flex-shrink-0"
-                  asChild
-                >
-                  <a 
-                    href={`/blog/${article.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={currentLanguage === 'es' ? 'Leer artículo' : 'Read article'}
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      <div className="mt-3 text-center">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          asChild
-          className="text-xs"
-        >
-          <a href="/blog" target="_blank" rel="noopener noreferrer">
-            {currentLanguage === 'es' ? 'Ver Más Guías' : 'View More Guides'}
-          </a>
-        </Button>
-      </div>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger asChild>
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2 p-0 h-auto hover:bg-transparent text-left w-full justify-start"
+          >
+            <BookOpen className="w-4 h-4 text-blue-600" />
+            <h4 className="font-semibold text-sm text-gray-900">
+              {currentLanguage === 'es' ? 'Recursos Relacionados' : 'Related Resources'}
+            </h4>
+            <span className="text-xs text-gray-500 ml-1">
+              ({relatedArticles.length})
+            </span>
+            {isOpen ? (
+              <ChevronDown className="w-4 h-4 text-gray-500 ml-auto" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-gray-500 ml-auto" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="mt-3">
+          <div className="space-y-3">
+            {relatedArticles.map((article) => (
+              <Card key={article.id} className="border border-gray-200 hover:border-blue-300 transition-colors">
+                <CardContent className="p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <h5 className="font-medium text-sm text-gray-900 leading-tight mb-1">
+                        {article.title}
+                      </h5>
+                      {article.excerpt && (
+                        <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                          {article.excerpt}
+                        </p>
+                      )}
+                      <span className="text-xs text-blue-600 font-medium">
+                        {article.category}
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 flex-shrink-0"
+                      asChild
+                    >
+                      <a 
+                        href={`/blog/${article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={currentLanguage === 'es' ? 'Leer artículo' : 'Read article'}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="mt-3 text-center">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              asChild
+              className="text-xs"
+            >
+              <a href="/blog" target="_blank" rel="noopener noreferrer">
+                {currentLanguage === 'es' ? 'Ver Más Guías' : 'View More Guides'}
+              </a>
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 };
