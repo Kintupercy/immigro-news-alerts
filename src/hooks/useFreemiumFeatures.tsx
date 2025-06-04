@@ -16,11 +16,6 @@ export const useFreemiumFeatures = (user: User | null) => {
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   const features: Record<string, FreemiumFeature> = {
-    smsNotifications: {
-      name: "SMS Notifications",
-      description: "Get instant text alerts for urgent immigration news",
-      proOnly: false // All features are now free
-    },
     spanishTranslation: {
       name: "Spanish Translation", 
       description: "Read all content in Spanish",

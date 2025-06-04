@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 interface NotificationPreferences {
   email?: boolean;
   push?: boolean;
-  sms?: boolean;
   urgent_only?: boolean;
 }
 
@@ -40,11 +39,10 @@ const UserAnalytics = () => {
           const prefs = user.notification_preferences as NotificationPreferences;
           acc.email += prefs.email ? 1 : 0;
           acc.push += prefs.push ? 1 : 0;
-          acc.sms += prefs.sms ? 1 : 0;
           acc.urgentOnly += prefs.urgent_only ? 1 : 0;
         }
         return acc;
-      }, { email: 0, push: 0, sms: 0, urgentOnly: 0 });
+      }, { email: 0, push: 0, urgentOnly: 0 });
 
       // Recent signups (last 30 days)
       const thirtyDaysAgo = new Date();
@@ -151,12 +149,6 @@ const UserAnalytics = () => {
                 {analytics?.notificationPrefs.push || 0}
               </div>
               <p className="text-sm text-muted-foreground">Push Enabled</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {analytics?.notificationPrefs.sms || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">SMS Enabled</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">

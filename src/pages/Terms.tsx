@@ -63,7 +63,7 @@ const Terms = () => {
                 <li>Curated immigration news from verified and authoritative sources</li>
                 <li>Personalized content filtering based on immigration status and interests</li>
                 <li>Real-time alerts for urgent immigration policy changes</li>
-                <li>Email and SMS notification services</li>
+                <li>Email notification services</li>
                 <li>Multi-language content translation (Pro feature)</li>
                 <li>Advanced search and filtering capabilities</li>
                 <li>User account management and preference settings</li>

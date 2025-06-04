@@ -21,11 +21,6 @@ const UpgradeModal = ({ open, onOpenChange, feature }: UpgradeModalProps) => {
       description: "Get instant notifications for breaking immigration news"
     },
     {
-      icon: <Bell className="w-5 h-5 text-emerald-600" />,
-      title: "SMS Notifications", 
-      description: "Receive urgent alerts directly to your phone"
-    },
-    {
       icon: <Globe className="w-5 h-5 text-emerald-600" />,
       title: "Spanish Translation",
       description: "Read all content in your preferred language"

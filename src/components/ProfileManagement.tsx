@@ -27,7 +27,6 @@ interface UserProfile {
   preferred_categories: string[];
   notification_preferences: {
     email: boolean;
-    sms: boolean;
     push: boolean;
     urgent_only: boolean;
   };
@@ -65,7 +64,6 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
       preferred_categories: dbProfile.preferred_categories || [],
       notification_preferences: {
         email: notificationPrefs?.email ?? true,
-        sms: notificationPrefs?.sms ?? false,
         push: notificationPrefs?.push ?? true,
         urgent_only: notificationPrefs?.urgent_only ?? false
       }
@@ -96,7 +94,6 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
           preferred_categories: [],
           notification_preferences: {
             email: true,
-            sms: false,
             push: true,
             urgent_only: false
           },
@@ -213,16 +210,6 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
   const updateNotificationPreference = (key: keyof UserProfile['notification_preferences'], value: boolean) => {
     if (!profile) return;
 
-    // If trying to enable SMS and not a pro member, show upgrade prompt
-    if (key === 'sms' && value && !isProMember) {
-      toast({
-        title: "Pro Feature",
-        description: "SMS notifications are available for Pro members only. Upgrade to Pro to receive text alerts.",
-        variant: "default"
-      });
-      return;
-    }
-
     const updatedPreferences = {
       ...profile.notification_preferences,
       [key]: value
@@ -287,21 +274,15 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
           </div>
           
           <div>
-            <Label htmlFor="phone">Phone Number {isProMember && <span className="text-emerald-600">(Pro)</span>}</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input
               id="phone"
               type="tel"
               placeholder="(555) 123-4567"
               value={formatPhoneNumber(profile.phone_number || '')}
               onChange={handlePhoneChange}
-              disabled={saving || !isProMember}
-              className={!isProMember ? "bg-gray-100" : ""}
+              disabled={saving}
             />
-            {!isProMember && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Phone number is required for SMS notifications (Pro feature)
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -335,31 +316,6 @@ const ProfileManagement = ({ user }: ProfileManagementProps) => {
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center space-x-3">
-                <MessageSquare className="w-5 h-5 text-navy-600" />
-                <div>
-                  <Label className="font-medium flex items-center gap-2">
-                    SMS Notifications 
-                    {isProMember ? (
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Pro</Badge>
-                    ) : (
-                      <Crown className="w-4 h-4 text-yellow-500" />
-                    )}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive urgent updates via text message
-                  </p>
-                </div>
-              </div>
-              <Checkbox
-                checked={profile.notification_preferences.sms && isProMember}
-                onCheckedChange={(checked) => 
-                  updateNotificationPreference('sms', checked as boolean)
-                }
-                disabled={saving || !isProMember}
-              />
-            </div>
 
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>

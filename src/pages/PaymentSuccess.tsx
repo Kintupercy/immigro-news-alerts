@@ -48,7 +48,7 @@ const PaymentSuccess = () => {
           </div>
           
           <p className="text-sm text-gray-600">
-            You now have access to all premium features including SMS notifications, 
+            You now have access to all premium features including
             Spanish translation, and priority news filtering.
           </p>
 

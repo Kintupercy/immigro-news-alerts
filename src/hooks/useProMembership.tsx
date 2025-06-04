@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 
 interface NotificationPreferences {
-  sms?: boolean;
   push?: boolean;
   email?: boolean;
   urgent_only?: boolean;

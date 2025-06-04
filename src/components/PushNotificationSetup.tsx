@@ -13,7 +13,6 @@ interface PushNotificationSetupProps {
   user: User;
   notificationPreferences: {
     email: boolean;
-    sms: boolean;
     push: boolean;
     urgent_only: boolean;
   };

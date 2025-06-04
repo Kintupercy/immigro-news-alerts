@@ -74,7 +74,7 @@ const Privacy = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Personal Information You Provide</h3>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Name and email address when you create an account</li>
-                  <li>Phone number (optional) for SMS notifications</li>
+                  <li>Phone number (optional)</li>
                   <li>Immigration status and categories of interest</li>
                   <li>Country of origin and destination preferences</li>
                   <li>Account settings and notification preferences</li>
