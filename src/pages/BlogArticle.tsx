@@ -8,6 +8,7 @@ import { Clock, User, ArrowLeft, Calendar } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { SafeContent } from "@/utils/contentSecurity";
 
 interface BlogArticle {
   id: string;
@@ -268,11 +269,9 @@ const BlogArticle = () => {
 
         {/* Article Content */}
         <div className="prose prose-sm lg:prose-lg max-w-none">
-          <div 
+          <SafeContent 
+            content={formatContent(article.content)}
             className="text-gray-800 leading-relaxed [&>h2]:scroll-mt-6 [&>h2]:lg:scroll-mt-8"
-            dangerouslySetInnerHTML={{ 
-              __html: formatContent(article.content)
-            }} 
           />
         </div>
 

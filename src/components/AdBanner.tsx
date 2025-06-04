@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { X, ExternalLink } from "lucide-react";
 import { useProMembership } from "@/hooks/useProMembership";
 import { supabase } from "@/integrations/supabase/client";
+import { SafeContent } from "@/utils/contentSecurity";
 
 interface AdConfig {
   id: string;
@@ -98,7 +99,7 @@ const AdBanner = ({ position, className = "" }: AdBannerProps) => {
     return (
       <div className={`ad-container ${className}`}>
         <div className="text-xs text-gray-500 mb-1">Advertisement</div>
-        <div dangerouslySetInnerHTML={{ __html: adConfig.adScript }} />
+        <SafeContent content={adConfig.adScript} />
       </div>
     );
   }
