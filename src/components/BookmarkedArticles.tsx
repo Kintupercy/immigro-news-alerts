@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookmarkCheck, ExternalLink, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { User } from "@supabase/supabase-js";
+import { useAuth } from "@/contexts/AuthContext";
 import LoadingSpinner from "./LoadingSpinner";
 import SocialShareButton from "./SocialShareButton";
 
@@ -27,15 +27,16 @@ interface BookmarkedArticle {
   };
 }
 
-interface BookmarkedArticlesProps {
-  user: User;
-}
-
-const BookmarkedArticles = ({ user }: BookmarkedArticlesProps) => {
+const BookmarkedArticles = () => {
+  const { user } = useAuth();
   const [bookmarks, setBookmarks] = useState<BookmarkedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const { toast } = useToast();
+
+  if (!user) {
+    return null; // This shouldn't happen due to ProtectedRoute
+  }
 
   useEffect(() => {
     fetchBookmarks();
