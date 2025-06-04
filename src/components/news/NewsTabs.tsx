@@ -34,7 +34,6 @@ interface NewsTabsProps {
   translatedContent: Record<string, any>;
   expandedArticle: string | null;
   setExpandedArticle: (id: string | null) => void;
-  user: any;
   searchTerm: string;
   getDisplayText: (text: string, articleId?: string, field?: string) => string;
   getSourceDomain: (url: string | null) => string;
@@ -54,7 +53,6 @@ const NewsTabs = ({
   translatedContent,
   expandedArticle,
   setExpandedArticle,
-  user,
   searchTerm,
   getDisplayText,
   getSourceDomain,
@@ -142,7 +140,6 @@ const NewsTabs = ({
                   translatedContent={translatedContent}
                   expandedArticle={expandedArticle}
                   setExpandedArticle={setExpandedArticle}
-                  user={user}
                   getDisplayText={getDisplayText}
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
@@ -170,7 +167,6 @@ const NewsTabs = ({
                   translatedContent={translatedContent}
                   expandedArticle={expandedArticle}
                   setExpandedArticle={setExpandedArticle}
-                  user={user}
                   getDisplayText={getDisplayText}
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
@@ -198,7 +194,6 @@ const NewsTabs = ({
                   translatedContent={translatedContent}
                   expandedArticle={expandedArticle}
                   setExpandedArticle={setExpandedArticle}
-                  user={user}
                   getDisplayText={getDisplayText}
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
@@ -226,7 +221,6 @@ const NewsTabs = ({
                   translatedContent={translatedContent}
                   expandedArticle={expandedArticle}
                   setExpandedArticle={setExpandedArticle}
-                  user={user}
                   getDisplayText={getDisplayText}
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}

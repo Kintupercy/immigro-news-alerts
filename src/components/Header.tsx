@@ -1,16 +1,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Globe, User, LogOut } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import UrgentNewsAlert from "./UrgentNewsAlert";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -75,49 +72,15 @@ const Header = () => {
               </div>
 
               <div className="flex items-center space-x-4">
-                {user ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-cream-300 hover:text-cream-100">
-                        <User className="h-4 w-4 mr-2" />
-                        {user.user_metadata?.first_name || user.email}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link to="/profile">Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/bookmarks">Bookmarks</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={signOut} className="text-red-600">
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <>
-                    <Link to="/news">
-                      <Button 
-                        size="sm"
-                        variant="ghost"
-                        className="text-cream-300 hover:text-cream-100"
-                      >
-                        News
-                      </Button>
-                    </Link>
-                    <Link to="/auth">
-                      <Button 
-                        size="sm"
-                        className="bg-cream-300 text-navy-800 hover:bg-cream-200"
-                      >
-                        Sign In
-                      </Button>
-                    </Link>
-                  </>
-                )}
+                <Link to="/news">
+                  <Button 
+                    size="sm"
+                    variant="ghost"
+                    className="text-cream-300 hover:text-cream-100"
+                  >
+                    News
+                  </Button>
+                </Link>
               </div>
             </nav>
 
@@ -183,53 +146,15 @@ const Header = () => {
                 </Link>
 
                 <div className="px-3 py-2 space-y-2">
-                  {user ? (
-                    <>
-                      <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="ghost" size="sm" className="w-full justify-start text-cream-300">
-                          <User className="h-4 w-4 mr-2" />
-                          Profile
-                        </Button>
-                      </Link>
-                      <Link to="/bookmarks" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="ghost" size="sm" className="w-full justify-start text-cream-300">
-                          Bookmarks
-                        </Button>
-                      </Link>
-                      <Button 
-                        onClick={() => {
-                          signOut();
-                          setIsMenuOpen(false);
-                        }}
-                        variant="ghost" 
-                        size="sm" 
-                        className="w-full justify-start text-red-400"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/news" onClick={() => setIsMenuOpen(false)}>
-                        <Button 
-                          size="sm"
-                          variant="ghost"
-                          className="w-full bg-navy-700 text-cream-300 hover:bg-navy-600"
-                        >
-                          News
-                        </Button>
-                      </Link>
-                      <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                        <Button 
-                          size="sm"
-                          className="w-full bg-cream-300 text-navy-800 hover:bg-cream-200"
-                        >
-                          Sign In
-                        </Button>
-                      </Link>
-                    </>
-                  )}
+                  <Link to="/news" onClick={() => setIsMenuOpen(false)}>
+                    <Button 
+                      size="sm"
+                      variant="ghost"
+                      className="w-full bg-navy-700 text-cream-300 hover:bg-navy-600"
+                    >
+                      News
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>

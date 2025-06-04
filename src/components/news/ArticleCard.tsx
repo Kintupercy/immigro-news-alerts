@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, ExternalLink, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { translateCategory } from "@/utils/translation";
-import BookmarkButton from "../BookmarkButton";
 import SocialShareButton from "../SocialShareButton";
 import RelatedResources from "./RelatedResources";
 
@@ -36,7 +35,6 @@ interface ArticleCardProps {
   translatedContent: Record<string, any>;
   expandedArticle: string | null;
   setExpandedArticle: (id: string | null) => void;
-  user: any;
   getDisplayText: (text: string, articleId?: string, field?: string) => string;
   getSourceDomain: (url: string | null) => string;
   isOfficialSource: (url: string | null) => boolean;
@@ -49,7 +47,6 @@ const ArticleCard = ({
   translatedContent,
   expandedArticle,
   setExpandedArticle,
-  user,
   getDisplayText,
   getSourceDomain,
   isOfficialSource
@@ -157,10 +154,6 @@ const ArticleCard = ({
             title={article.title}
             url={`https://immigronews.com/news`}
           />
-
-          {user && (
-            <BookmarkButton articleId={article.id} user={user} />
-          )}
         </div>
 
         {/* Enhanced Attribution Section */}

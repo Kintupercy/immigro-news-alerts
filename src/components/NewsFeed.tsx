@@ -534,7 +534,6 @@ const NewsFeed = () => {
               translatedContent={translatedContent}
               expandedArticle={expandedArticle}
               setExpandedArticle={setExpandedArticle}
-              user={user}
               searchTerm={searchTerm}
               getDisplayText={getDisplayText}
               getSourceDomain={getSourceDomain}
