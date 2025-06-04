@@ -11,7 +11,6 @@ import { Progress } from "@/components/ui/progress";
 import { User } from "@supabase/supabase-js";
 import { ChevronRight, Mail, Check, Crown } from "lucide-react";
 import { useProMembership } from "@/hooks/useProMembership";
-import UpgradeModal from "@/components/UpgradeModal";
 
 interface OnboardingFlowProps {
   user: User;
@@ -40,7 +39,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
     push: true,
     urgent_only: false
   });
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const { toast } = useToast();
   const { isProMember, loading: proLoading } = useProMembership(user);
 
@@ -58,15 +56,9 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
         // Remove if already selected
         return prev.filter(cat => cat !== categorySlug);
       } else {
-        // Check if we're at the limit for free users
-        if (!isProMember && prev.length >= FREE_USER_CATEGORY_LIMIT) {
-          toast({
-            title: "Category limit reached",
-            description: `Free users can select up to ${FREE_USER_CATEGORY_LIMIT} categories. Upgrade to Pro to unlock all categories.`,
-            variant: "default"
-          });
-          setUpgradeModalOpen(true);
-          return prev;
+        // Since everything is free now, no limits
+        if (prev.length >= immigrationCategories.length) {
+          return prev; // All categories already selected
         }
         // Add if not selected
         return [...prev, categorySlug];
@@ -75,15 +67,6 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
   };
 
   const handleUrgentOnlyToggle = (checked: boolean) => {
-    if (checked && !isProMember) {
-      toast({
-        title: "Pro Feature", 
-        description: "Urgent news only mode is available for Pro members. Upgrade to Pro for priority news filtering.",
-        variant: "default"
-      });
-      setUpgradeModalOpen(true);
-      return;
-    }
     setNotificationPreferences(prev => ({ ...prev, urgent_only: checked }));
   };
 
@@ -109,11 +92,8 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
       console.log('Selected categories:', selectedCategories);
       console.log('Notification preferences:', notificationPreferences);
 
-      // Prepare the update data - ensure Pro features are disabled for non-Pro users
-      const finalNotificationPrefs = {
-        ...notificationPreferences,
-        urgent_only: isProMember ? notificationPreferences.urgent_only : false
-      };
+      // Prepare the update data
+      const finalNotificationPrefs = notificationPreferences;
 
       const updateData = {
         preferred_categories: selectedCategories,
@@ -185,246 +165,207 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
     }
   };
 
-  const handleUpgradeClick = () => {
-    setUpgradeModalOpen(true);
-  };
 
   return (
-    <>
-      <div 
-        className="min-h-screen flex items-center justify-center p-4 relative"
-        style={{
-          backgroundImage: `url('/lovable-uploads/5cb46a58-9c2c-4d5a-87d5-f03985e8aa30.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {/* Fade overlay */}
-        <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url('/lovable-uploads/5cb46a58-9c2c-4d5a-87d5-f03985e8aa30.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Fade overlay */}
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
+      
+      {/* Content */}
+      <Card className="w-full max-w-2xl relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-navy-800">
+            Welcome to Immigro!
+          </CardTitle>
+          <p className="text-muted-foreground">
+            Let's personalize your immigration news experience
+          </p>
+          <Progress value={progress} className="mt-4" />
+          <p className="text-sm text-muted-foreground mt-2">
+            Step {currentStep} of {totalSteps}
+          </p>
+        </CardHeader>
         
-        {/* Content */}
-        <Card className="w-full max-w-2xl relative z-10 shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-navy-800">
-              Welcome to Immigro!
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Let's personalize your immigration news experience
-            </p>
-            <Progress value={progress} className="mt-4" />
-            <p className="text-sm text-muted-foreground mt-2">
-              Step {currentStep} of {totalSteps}
-            </p>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            {currentStep === 1 && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">
-                    What immigration topics interest you?
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {!isProMember ? (
-                      <>Select up to {FREE_USER_CATEGORY_LIMIT} categories that apply to you. <span className="font-medium text-emerald-600">Upgrade to Pro to unlock all categories.</span></>
-                    ) : (
-                      "Select all categories that apply to you. We'll send you relevant news and updates."
-                    )}
-                  </p>
-                  {!isProMember && (
-                    <div className="flex items-center gap-2 mb-4">
-                      <Badge variant="outline" className="text-emerald-600 border-emerald-600">
-                        Free Plan: {selectedCategories.length}/{FREE_USER_CATEGORY_LIMIT} selected
-                      </Badge>
-                      <Button 
-                        onClick={handleUpgradeClick}
-                        variant="outline"
-                        size="sm"
-                        className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-                      >
-                        <Crown className="w-3 h-3 mr-1" />
-                        Upgrade to Pro
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-1 gap-3">
-                  {immigrationCategories.map((category) => {
-                    const isSelected = selectedCategories.includes(category.slug);
-                    const isDisabled = !isProMember && !isSelected && selectedCategories.length >= FREE_USER_CATEGORY_LIMIT;
-                    
-                    return (
-                      <div
-                        key={category.slug}
-                        className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'border-navy-500 bg-navy-50' 
-                            : isDisabled
-                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                            : 'border-gray-200 hover:bg-gray-50'
-                        }`}
-                        onClick={() => !isDisabled && toggleCategory(category.slug)}
-                      >
-                        <Checkbox
-                          checked={isSelected}
-                          disabled={isDisabled}
-                          onChange={() => !isDisabled && toggleCategory(category.slug)}
-                        />
-                        <Label className={`cursor-pointer font-medium ${isDisabled ? 'text-gray-400' : ''}`}>
-                          {category.name}
-                        </Label>
-                        {isDisabled && (
-                          <Crown className="w-4 h-4 text-yellow-500 ml-auto" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {selectedCategories.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm font-medium mb-2">Selected categories:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCategories.map(slug => {
-                        const category = immigrationCategories.find(c => c.slug === slug);
-                        return (
-                          <Badge key={slug} variant="secondary">
-                            {category?.name}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+        <CardContent className="space-y-6">
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">
+                  What immigration topics interest you?
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Select all categories that apply to you. We'll send you relevant news and updates.
+                </p>
               </div>
-            )}
-
-            {currentStep === 2 && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">
-                    How would you like to receive notifications?
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Choose your preferred notification methods for immigration news updates.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Mail className="w-5 h-5 text-navy-600" />
-                      <div>
-                        <Label className="font-medium">Email Notifications</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive updates via email
-                        </p>
-                      </div>
-                    </div>
-                    <Checkbox
-                      checked={notificationPreferences.email}
-                      onCheckedChange={(checked) => 
-                        setNotificationPreferences(prev => ({ ...prev, email: checked as boolean }))
-                      }
-                    />
-                  </div>
-
-                  <div className={`flex items-center justify-between p-4 border rounded-lg ${!isProMember ? 'opacity-50 bg-gray-50' : ''}`}>
-                    <div>
-                      <Label className="font-medium flex items-center gap-2">
-                        Urgent News Only
-                        {isProMember ? (
-                          <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Pro</Badge>
-                        ) : (
-                          <Crown className="w-4 h-4 text-yellow-500" />
-                        )}
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Only receive notifications for urgent immigration news
-                      </p>
-                    </div>
-                    <Checkbox
-                      checked={notificationPreferences.urgent_only && isProMember}
-                      onCheckedChange={handleUrgentOnlyToggle}
-                      disabled={!isProMember}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {currentStep === 3 && (
-              <div className="space-y-4 text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <Check className="w-8 h-8 text-green-600" />
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">You're all set!</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Your preferences have been configured. Here's what you'll receive:
-                  </p>
-                </div>
-
-                <div className="text-left space-y-2">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium text-sm">Categories:</h4>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedCategories.map(slug => {
-                        const category = immigrationCategories.find(c => c.slug === slug);
-                        return (
-                          <Badge key={slug} variant="outline" className="text-xs">
-                            {category?.name}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium text-sm">Notifications:</h4>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {notificationPreferences.email && "✓ Email"}
-                      {notificationPreferences.urgent_only && isProMember && " • Urgent only"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-between pt-4">
-              {currentStep > 1 && (
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep(prev => prev - 1)}
-                  disabled={loading}
-                >
-                  Back
-                </Button>
-              )}
               
-              {currentStep < totalSteps ? (
-                <Button onClick={handleNextStep} className="ml-auto" disabled={loading}>
-                  Continue
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              ) : (
-                <Button onClick={handleComplete} disabled={loading} className="ml-auto">
-                  {loading ? "Saving..." : "Complete Setup"}
-                </Button>
+              <div className="grid grid-cols-1 gap-3">
+                {immigrationCategories.map((category) => {
+                  const isSelected = selectedCategories.includes(category.slug);
+                  const isDisabled = false; // All categories are free now
+                  
+                  return (
+                    <div
+                      key={category.slug}
+                      className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'border-navy-500 bg-navy-50' 
+                          : isDisabled
+                          ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                          : 'border-gray-200 hover:bg-gray-50'
+                      }`}
+                      onClick={() => !isDisabled && toggleCategory(category.slug)}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        disabled={isDisabled}
+                        onChange={() => !isDisabled && toggleCategory(category.slug)}
+                      />
+                      <Label className="cursor-pointer font-medium">
+                        {category.name}
+                      </Label>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {selectedCategories.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium mb-2">Selected categories:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCategories.map(slug => {
+                      const category = immigrationCategories.find(c => c.slug === slug);
+                      return (
+                        <Badge key={slug} variant="secondary">
+                          {category?.name}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
 
-      <UpgradeModal 
-        open={upgradeModalOpen} 
-        onOpenChange={setUpgradeModalOpen}
-      />
-    </>
+          {currentStep === 2 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">
+                  How would you like to receive notifications?
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Choose your preferred notification methods for immigration news updates.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-navy-600" />
+                    <div>
+                      <Label className="font-medium">Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive updates via email
+                      </p>
+                    </div>
+                  </div>
+                  <Checkbox
+                    checked={notificationPreferences.email}
+                    onCheckedChange={(checked) => 
+                      setNotificationPreferences(prev => ({ ...prev, email: checked as boolean }))
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <Label className="font-medium">
+                      Urgent News Only
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Only receive notifications for urgent immigration news
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={notificationPreferences.urgent_only}
+                    onCheckedChange={handleUrgentOnlyToggle}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-4 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <Check className="w-8 h-8 text-green-600" />
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-2">You're all set!</h3>
+                <p className="text-muted-foreground mb-4">
+                  Your preferences have been configured. Here's what you'll receive:
+                </p>
+              </div>
+
+              <div className="text-left space-y-2">
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-sm">Categories:</h4>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedCategories.map(slug => {
+                      const category = immigrationCategories.find(c => c.slug === slug);
+                      return (
+                        <Badge key={slug} variant="outline" className="text-xs">
+                          {category?.name}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-sm">Notifications:</h4>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {notificationPreferences.email && "✓ Email"}
+                    {notificationPreferences.urgent_only && " • Urgent only"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-4">
+            {currentStep > 1 && (
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(prev => prev - 1)}
+                disabled={loading}
+              >
+                Back
+              </Button>
+            )}
+            
+            {currentStep < totalSteps ? (
+              <Button onClick={handleNextStep} className="ml-auto" disabled={loading}>
+                Continue
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            ) : (
+              <Button onClick={handleComplete} disabled={loading} className="ml-auto">
+                {loading ? "Saving..." : "Complete Setup"}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

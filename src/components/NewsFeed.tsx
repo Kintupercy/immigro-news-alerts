@@ -18,11 +18,7 @@ import { rateLimiter, RATE_LIMITS } from "@/utils/rateLimiter";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import ErrorBoundary from "./ErrorBoundary";
 import { NewsLoadingState } from "./LoadingStates";
-import AdBanner from "./AdBanner";
 import KofiDonateButton from "./KofiDonateButton";
-import { useProMembership } from "@/hooks/useProMembership";
-import { useFreemiumFeatures } from "@/hooks/useFreemiumFeatures";
-import UpgradeModal from "./UpgradeModal";
 import { translateText } from "@/utils/translation";
 import NewsHeader from "./news/NewsHeader";
 import NewsFilters from "./news/NewsFilters";
@@ -64,8 +60,6 @@ const NewsFeed = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
-  const { isProMember } = useProMembership(user);
-  const { checkFeatureAccess, showUpgradePrompt, upgradeModalOpen, setUpgradeModalOpen } = useFreemiumFeatures(user);
 
   // Free tier: limit to 3 categories
   const FREE_CATEGORIES_LIMIT = 3;
@@ -163,16 +157,11 @@ const NewsFeed = () => {
   const regularArticles = filteredArticles.filter(article => !article.is_urgent);
   const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news');
 
-  // Add the missing handleLanguageChange function
+  // Simplified language change handler
   const handleLanguageChange = async (language: 'en' | 'es') => {
-    if (language === 'es' && !isProMember) {
-      showUpgradePrompt('spanishTranslation');
-      return;
-    }
-    
     setCurrentLanguage(language);
     
-    if (language === 'es' && isProMember) {
+    if (language === 'es') {
       // Translate current articles if switching to Spanish
       const newTranslatedContent: Record<string, any> = {};
       
@@ -399,33 +388,16 @@ const NewsFeed = () => {
   };
 
   const handleCategoryClick = (categorySlug: string) => {
-    if (!isProMember && categorySlug !== 'all' && categorySlug !== 'breaking-news' && !FREE_TIER_CATEGORIES.includes(categorySlug)) {
-      showUpgradePrompt('allCategories');
-      setUpgradeModalOpen(true);
-      return;
-    }
     setSelectedCategory(categorySlug);
   };
 
   const isCategoryLocked = (categorySlug: string) => {
-    if (isProMember) return false;
-    if (categorySlug === 'all' || categorySlug === 'breaking-news') return false;
-    return !FREE_TIER_CATEGORIES.includes(categorySlug);
+    return false; // All categories are free now
   };
 
-  // Get categories to display based on user preferences and membership
+  // Get all categories since everything is free
   const getCategoriesToDisplay = () => {
-    if (isProMember) {
-      return categories;
-    }
-    
-    // For free users, show their selected categories from onboarding
-    if (userPreferredCategories.length > 0) {
-      return categories.filter(cat => userPreferredCategories.includes(cat.slug));
-    }
-    
-    // Fallback to default free categories
-    return categories.filter(cat => FREE_TIER_CATEGORIES.includes(cat.slug));
+    return categories;
   };
 
   const handlePageChange = (page: number) => {
@@ -513,10 +485,8 @@ const NewsFeed = () => {
         <NewsHeader
           currentLanguage={currentLanguage}
           onLanguageChange={handleLanguageChange}
-          isProMember={isProMember}
           user={user}
           userPreferredCategories={userPreferredCategories}
-          setUpgradeModalOpen={setUpgradeModalOpen}
         />
 
         {/* Filters Section */}
@@ -527,14 +497,10 @@ const NewsFeed = () => {
           handleCategoryClick={handleCategoryClick}
           categories={categories}
           currentLanguage={currentLanguage}
-          isProMember={isProMember}
           userPreferredCategories={userPreferredCategories}
           getCategoriesToDisplay={getCategoriesToDisplay}
           isCategoryLocked={isCategoryLocked}
         />
-
-        {/* Ad Banner - Header Position (only for free users) */}
-        {!isProMember && <AdBanner position="header" className="mb-6" />}
 
         {/* Search Results Info */}
         {searchTerm && (
@@ -569,7 +535,6 @@ const NewsFeed = () => {
               expandedArticle={expandedArticle}
               setExpandedArticle={setExpandedArticle}
               user={user}
-              isProMember={isProMember}
               searchTerm={searchTerm}
               getDisplayText={getDisplayText}
               getSourceDomain={getSourceDomain}
@@ -582,39 +547,8 @@ const NewsFeed = () => {
             {renderPagination()}
           </div>
 
-          {/* Sidebar with ads (only for free users) */}
-          {!isProMember && (
-            <div className="lg:col-span-1">
-              <div className="sticky top-4 space-y-4">
-                <AdBanner position="sidebar" />
-                {/* Upgrade prompt in sidebar */}
-                <Card className="bg-emerald-50 border-emerald-200">
-                  <CardContent className="p-4 text-center">
-                    <Crown className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                    <h3 className="font-semibold text-emerald-800 mb-1">Upgrade to Pro</h3>
-                    <p className="text-sm text-emerald-700 mb-3">Remove ads and unlock all features</p>
-                    <Button 
-                      onClick={() => setUpgradeModalOpen(true)}
-                      size="sm" 
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                    >
-                      Learn More
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
         </div>
-
-        {/* Footer Ad (only for free users) */}
-        {!isProMember && <AdBanner position="footer" className="mt-8" />}
       </div>
-
-      <UpgradeModal 
-        open={upgradeModalOpen}
-        onOpenChange={setUpgradeModalOpen}
-      />
     </ErrorBoundary>
   );
 };

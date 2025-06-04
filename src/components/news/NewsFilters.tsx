@@ -25,7 +25,6 @@ interface NewsFiltersProps {
   handleCategoryClick: (category: string) => void;
   categories: Category[];
   currentLanguage: 'en' | 'es';
-  isProMember: boolean;
   userPreferredCategories: string[];
   getCategoriesToDisplay: () => Category[];
   isCategoryLocked: (categorySlug: string) => boolean;
@@ -38,7 +37,6 @@ const NewsFilters = ({
   handleCategoryClick,
   categories,
   currentLanguage,
-  isProMember,
   userPreferredCategories,
   getCategoriesToDisplay,
   isCategoryLocked
@@ -102,16 +100,6 @@ const NewsFilters = ({
                     </SelectItem>
                   );
                 })}
-                
-                {/* Show upgrade option for free users */}
-                {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
-                  <SelectItem value="upgrade" disabled>
-                    <div className="flex items-center text-gray-500">
-                      <Crown className="w-3 h-3 mr-2" />
-                      +{categories.length - getCategoriesToDisplay().length - 2} More Categories (Pro)
-                    </div>
-                  </SelectItem>
-                )}
               </SelectContent>
             </Select>
           </div>
@@ -132,16 +120,6 @@ const NewsFilters = ({
           </div>
         </div>
 
-        {/* Show additional categories info for free users */}
-        {!isProMember && categories.length > getCategoriesToDisplay().length + 2 && (
-          <div className="text-cream-200 text-sm">
-            <Crown className="inline w-4 h-4 mr-1" />
-            {currentLanguage === 'es' 
-              ? `${categories.length - getCategoriesToDisplay().length - 2} categorías más disponibles con Pro`
-              : `${categories.length - getCategoriesToDisplay().length - 2} more categories available with Pro`
-            }
-          </div>
-        )}
       </div>
     </div>
   );

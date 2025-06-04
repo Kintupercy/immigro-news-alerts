@@ -15,13 +15,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Clock, ExternalLink, RefreshCw, AlertCircle, Newspaper, Shield } from "lucide-react";
+import { Clock, ExternalLink, RefreshCw, AlertCircle, Newspaper, Shield, Languages } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { enhancedCache, cacheKeys } from "@/utils/enhancedCache";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import ErrorBoundary from "./ErrorBoundary";
 import { NewsCardSkeleton, EmptyState } from "./LoadingStates";
-import LanguageToggle from "./LanguageToggle";
 import { useProMembership } from "@/hooks/useProMembership";
 import { translateText, translateCategory } from "@/utils/translation";
 
@@ -117,7 +116,7 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
   const handleLanguageChange = async (language: 'en' | 'es') => {
     setCurrentLanguage(language);
     
-    if (language === 'es' && isProMember && articles) {
+    if (language === 'es' && articles) {
       // Translate current articles if switching to Spanish
       const newTranslatedContent: Record<string, any> = {};
       
@@ -296,11 +295,27 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
               {currentLanguage === 'es' ? 'Tus Noticias Personalizadas' : 'Your Personalized News'}
             </h2>
             <div className="flex items-center gap-3">
-              <LanguageToggle 
-                currentLanguage={currentLanguage}
-                onLanguageChange={handleLanguageChange}
-                isProMember={isProMember}
-              />
+              <div className="flex items-center gap-2">
+                <Languages className="w-4 h-4 text-gray-600" />
+                <div className="flex rounded-lg border overflow-hidden">
+                  <Button
+                    variant={currentLanguage === 'en' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => handleLanguageChange('en')}
+                    className="rounded-none border-0"
+                  >
+                    English
+                  </Button>
+                  <Button
+                    variant={currentLanguage === 'es' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => handleLanguageChange('es')}
+                    className="rounded-none border-0"
+                  >
+                    Español
+                  </Button>
+                </div>
+              </div>
               <Button 
                 variant="outline" 
                 onClick={() => retry(handleRefresh)}
@@ -333,11 +348,27 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
             {currentLanguage === 'es' ? 'Tus Noticias Personalizadas' : 'Your Personalized News'}
           </h2>
           <div className="flex items-center gap-3">
-            <LanguageToggle 
-              currentLanguage={currentLanguage}
-              onLanguageChange={handleLanguageChange}
-              isProMember={isProMember}
-            />
+            <div className="flex items-center gap-2">
+              <Languages className="w-4 h-4 text-gray-600" />
+              <div className="flex rounded-lg border overflow-hidden">
+                <Button
+                  variant={currentLanguage === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleLanguageChange('en')}
+                  className="rounded-none border-0"
+                >
+                  English
+                </Button>
+                <Button
+                  variant={currentLanguage === 'es' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleLanguageChange('es')}
+                  className="rounded-none border-0"
+                >
+                  Español
+                </Button>
+              </div>
+            </div>
             <Button 
               variant="outline" 
               onClick={() => retry(handleRefresh)} 
@@ -383,11 +414,27 @@ const PersonalizedNewsFeed = ({ user }: PersonalizedNewsFeedProps) => {
             {currentLanguage === 'es' ? 'Tus Noticias Personalizadas' : 'Your Personalized News'}
           </h2>
           <div className="flex items-center gap-3">
-            <LanguageToggle 
-              currentLanguage={currentLanguage}
-              onLanguageChange={handleLanguageChange}
-              isProMember={isProMember}
-            />
+            <div className="flex items-center gap-2">
+              <Languages className="w-4 h-4 text-gray-600" />
+              <div className="flex rounded-lg border overflow-hidden">
+                <Button
+                  variant={currentLanguage === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleLanguageChange('en')}
+                  className="rounded-none border-0"
+                >
+                  English
+                </Button>
+                <Button
+                  variant={currentLanguage === 'es' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleLanguageChange('es')}
+                  className="rounded-none border-0"
+                >
+                  Español
+                </Button>
+              </div>
+            </div>
             <Button 
               variant="outline" 
               onClick={() => retry(handleRefresh)} 

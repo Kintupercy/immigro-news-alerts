@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Newspaper } from "lucide-react";
 import { EmptyState } from "../LoadingStates";
 import ArticleCard from "./ArticleCard";
-import AdBanner from "../AdBanner";
 
 interface NewsArticle {
   id: string;
@@ -36,7 +35,6 @@ interface NewsTabsProps {
   expandedArticle: string | null;
   setExpandedArticle: (id: string | null) => void;
   user: any;
-  isProMember: boolean;
   searchTerm: string;
   getDisplayText: (text: string, articleId?: string, field?: string) => string;
   getSourceDomain: (url: string | null) => string;
@@ -57,7 +55,6 @@ const NewsTabs = ({
   expandedArticle,
   setExpandedArticle,
   user,
-  isProMember,
   searchTerm,
   getDisplayText,
   getSourceDomain,
@@ -150,10 +147,6 @@ const NewsTabs = ({
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
                 />
-                {/* Insert ad every 3 articles for free users */}
-                {!isProMember && (index + 1) % 3 === 0 && (
-                  <AdBanner position="between-articles" className="my-6" />
-                )}
               </div>
             ))
           )}
@@ -182,9 +175,6 @@ const NewsTabs = ({
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
                 />
-                {!isProMember && (index + 1) % 3 === 0 && (
-                  <AdBanner position="between-articles" className="my-6" />
-                )}
               </div>
             ))
           )}
@@ -213,9 +203,6 @@ const NewsTabs = ({
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
                 />
-                {!isProMember && (index + 1) % 3 === 0 && (
-                  <AdBanner position="between-articles" className="my-6" />
-                )}
               </div>
             ))
           )}
@@ -244,9 +231,6 @@ const NewsTabs = ({
                   getSourceDomain={getSourceDomain}
                   isOfficialSource={isOfficialSource}
                 />
-                {!isProMember && (index + 1) % 3 === 0 && (
-                  <AdBanner position="between-articles" className="my-6" />
-                )}
               </div>
             ))
           )}

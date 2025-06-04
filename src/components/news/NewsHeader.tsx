@@ -1,25 +1,19 @@
 
-import { Shield, Crown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Shield, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import LanguageToggle from "../LanguageToggle";
 
 interface NewsHeaderProps {
   currentLanguage: 'en' | 'es';
   onLanguageChange: (language: 'en' | 'es') => void;
-  isProMember: boolean;
   user: any;
   userPreferredCategories: string[];
-  setUpgradeModalOpen: (open: boolean) => void;
 }
 
 const NewsHeader = ({
   currentLanguage,
   onLanguageChange,
-  isProMember,
   user,
-  userPreferredCategories,
-  setUpgradeModalOpen
+  userPreferredCategories
 }: NewsHeaderProps) => {
   return (
     <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
@@ -32,30 +26,27 @@ const NewsHeader = ({
             <Shield className="inline w-4 h-4 mr-1" />
             {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS + BREAKING NEWS' : 'SEARCH, SAVE & SHARE NEWS + BREAKING NEWS'}
           </p>
-          {!isProMember && (
-            <div className="mt-2">
-              <Badge className="bg-emerald-600 text-white">
-                <Crown className="w-3 h-3 mr-1" />
-                Free Plan: {userPreferredCategories.length > 0 ? `${userPreferredCategories.length} Selected Categories` : '3 Categories'}
-              </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setUpgradeModalOpen(true)}
-                className="ml-2 mt-2 lg:mt-0 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-navy-800"
-              >
-                Unlock All 12+ Categories
-              </Button>
-            </div>
-          )}
         </div>
-        <div className="flex items-center gap-3">
-          <LanguageToggle 
-            currentLanguage={currentLanguage}
-            onLanguageChange={onLanguageChange}
-            isProMember={isProMember}
-            user={user}
-          />
+        <div className="flex items-center gap-2">
+          <Languages className="w-4 h-4 text-cream-200" />
+          <div className="flex rounded-lg border overflow-hidden">
+            <Button
+              variant={currentLanguage === 'en' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onLanguageChange('en')}
+              className="rounded-none border-0"
+            >
+              English
+            </Button>
+            <Button
+              variant={currentLanguage === 'es' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onLanguageChange('es')}
+              className="rounded-none border-0"
+            >
+              Español
+            </Button>
+          </div>
         </div>
       </div>
     </div>
