@@ -50,7 +50,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: { 
               name: "Immigro Pro Subscription",
-              description: "Premium immigration news features including SMS notifications, Spanish translation, and more"
+              description: "Premium immigration news features including Spanish translation, priority filtering, and more"
             },
             unit_amount: 499, // $4.99 in cents
             recurring: { interval: "month" },

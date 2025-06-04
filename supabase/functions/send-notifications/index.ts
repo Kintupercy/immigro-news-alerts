@@ -122,7 +122,6 @@ serve(async (req) => {
         }
       }
 
-      // Add SMS notifications here if needed
       // Add push notifications here if needed
     }
 
