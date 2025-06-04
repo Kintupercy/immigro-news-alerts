@@ -79,6 +79,27 @@ const NewsFeed = () => {
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'breaking-news') {
         filtered = filtered.filter(article => article.category === 'breaking-news');
+      } else if (selectedCategory === 'student-visas') {
+        // Special handling for F-1 Student Visa category
+        filtered = filtered.filter(article => 
+          article.category === 'student-visas' ||
+          article.category === 'international-students' ||
+          (article.tags && (
+            article.tags.some(tag => 
+              tag.toLowerCase().includes('student') ||
+              tag.toLowerCase().includes('f-1') ||
+              tag.toLowerCase().includes('international-students') ||
+              tag.toLowerCase().includes('student visa')
+            )
+          )) ||
+          article.title.toLowerCase().includes('student visa') ||
+          article.title.toLowerCase().includes('f-1') ||
+          article.title.toLowerCase().includes('international student') ||
+          article.content.toLowerCase().includes('student visa') ||
+          article.content.toLowerCase().includes('f-1 visa') ||
+          article.summary?.toLowerCase().includes('student visa') ||
+          article.summary?.toLowerCase().includes('f-1')
+        );
       } else {
         filtered = filtered.filter(article => article.category === selectedCategory);
       }
