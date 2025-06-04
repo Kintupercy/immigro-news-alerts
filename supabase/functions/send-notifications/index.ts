@@ -14,18 +14,48 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const body = await req.json();
+    const { type, newsId, articleId, isUrgent, timeSlot } = body;
 
-    const { articleId, isUrgent } = await req.json();
+    // Handle different notification types
+    if (type === 'urgent_news' && newsId) {
+      // Call the dedicated urgent notifications function
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-urgent-notifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({ newsId }),
+      });
+
+      const result = await response.json();
+      return new Response(JSON.stringify(result), {
+        status: response.status,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Handle legacy format (for backward compatibility)
+    const targetArticleId = newsId || articleId;
+
+    if (!targetArticleId) {
+      return new Response(JSON.stringify({ message: 'No specific article notifications to send' }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     // Get the article details
     const { data: article, error: articleError } = await supabaseClient
       .from('immigration_news')
       .select('*')
-      .eq('id', articleId)
+      .eq('id', targetArticleId)
       .single();
 
     if (articleError || !article) {

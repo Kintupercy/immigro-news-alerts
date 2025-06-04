@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -6,18 +5,18 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface UrgentAlertEmailRequest {
+interface UrgentAlertRequest {
   to: string;
   newsTitle: string;
   newsContent: string;
-  newsSummary: string;
+  newsSummary?: string;
   newsCategory: string;
   sourceUrl?: string;
   firstName?: string;
+  urgencyContext?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -26,76 +25,92 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, newsTitle, newsContent, newsSummary, newsCategory, sourceUrl, firstName }: UrgentAlertEmailRequest = await req.json();
+    const { 
+      to, 
+      newsTitle, 
+      newsContent, 
+      newsSummary, 
+      newsCategory, 
+      sourceUrl, 
+      firstName,
+      urgencyContext 
+    }: UrgentAlertRequest = await req.json();
 
-    const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>🚨 URGENT Immigration News Alert</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .urgent-banner { background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border-radius: 6px; }
-            .content { background: #f8fafc; padding: 30px 20px; border-radius: 0 0 8px 8px; }
-            .category-badge { background: #dc2626; color: white; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 20px; display: inline-block; }
-            .news-title { font-size: 24px; font-weight: bold; margin: 20px 0; color: #dc2626; }
-            .news-summary { font-size: 18px; line-height: 1.6; margin: 20px 0; padding: 15px; background: #fef9c3; border-left: 4px solid #eab308; }
-            .news-content { font-size: 16px; line-height: 1.8; margin: 20px 0; }
-            .source-link { background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }
-            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
-            .cta-button { background: #1e3a8a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1 style="margin: 0; font-size: 28px;">🚨 URGENT IMMIGRATION ALERT</h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">Critical immigration law update</p>
+    const htmlContent = `
+      <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; line-height: 1.6;">
+        <!-- Urgent Header -->
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; padding: 25px; text-align: center;">
+          <div style="font-size: 14px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">🚨 URGENT IMMIGRATION ALERT</div>
+          <h1 style="margin: 0; font-size: 24px;">Breaking Immigration News</h1>
+        </div>
+        
+        <div style="padding: 30px; background: #ffffff;">
+          ${firstName ? `<p style="font-size: 16px; margin-bottom: 20px;">Hello ${firstName},</p>` : ''}
+          
+          <!-- Urgency Context -->
+          ${urgencyContext ? `
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 25px;">
+            <h3 style="color: #dc2626; margin-top: 0; font-size: 16px;">Why This Is Urgent:</h3>
+            <p style="color: #7f1d1d; margin-bottom: 0;">${urgencyContext}</p>
+          </div>
+          ` : ''}
+          
+          <!-- News Content -->
+          <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+            <div style="background: #f3f4f6; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+              <span style="font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: bold;">
+                ${newsCategory.replace('-', ' ')}
+              </span>
+            </div>
+            
+            <h2 style="color: #1f2937; margin-top: 0; font-size: 20px;">${newsTitle}</h2>
+            
+            ${newsSummary ? `
+            <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <h4 style="color: #374151; margin-top: 0; font-size: 14px; font-weight: bold;">Summary:</h4>
+              <p style="color: #4b5563; margin-bottom: 0;">${newsSummary}</p>
+            </div>
+            ` : ''}
+            
+            <div style="color: #374151; font-size: 15px;">
+              ${newsContent.split('\n').map(paragraph => paragraph.trim() ? `<p>${paragraph}</p>` : '').join('')}
+            </div>
           </div>
           
-          <div class="urgent-banner">
-            ⚠️ URGENT UPDATE: This news may significantly impact your immigration status or applications
+          <!-- Action Buttons -->
+          <div style="text-align: center; margin-bottom: 25px;">
+            ${sourceUrl ? `
+            <a href="${sourceUrl}" style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-right: 10px;">
+              Read Original Source
+            </a>
+            ` : ''}
+            <a href="https://immigronews.com/news" style="background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              View All News
+            </a>
           </div>
           
-          <div class="content">
-            ${firstName ? `<p>Hi ${firstName},</p>` : '<p>Hello,</p>'}
-            
-            <span class="category-badge">${newsCategory.toUpperCase()}</span>
-            
-            <h2 class="news-title">${newsTitle}</h2>
-            
-            <div class="news-summary">
-              <strong>Summary:</strong> ${newsSummary}
-            </div>
-            
-            <div class="news-content">${newsContent}</div>
-            
-            ${sourceUrl ? `<a href="${sourceUrl}" class="source-link">📰 Read Full Article</a>` : ''}
-            
-            <a href="https://xybpgorbkiaitimxiqej.supabase.co/news" class="cta-button">View All Immigration News</a>
-            
-            <div style="background: #fef2f2; padding: 15px; border-radius: 6px; margin-top: 20px;">
-              <p style="margin: 0; color: #dc2626; font-weight: bold;">⚡ Action Required:</p>
-              <p style="margin: 5px 0 0 0; color: #991b1b;">We recommend consulting with an immigration attorney if this update affects your situation.</p>
-            </div>
-            
-            <div class="footer">
-              <p>You're receiving this urgent alert because you subscribed to Immigro immigration news alerts and selected email notifications during onboarding.</p>
-              <p>Want to change your notification preferences? <a href="https://xybpgorbkiaitimxiqej.supabase.co/profile">Update your settings</a></p>
-              <p>© 2024 Immigro. All rights reserved.</p>
-            </div>
+          <!-- Disclaimer -->
+          <div style="background: #fffbeb; border: 1px solid #fbbf24; padding: 15px; border-radius: 6px; margin-top: 20px;">
+            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">⚠️ Important:</h4>
+            <p style="color: #78350f; margin-bottom: 0; font-size: 13px;">
+              This is breaking news and situations can change rapidly. Please consult with a qualified immigration attorney for advice specific to your situation. ImmigroNews provides information for educational purposes only.
+            </p>
           </div>
-        </body>
-      </html>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
+          <p style="margin-bottom: 10px;">You're receiving this urgent alert because you have urgent immigration notifications enabled.</p>
+          <p style="margin-bottom: 0;">© 2025 ImmigroNews. All rights reserved.</p>
+        </div>
+      </div>
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "Immigro Urgent Alerts <urgent@immigro.co>",
+      from: "ImmigroNews Alerts <alerts@immigronews.com>",
       to: [to],
       subject: `🚨 URGENT: ${newsTitle}`,
-      html: emailHtml,
+      html: htmlContent,
     });
 
     console.log("Urgent alert email sent successfully:", emailResponse);
