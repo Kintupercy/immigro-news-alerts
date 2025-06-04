@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { translateCategory } from "@/utils/translation";
 import BookmarkButton from "../BookmarkButton";
 import SocialShareButton from "../SocialShareButton";
+import RelatedResources from "./RelatedResources";
 
 interface NewsArticle {
   id: string;
@@ -179,6 +180,14 @@ const ArticleCard = ({
             </p>
           </div>
         )}
+
+        {/* Related Resources Section */}
+        <RelatedResources
+          articleCategory={article.category}
+          articleTags={article.tags}
+          articleTitle={article.title}
+          currentLanguage={currentLanguage}
+        />
       </CardContent>
     </Card>
   );
