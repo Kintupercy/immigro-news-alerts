@@ -129,17 +129,6 @@ const NewsFilters = ({
             >
               {currentLanguage === 'es' ? 'Todas' : 'All'}
             </Button>
-            <Button
-              variant={selectedCategory === 'breaking-news' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleCategoryClick('breaking-news')}
-              className={selectedCategory === 'breaking-news' 
-                ? 'bg-cream-50 text-navy-800 hover:bg-cream-100' 
-                : 'bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800'
-              }
-            >
-              {currentLanguage === 'es' ? 'Breaking' : 'Breaking'}
-            </Button>
           </div>
         </div>
 
