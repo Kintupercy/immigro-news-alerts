@@ -11,6 +11,8 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 
 const Index = () => {
+  console.log('Index component rendering');
+  
   useEffect(() => {
     // Auto-scroll functionality - disabled on mobile for better UX
     let scrollTimeout: NodeJS.Timeout;
