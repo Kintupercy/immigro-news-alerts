@@ -152,10 +152,10 @@ const NewsFeed = () => {
   const paginatedArticles = getPaginatedArticles();
   const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
 
-  // Urgent articles should respect the selected category filter
+  // Mutually exclusive tab filtering
   const urgentArticles = filteredArticles.filter(article => article.is_urgent);
-  const regularArticles = filteredArticles.filter(article => !article.is_urgent);
-  const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news');
+  const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news' && !article.is_urgent);
+  const regularArticles = filteredArticles.filter(article => !article.is_urgent && article.category !== 'breaking-news');
 
   // Simplified language change handler
   const handleLanguageChange = async (language: 'en' | 'es') => {
