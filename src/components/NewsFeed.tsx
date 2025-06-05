@@ -137,7 +137,8 @@ const NewsFeed = () => {
       );
     }
 
-    return filtered;
+    // Ensure articles are always sorted by published_at (newest first)
+    return filtered.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
   };
 
   const filteredArticles = getFilteredArticles();
