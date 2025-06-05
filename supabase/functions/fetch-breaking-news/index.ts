@@ -15,7 +15,8 @@ const IMMIGRATION_KEYWORDS = [
   'family reunification', 'chain migration', 'merit-based', 'undocumented',
   'immigration policy', 'immigration law', 'immigration court', 'immigration judge',
   'removal proceedings', 'adjustment of status', 'consular processing',
-  'priority date', 'visa bulletin', 'employment authorization', 'travel document'
+  'priority date', 'visa bulletin', 'employment authorization', 'travel document',
+  'travel ban', 'muslim ban', 'country ban', 'proclamation', 'executive order'
 ];
 
 const handler = async (req: Request): Promise<Response> => {
@@ -44,7 +45,8 @@ IMMIGRATION TOPICS ONLY:
 - Green card processing changes
 - Asylum policy updates
 - DACA/TPS announcements
-- Immigration executive orders
+- Immigration executive orders and proclamations
+- Travel bans and country restrictions
 - Citizenship ceremony changes
 
 REQUIRED SOURCES - Major trusted outlets:
