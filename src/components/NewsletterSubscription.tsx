@@ -6,13 +6,52 @@ import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SecureForm } from "@/components/SecureForm";
+import { HoneypotField } from "@/components/HoneypotField";
+import { enhancedRateLimiter } from "@/utils/enhancedRateLimiter";
+import { securityMonitor, generateClientFingerprint } from "@/utils/securityMonitoring";
 
 const NewsletterSubscription = () => {
   const [email, setEmail] = useState("");
+  const [honeypotValue, setHoneypotValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubscribe = async (data: any, csrfToken: string) => {
+    const clientId = generateClientFingerprint();
+    
+    // Check honeypot field
+    if (honeypotValue.trim() !== '') {
+      securityMonitor.logSecurityEvent({
+        type: 'honeypot_triggered',
+        clientId,
+        details: { form: 'newsletter_subscription' }
+      });
+      toast({
+        title: "Error",
+        description: "Invalid submission detected.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Rate limiting check
+    const rateLimitCheck = enhancedRateLimiter.checkLimit(clientId, 'api');
+    if (!rateLimitCheck.allowed) {
+      securityMonitor.logSecurityEvent({
+        type: 'rate_limit_exceeded',
+        clientId,
+        details: { 
+          form: 'newsletter_subscription',
+          remainingAttempts: rateLimitCheck.remainingAttempts 
+        }
+      });
+      toast({
+        title: "Too many requests",
+        description: `Please wait ${Math.ceil((rateLimitCheck.resetTime! - Date.now()) / 1000)} seconds before trying again.`,
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!email) {
       toast({
@@ -23,9 +62,20 @@ const NewsletterSubscription = () => {
       return;
     }
 
-    // Basic email validation
+    // Enhanced email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    const sanitizedEmail = email.trim().toLowerCase();
+    
+    if (!emailRegex.test(sanitizedEmail) || sanitizedEmail.length > 254) {
+      securityMonitor.logSecurityEvent({
+        type: 'suspicious_input',
+        clientId,
+        details: { 
+          form: 'newsletter_subscription',
+          issue: 'invalid_email_format',
+          emailLength: email.length 
+        }
+      });
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address.",
@@ -40,10 +90,12 @@ const NewsletterSubscription = () => {
       const { error } = await supabase
         .from('email_subscriptions')
         .insert([{ 
-          email: email.toLowerCase().trim(),
+          email: sanitizedEmail,
           preferences: {
             source: 'newsletter_subscription',
-            subscribed_from: 'home_page'
+            subscribed_from: 'home_page',
+            client_fingerprint: clientId,
+            subscription_timestamp: Date.now()
           }
         }]);
 
@@ -64,6 +116,7 @@ const NewsletterSubscription = () => {
           description: "You'll receive updates on US immigration law changes.",
         });
         setEmail("");
+        setHoneypotValue("");
       }
     } catch (error) {
       console.error('Subscription error:', error);
@@ -90,6 +143,7 @@ const NewsletterSubscription = () => {
 
         {/* Email subscription form */}
         <SecureForm onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+          <HoneypotField value={honeypotValue} onChange={setHoneypotValue} />
           <div className="relative flex-1">
             <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400 h-5 w-5" />
             <Input

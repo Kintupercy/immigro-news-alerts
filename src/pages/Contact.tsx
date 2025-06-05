@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SocialShareButton from "@/components/SocialShareButton";
 import { SecureForm } from "@/components/SecureForm";
+import { HoneypotField } from "@/components/HoneypotField";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ const Contact = () => {
     subject: "",
     message: ""
   });
+  const [honeypotValue, setHoneypotValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -34,6 +36,17 @@ const Contact = () => {
 
   const handleSubmit = async (data: any, csrfToken: string) => {
     setIsSubmitting(true);
+
+    // Check honeypot field - if filled, it's likely a bot
+    if (honeypotValue.trim() !== '') {
+      toast({
+        title: "Error",
+        description: "Invalid submission detected.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const submissionData = {
@@ -60,6 +73,7 @@ const Contact = () => {
         subject: "",
         message: ""
       });
+      setHoneypotValue("");
     } catch (error) {
       console.error('Error sending contact email:', error);
       toast({
@@ -157,6 +171,7 @@ const Contact = () => {
                 </CardHeader>
                 <CardContent>
                   <SecureForm onSubmit={handleSubmit} className="space-y-6">
+                    <HoneypotField value={honeypotValue} onChange={setHoneypotValue} />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">

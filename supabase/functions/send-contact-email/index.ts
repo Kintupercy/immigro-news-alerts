@@ -17,7 +17,50 @@ interface ContactFormRequest {
   subject: string;
   message: string;
   csrf_token?: string;
+  csrf_timestamp?: number;
 }
+
+// Rate limiting storage
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+// Enhanced CSRF token validation with timing-safe comparison
+const validateCSRFToken = (token: string, expectedToken: string): boolean => {
+  if (!token || !expectedToken || token.length !== expectedToken.length) {
+    return false;
+  }
+  
+  let result = 0;
+  for (let i = 0; i < token.length; i++) {
+    result |= token.charCodeAt(i) ^ expectedToken.charCodeAt(i);
+  }
+  return result === 0;
+};
+
+// Rate limiting function
+const checkRateLimit = (identifier: string, maxAttempts: number = 5, windowMs: number = 15 * 60 * 1000): boolean => {
+  const now = Date.now();
+  const record = rateLimitMap.get(identifier);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxAttempts) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+};
+
+// Get client identifier from request
+const getClientIdentifier = (req: Request): string => {
+  return req.headers.get('x-forwarded-for') || 
+         req.headers.get('x-real-ip') || 
+         req.headers.get('cf-connecting-ip') ||
+         'unknown';
+};
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -26,13 +69,73 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { firstName, lastName, email, subject, message, csrf_token }: ContactFormRequest = await req.json();
+    const { firstName, lastName, email, subject, message, csrf_token, csrf_timestamp }: ContactFormRequest = await req.json();
     
-    // Basic CSRF token validation (verify token exists)
-    if (!csrf_token || csrf_token.length < 32) {
+    // Get client identifier for rate limiting
+    const clientId = getClientIdentifier(req);
+    
+    // Rate limiting check
+    if (!checkRateLimit(clientId)) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: "Invalid request token" 
+        error: "Too many requests. Please wait before trying again." 
+      }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    
+    // Enhanced CSRF token validation
+    if (!csrf_token || csrf_token.length !== 64) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "Invalid security token" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    
+    // Check token expiration (1 hour limit)
+    if (csrf_timestamp) {
+      const oneHour = 60 * 60 * 1000;
+      if (Date.now() - csrf_timestamp > oneHour) {
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: "Security token expired. Please refresh the page." 
+        }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
+    
+    // Input validation and sanitization
+    if (!firstName || !lastName || !email || !subject || !message) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "All fields are required" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    
+    // Sanitize inputs
+    const sanitizedData = {
+      firstName: firstName.trim().slice(0, 50),
+      lastName: lastName.trim().slice(0, 50),
+      email: email.trim().toLowerCase().slice(0, 254),
+      subject: subject.trim().slice(0, 200),
+      message: message.trim().slice(0, 5000)
+    };
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedData.email)) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "Invalid email address" 
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -43,7 +146,7 @@ const handler = async (req: Request): Promise<Response> => {
     const companyEmailResponse = await resend.emails.send({
       from: "Contact Form <contact@immigronews.com>",
       to: ["support@immigronews.com"],
-      subject: `New Contact Form Submission: ${subject}`,
+      subject: `New Contact Form Submission: ${sanitizedData.subject}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -68,22 +171,22 @@ const handler = async (req: Request): Promise<Response> => {
             <div class="content">
               <div class="field">
                 <div class="label">From:</div>
-                <div class="value">${firstName} ${lastName}</div>
+                <div class="value">${sanitizedData.firstName} ${sanitizedData.lastName}</div>
               </div>
               
               <div class="field">
                 <div class="label">Email:</div>
-                <div class="value">${email}</div>
+                <div class="value">${sanitizedData.email}</div>
               </div>
               
               <div class="field">
                 <div class="label">Subject:</div>
-                <div class="value">${subject}</div>
+                <div class="value">${sanitizedData.subject}</div>
               </div>
               
               <div class="field">
                 <div class="label">Message:</div>
-                <div class="value">${message}</div>
+                <div class="value">${sanitizedData.message}</div>
               </div>
             </div>
           </body>
@@ -94,7 +197,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to the user
     const userEmailResponse = await resend.emails.send({
       from: "ImmigrowNews Support <support@immigronews.com>",
-      to: [email],
+      to: [sanitizedData.email],
       subject: "We received your message - ImmigrowNews Support",
       html: `
         <!DOCTYPE html>
@@ -118,9 +221,9 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <div class="content">
-              <p>Hi ${firstName},</p>
+              <p>Hi ${sanitizedData.firstName},</p>
               
-              <p>Thank you for reaching out to us! We have successfully received your message regarding: <strong>"${subject}"</strong></p>
+              <p>Thank you for reaching out to us! We have successfully received your message regarding: <strong>"${sanitizedData.subject}"</strong></p>
               
               <p>Our team will review your inquiry and get back to you within 24 hours during business days (Monday - Friday, 9 AM - 6 PM EST).</p>
               

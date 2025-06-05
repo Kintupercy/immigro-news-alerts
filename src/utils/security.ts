@@ -53,9 +53,31 @@ export const createRateLimiter = (maxAttempts: number, windowMs: number) => {
   };
 };
 
-// CSRF Token generation (for forms)
+// CSRF Token generation (for forms) - Cryptographically secure
 export const generateCSRFToken = (): string => {
-  return crypto.randomUUID();
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+};
+
+// CSRF Token validation with timing-safe comparison
+export const validateCSRFToken = (token: string, expectedToken: string): boolean => {
+  if (!token || !expectedToken || token.length !== expectedToken.length) {
+    return false;
+  }
+  
+  // Timing-safe comparison to prevent timing attacks
+  let result = 0;
+  for (let i = 0; i < token.length; i++) {
+    result |= token.charCodeAt(i) ^ expectedToken.charCodeAt(i);
+  }
+  return result === 0;
+};
+
+// Token expiration check (tokens valid for 1 hour)
+export const isTokenExpired = (tokenTimestamp: number): boolean => {
+  const oneHour = 60 * 60 * 1000;
+  return Date.now() - tokenTimestamp > oneHour;
 };
 
 // Safe content rendering - moved to contentSecurity.tsx for React components
