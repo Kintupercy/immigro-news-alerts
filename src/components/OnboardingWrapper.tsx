@@ -22,23 +22,9 @@ const OnboardingWrapper = ({ user, children }: OnboardingWrapperProps) => {
   }, [user]);
 
   const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('onboarding_completed')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
-      } else {
-        setProfile(data);
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    } finally {
-      setLoading(false);
-    }
+    // Skip profile fetching for public site
+    setProfile({ onboarding_completed: true });
+    setLoading(false);
   };
 
   const handleOnboardingComplete = () => {

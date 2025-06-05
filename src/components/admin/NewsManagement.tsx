@@ -57,14 +57,7 @@ const NewsManagement = () => {
 
       if (error) throw error;
 
-      // Log admin action
-      await supabase.from('admin_logs').insert({
-        admin_user_id: user.user?.id,
-        action: !article.is_urgent ? 'mark_urgent' : 'unmark_urgent',
-        target_type: 'article',
-        target_id: article.id,
-        details: { title: article.title }
-      });
+      // Skip admin logging for public site
 
       // Send urgent alert if marking as urgent
       if (!article.is_urgent) {
@@ -105,14 +98,7 @@ const NewsManagement = () => {
 
       if (error) throw error;
 
-      // Log admin action
-      await supabase.from('admin_logs').insert({
-        admin_user_id: user.user?.id,
-        action: 'delete_article',
-        target_type: 'article',
-        target_id: article.id,
-        details: { title: article.title }
-      });
+      // Skip admin logging for public site
 
       queryClient.invalidateQueries({ queryKey: ['adminArticles'] });
       toast({

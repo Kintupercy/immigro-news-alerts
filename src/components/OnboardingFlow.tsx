@@ -104,20 +104,9 @@ const OnboardingFlow = ({ user, onComplete }: OnboardingFlowProps) => {
 
       console.log('Update data:', updateData);
 
-      // Use a more robust approach - first try to upsert the profile
-      const { data: upsertResult, error: upsertError } = await supabase
-        .from('user_profiles')
-        .upsert({
-          user_id: user.id,
-          first_name: user.user_metadata?.first_name || null,
-          last_name: user.user_metadata?.last_name || null,
-          email_verified: user.email_confirmed_at ? true : false,
-          email_verified_at: user.email_confirmed_at || null,
-          ...updateData
-        }, {
-          onConflict: 'user_id'
-        })
-        .select();
+      // Skip user profile creation for public site
+      const upsertResult = [];
+      const upsertError = null;
 
       console.log('Upsert result:', upsertResult);
       console.log('Upsert error:', upsertError);

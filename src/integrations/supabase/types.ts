@@ -9,63 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      admin_logs: {
-        Row: {
-          action: string
-          admin_user_id: string
-          created_at: string | null
-          details: Json | null
-          id: string
-          target_id: string | null
-          target_type: string | null
-        }
-        Insert: {
-          action: string
-          admin_user_id: string
-          created_at?: string | null
-          details?: Json | null
-          id?: string
-          target_id?: string | null
-          target_type?: string | null
-        }
-        Update: {
-          action?: string
-          admin_user_id?: string
-          created_at?: string | null
-          details?: Json | null
-          id?: string
-          target_id?: string | null
-          target_type?: string | null
-        }
-        Relationships: []
-      }
-      auth_rate_limits: {
-        Row: {
-          attempt_count: number
-          blocked_until: string | null
-          created_at: string
-          id: string
-          identifier: string
-          last_attempt: string
-        }
-        Insert: {
-          attempt_count?: number
-          blocked_until?: string | null
-          created_at?: string
-          id?: string
-          identifier: string
-          last_attempt?: string
-        }
-        Update: {
-          attempt_count?: number
-          blocked_until?: string | null
-          created_at?: string
-          id?: string
-          identifier?: string
-          last_attempt?: string
-        }
-        Relationships: []
-      }
       blog_articles: {
         Row: {
           author: string
@@ -119,35 +62,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      bookmarks: {
-        Row: {
-          article_id: string
-          created_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          article_id: string
-          created_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          article_id?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bookmarks_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "immigration_news"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       email_subscriptions: {
         Row: {
@@ -320,78 +234,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_profiles: {
-        Row: {
-          created_at: string
-          email_verified: boolean | null
-          email_verified_at: string | null
-          first_name: string | null
-          id: string
-          last_name: string | null
-          notification_preferences: Json | null
-          onboarding_completed: boolean | null
-          phone_number: string | null
-          preferred_categories: string[] | null
-          push_subscription: Json | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email_verified?: boolean | null
-          email_verified_at?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          notification_preferences?: Json | null
-          onboarding_completed?: boolean | null
-          phone_number?: string | null
-          preferred_categories?: string[] | null
-          push_subscription?: Json | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email_verified?: boolean | null
-          email_verified_at?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          notification_preferences?: Json | null
-          onboarding_completed?: boolean | null
-          phone_number?: string | null
-          preferred_categories?: string[] | null
-          push_subscription?: Json | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -428,7 +270,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -543,8 +385,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "moderator", "user"],
-    },
+    Enums: {},
   },
 } as const

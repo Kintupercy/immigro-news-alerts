@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SocialShareButton from "@/components/SocialShareButton";
+import { SecureForm } from "@/components/SecureForm";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -31,20 +32,24 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: any, csrfToken: string) => {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: formData
+      const submissionData = {
+        ...data,
+        csrf_token: csrfToken
+      };
+
+      const { data: responseData, error } = await supabase.functions.invoke('send-contact-email', {
+        body: submissionData
       });
 
       if (error) throw error;
 
       toast({
         title: "Message Sent Successfully!",
-        description: data.message,
+        description: responseData.message,
       });
 
       // Reset form
@@ -151,7 +156,7 @@ const Contact = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <SecureForm onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -240,7 +245,7 @@ const Contact = () => {
                     >
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
-                  </form>
+                  </SecureForm>
                 </CardContent>
               </Card>
             </div>

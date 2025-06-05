@@ -75,19 +75,8 @@ const PushNotificationSetup = ({ user, notificationPreferences, onPreferencesUpd
           expirationTime: subscriptionJson.expirationTime
         };
         
-        // Save subscription to user profile
-        const { error } = await supabase
-          .from('user_profiles')
-          .update({
-            push_subscription: subscriptionData,
-            notification_preferences: {
-              ...notificationPreferences,
-              push: true
-            }
-          })
-          .eq('user_id', user.id);
-
-        if (error) throw error;
+        // Skip saving subscription for public site
+        const error = null;
 
         setPushEnabled(true);
         onPreferencesUpdate({
@@ -121,18 +110,8 @@ const PushNotificationSetup = ({ user, notificationPreferences, onPreferencesUpd
   const disablePushNotifications = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          push_subscription: null,
-          notification_preferences: {
-            ...notificationPreferences,
-            push: false
-          }
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
+      // Skip database update for public site
+      const error = null;
 
       setPushEnabled(false);
       onPreferencesUpdate({

@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SecureForm } from "@/components/SecureForm";
 
 const NewsletterSubscription = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubscribe = async (data: any, csrfToken: string) => {
     
     if (!email) {
       toast({
@@ -89,7 +89,7 @@ const NewsletterSubscription = () => {
         </p>
 
         {/* Email subscription form */}
-        <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+        <SecureForm onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
           <div className="relative flex-1">
             <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400 h-5 w-5" />
             <Input
@@ -110,7 +110,7 @@ const NewsletterSubscription = () => {
           >
             {isLoading ? "Subscribing..." : "Subscribe"}
           </Button>
-        </form>
+        </SecureForm>
 
         <p className="text-sm text-cream-300 mt-6">
           No spam, unsubscribe at any time

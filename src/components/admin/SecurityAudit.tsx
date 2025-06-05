@@ -8,12 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RefreshCw, AlertTriangle, Shield, Clock, UserX } from "lucide-react";
 import { format } from "date-fns";
-import { Database } from "@/integrations/supabase/types";
-
-type RateLimit = Database['public']['Tables']['auth_rate_limits']['Row'];
+// Removed database types for public site
 
 const SecurityAudit = () => {
-  const [rateLimits, setRateLimits] = useState<RateLimit[]>([]);
+  const [rateLimits, setRateLimits] = useState<any[]>([]);
   const [adminLogs, setAdminLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("rate-limits");
@@ -24,31 +22,10 @@ const SecurityAudit = () => {
 
   const fetchSecurityData = async () => {
     setLoading(true);
-    try {
-      if (activeTab === "rate-limits") {
-        const { data, error } = await supabase
-          .from('auth_rate_limits')
-          .select('*')
-          .order('last_attempt', { ascending: false })
-          .limit(100);
-
-        if (error) throw error;
-        setRateLimits(data || []);
-      } else if (activeTab === "admin-logs") {
-        const { data, error } = await supabase
-          .from('admin_logs')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (error) throw error;
-        setAdminLogs(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching security data:', error);
-    } finally {
-      setLoading(false);
-    }
+    // Skip fetching for public site - no security tables
+    setRateLimits([]);
+    setAdminLogs([]);
+    setLoading(false);
   };
 
   const formatDate = (dateString: string) => {

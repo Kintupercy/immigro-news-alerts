@@ -16,6 +16,7 @@ interface ContactFormRequest {
   email: string;
   subject: string;
   message: string;
+  csrf_token?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -25,7 +26,18 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { firstName, lastName, email, subject, message }: ContactFormRequest = await req.json();
+    const { firstName, lastName, email, subject, message, csrf_token }: ContactFormRequest = await req.json();
+    
+    // Basic CSRF token validation (verify token exists)
+    if (!csrf_token || csrf_token.length < 32) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "Invalid request token" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     // Send email to the company
     const companyEmailResponse = await resend.emails.send({

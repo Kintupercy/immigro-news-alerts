@@ -50,17 +50,7 @@ const ContentModeration = () => {
 
       if (error) throw error;
 
-      // Log admin action
-      await supabase.from('admin_logs').insert({
-        admin_user_id: user.user?.id,
-        action: `moderate_${status}`,
-        target_type: 'article',
-        target_id: articleId,
-        details: { 
-          moderation_status: status,
-          notes: notes || null
-        }
-      });
+      // Skip admin logging for public site
 
       queryClient.invalidateQueries({ queryKey: ['moderationArticles'] });
       setSelectedArticle(null);

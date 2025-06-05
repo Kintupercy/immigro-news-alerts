@@ -8,11 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RefreshCw, AlertTriangle, Shield, Clock, UserX, Eye, Lock } from "lucide-react";
 import { format } from "date-fns";
-import { Database } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 
-type RateLimit = Database['public']['Tables']['auth_rate_limits']['Row'];
-type AdminLog = Database['public']['Tables']['admin_logs']['Row'];
+// Removed database types for public site
 
 interface SecurityMetrics {
   totalRateLimits: number;
@@ -22,8 +20,8 @@ interface SecurityMetrics {
 }
 
 const SecurityAuditEnhanced = () => {
-  const [rateLimits, setRateLimits] = useState<RateLimit[]>([]);
-  const [adminLogs, setAdminLogs] = useState<AdminLog[]>([]);
+  const [rateLimits, setRateLimits] = useState<any[]>([]);
+  const [adminLogs, setAdminLogs] = useState<any[]>([]);
   const [metrics, setMetrics] = useState<SecurityMetrics>({
     totalRateLimits: 0,
     blockedAttempts: 0,
@@ -40,101 +38,30 @@ const SecurityAuditEnhanced = () => {
 
   const fetchSecurityData = async () => {
     setLoading(true);
-    try {
-      const [rateLimitsResponse, adminLogsResponse] = await Promise.all([
-        supabase
-          .from('auth_rate_limits')
-          .select('*')
-          .order('last_attempt', { ascending: false })
-          .limit(100),
-        supabase
-          .from('admin_logs')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100)
-      ]);
-
-      if (rateLimitsResponse.error) throw rateLimitsResponse.error;
-      if (adminLogsResponse.error) throw adminLogsResponse.error;
-
-      const rateLimitsData = rateLimitsResponse.data || [];
-      const adminLogsData = adminLogsResponse.data || [];
-
-      setRateLimits(rateLimitsData);
-      setAdminLogs(adminLogsData);
-
-      // Calculate security metrics
-      const blockedCount = rateLimitsData.filter(limit => 
-        limit.blocked_until && new Date(limit.blocked_until) > new Date()
-      ).length;
-
-      const suspiciousCount = rateLimitsData.filter(limit => 
-        limit.attempt_count > 5
-      ).length;
-
-      setMetrics({
-        totalRateLimits: rateLimitsData.length,
-        blockedAttempts: blockedCount,
-        adminActions: adminLogsData.length,
-        suspiciousActivity: suspiciousCount
-      });
-
-    } catch (error) {
-      console.error('Error fetching security data:', error);
-      toast({
-        title: "Security Data Error",
-        description: "Failed to fetch security audit data.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Skip fetching for public site - no security tables
+    setRateLimits([]);
+    setAdminLogs([]);
+    setMetrics({
+      totalRateLimits: 0,
+      blockedAttempts: 0,
+      adminActions: 0,
+      suspiciousActivity: 0
+    });
+    setLoading(false);
   };
 
   const logSecurityEvent = async (action: string, details: any) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      await supabase.from('admin_logs').insert({
-        admin_user_id: user.id,
-        action: `SECURITY_${action}`,
-        details: details,
-        target_type: 'security_audit'
-      });
-    } catch (error) {
-      console.error('Error logging security event:', error);
-    }
+    // Skip logging for public site
+    console.log('Security event (not logged):', action, details);
   };
 
   const clearOldRateLimits = async () => {
-    try {
-      const { error } = await supabase
-        .from('auth_rate_limits')
-        .delete()
-        .lt('last_attempt', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-      if (error) throw error;
-
-      await logSecurityEvent('RATE_LIMITS_CLEARED', { 
-        action: 'cleared_old_rate_limits',
-        timestamp: new Date().toISOString()
-      });
-
-      toast({
-        title: "Rate Limits Cleared",
-        description: "Old rate limit records have been removed.",
-      });
-
-      fetchSecurityData();
-    } catch (error) {
-      console.error('Error clearing rate limits:', error);
-      toast({
-        title: "Error",
-        description: "Failed to clear old rate limits.",
-        variant: "destructive",
-      });
-    }
+    // Skip clearing for public site
+    toast({
+      title: "Feature Unavailable",
+      description: "Rate limit management is not available on public sites.",
+      variant: "destructive",
+    });
   };
 
   const formatDate = (dateString: string) => {

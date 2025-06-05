@@ -196,18 +196,8 @@ const NewsFeed = () => {
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
 
-        // Get user's preferred categories if they exist
-        if (user) {
-          const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('preferred_categories')
-            .eq('user_id', user.id)
-            .single();
-          
-          if (profile?.preferred_categories) {
-            setUserPreferredCategories(profile.preferred_categories);
-          }
-        }
+        // Skip user preferences for public site
+        setUserPreferredCategories([]);
 
         // Load categories and articles in parallel with enhanced caching
         await Promise.all([
