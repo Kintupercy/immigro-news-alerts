@@ -5,7 +5,7 @@ import { Settings, Users, FileText, BarChart3, Plus, AlertTriangle, Shield } fro
 import Header from '@/components/Header';
 import ManualNewsUpload from '@/components/admin/ManualNewsUpload';
 import NewsManagement from '@/components/admin/NewsManagement';
-import UserAnalytics from '@/components/admin/UserAnalytics';
+import PublicSiteAnalytics from '@/components/admin/PublicSiteAnalytics';
 import ContentModeration from '@/components/admin/ContentModeration';
 import SecurityAuditEnhanced from '@/components/admin/SecurityAuditEnhanced';
 import SecureAdminWrapper from '@/components/admin/SecureAdminWrapper';
@@ -19,15 +19,15 @@ const AdminDashboard = () => {
   const { data: stats } = useQuery({
     queryKey: ['adminStats'],
     queryFn: async () => {
-      const [articlesResult, usersResult, urgentResult] = await Promise.all([
+      const [articlesResult, subscriptionsResult, urgentResult] = await Promise.all([
         supabase.from('immigration_news').select('*', { count: 'exact', head: true }),
-        supabase.from('user_profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('email_subscriptions').select('*', { count: 'exact', head: true }),
         supabase.from('immigration_news').select('*', { count: 'exact', head: true }).eq('is_urgent', true)
       ]);
 
       return {
         totalArticles: articlesResult.count || 0,
-        totalUsers: usersResult.count || 0,
+        totalSubscriptions: subscriptionsResult.count || 0,
         urgentNews: urgentResult.count || 0
       };
     },
@@ -88,12 +88,12 @@ const AdminDashboard = () => {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Registered Users</CardTitle>
+                    <CardTitle className="text-sm font-medium">Email Subscriptions</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
-                    <p className="text-xs text-muted-foreground">Active user accounts</p>
+                    <div className="text-2xl font-bold">{stats?.totalSubscriptions || 0}</div>
+                    <p className="text-xs text-muted-foreground">Newsletter subscribers</p>
                   </CardContent>
                 </Card>
 
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
             </TabsContent>
 
             <TabsContent value="analytics">
-              <UserAnalytics />
+              <PublicSiteAnalytics />
             </TabsContent>
 
             <TabsContent value="security">
