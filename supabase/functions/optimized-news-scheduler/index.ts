@@ -46,7 +46,7 @@ function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
 
 // Prioritizing NBC, FOX, NPR, CNN for immigration news coverage
 const approvedDomains = [
-  "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
+  "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", "whitehouse.gov",
   "nbcnews.com", "foxnews.com", "npr.org", "cnn.com",
   "nytimes.com", "cnbc.com",
   "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 

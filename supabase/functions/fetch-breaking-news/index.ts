@@ -261,7 +261,7 @@ function isValidSource(url: string): boolean {
   
   // Only allow trusted news domains
   const trustedDomains = [
-    "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", 
+    "uscis.gov", "dhs.gov", "state.gov", "ice.gov", "cbp.gov", "whitehouse.gov",
     "nbcnews.com", "foxnews.com", "npr.org", "cnn.com",
     "nytimes.com", "cnbc.com", "reuters.com", "apnews.com", 
     "bbc.com", "washingtonpost.com", "abcnews.go.com", "cbsnews.com",
