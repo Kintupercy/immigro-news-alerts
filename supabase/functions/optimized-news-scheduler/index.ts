@@ -134,36 +134,32 @@ serve(async (req) => {
           // Get category-specific search terms to avoid overlap
           const categorySearchTerms = getCategorySearchTerms(category.slug);
 
-          const prompt = `Find the latest verified U.S. IMMIGRATION news specifically for ${categorySearchTerms} from the past 12-24 hours. Focus ONLY on immigration law changes, visa updates, policy decisions related to ${categorySearchTerms}.
+          const prompt = `Find VERIFIED U.S. IMMIGRATION news about ${categorySearchTerms} from the past 12-24 hours. MUST use DIRECT links from these PRIMARY sources:
 
-PRIORITIZE THESE MAJOR SOURCES:
-- NBCNews.com (NBC News immigration section)
-- FoxNews.com (Fox News immigration coverage)  
+PRIMARY SOURCES (HIGHEST PRIORITY):
+- CNN.com/politics/immigration or CNN.com (CNN breaking immigration news)
+- NBCNews.com (NBC immigration coverage)  
+- FoxNews.com/politics/immigration (Fox News immigration)
 - NPR.org (NPR immigration reporting)
-- CNN.com (CNN immigration news)
 
-ADDITIONAL SOURCES:
-Government: USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
-News: NYTimes, CNBC, Reuters, AP, BBC, Washington Post
-Legal: Immigration.com, Nolo.com, ILRC.org
+SECONDARY SOURCES (if primary unavailable):
+- Reuters.com, AP News, NYTimes.com, WashingtonPost.com
+- USCIS.gov, DHS.gov, State.gov (official announcements)
 
-Requirements:
-- Provide 2-3 distinct IMMIGRATION-SPECIFIC recent news items about ${categorySearchTerms}
-- Include factual, verified information about immigration law/policy only
-- Format: Title, Summary (2-3 sentences), Content (3-4 paragraphs), Source URL
-- Mark urgent only for immediate immigration policy changes
-- Include relevant immigration tags
-- NO general politics unless directly about immigration law
-- NO video, social media, or unverified sources
-- DO NOT include news that overlaps with other categories
+CRITICAL REQUIREMENTS:
+- MUST link directly to CNN, NBC, Fox News, or NPR articles
+- NO secondary sources, blogs, or law firm summaries
+- Verify each article is specifically about U.S. immigration law/policy
+- Include 2-3 distinct immigration stories about ${categorySearchTerms}
+- Mark urgent only for immediate policy changes or deadlines
 
-Format:
-Title: [immigration-focused headline about ${categorySearchTerms}]
-Summary: [brief immigration impact summary]
-Content: [detailed immigration content]
-Source: [verified NBC/FOX/NPR/CNN or other approved URL]
-Urgent: [true/false]
-Tags: [immigration, comma-separated tags]`;
+Return this exact format:
+Title: [Immigration headline from primary source]
+Summary: [2-3 sentence immigration impact summary]  
+Content: [Detailed immigration policy/law information]
+Source: [Direct URL to CNN/NBC/Fox/NPR article]
+Urgent: [true/false for immediate policy changes]
+Tags: [immigration, relevant, tags]`;
 
           const response = await fetch('https://api.perplexity.ai/chat/completions', {
             method: 'POST',
@@ -176,7 +172,7 @@ Tags: [immigration, comma-separated tags]`;
               messages: [
                 {
                   role: 'system',
-                  content: `Expert U.S. immigration news researcher. Provide verified immigration-specific info from NBC News, Fox News, NPR, CNN, and other approved sources only. Focus exclusively on ${categorySearchTerms}. Never include general political news unless directly related to immigration law changes. Avoid overlap between categories.`
+                  content: `Expert immigration news researcher. ONLY use direct articles from CNN.com, NBCNews.com, FoxNews.com, or NPR.org for immigration news about ${categorySearchTerms}. Reject any secondary sources, blogs, or law firm websites. Focus exclusively on verified immigration policy, visa changes, and enforcement updates. Include original source URLs.`
                 },
                 {
                   role: 'user',

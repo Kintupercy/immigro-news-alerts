@@ -33,46 +33,44 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Starting immigration-specific breaking news fetch...");
 
-    // Use Perplexity API to fetch immigration-specific breaking news
-    const prompt = `Find ONLY U.S. IMMIGRATION-related breaking news from the past 24 hours. Focus STRICTLY on:
+    // Use Perplexity API to fetch immigration-specific breaking news  
+    const prompt = `Find CURRENT U.S. IMMIGRATION breaking news from the past 12 hours. MUST use these PRIMARY sources:
+
+PRIMARY SOURCES (REQUIRED):
+- CNN.com (CNN Politics Immigration or main CNN)
+- NBCNews.com (NBC News Immigration) 
+- FoxNews.com (Fox News Politics Immigration)
+- NPR.org (NPR Immigration coverage)
+
+SECONDARY SOURCES (only if primary unavailable):
+- Reuters.com, AP News, NYTimes.com, WashingtonPost.com
+- USCIS.gov, DHS.gov, State.gov (official announcements)
 
 IMMIGRATION TOPICS ONLY:
-- Visa policy changes (H-1B, F-1, etc.)
-- Deportation raids or enforcement actions
-- Immigration court decisions
-- Border policy updates
-- USCIS/CBP/ICE announcements
-- Green card processing changes
-- Asylum policy updates
-- DACA/TPS announcements
+- Visa policy changes, travel bans, country restrictions
+- Deportation raids, ICE enforcement actions
+- Immigration court decisions, asylum policy updates  
+- Border security, USCIS/CBP announcements
+- Green card processing, DACA/TPS changes
 - Immigration executive orders and proclamations
-- Travel bans and country restrictions
-- Citizenship ceremony changes
 
-PRIORITY SOURCES - Must use DIRECT article URLs from these major outlets:
-- CNN.com (highest priority for breaking news)
-- NBCNews.com, FoxNews.com, NPR.org
-- Reuters.com, AP News, Washington Post, ABC News
-- USCIS.gov, DHS.gov, State.gov official announcements
+STRICT REQUIREMENTS:
+- MUST link directly to CNN, NBC, Fox News, or NPR articles
+- NO law firm blogs, secondary summaries, or non-news sources
+- Each article MUST be immigration-specific breaking news
+- Mark urgent only for immediate policy deadlines or major changes
+- Include original source URL for fact-checking
 
-CRITICAL REQUIREMENTS:
-- MUST link directly to the original news article, NOT secondary sources
-- NO immigration law firm websites, blogs, or summaries
-- MUST be directly related to U.S. immigration law, policy, or enforcement
-- NO general crime, politics, or non-immigration news
-- Include valid URLs ONLY from the priority sources above
-- Mark urgent only for immediate policy changes or deadlines
-
-Return exactly 3-5 immigration-specific breaking news articles in JSON format:
+JSON format required:
 {
   "articles": [
     {
-      "title": "Immigration-specific breaking news headline",
-      "summary": "Brief summary focusing on immigration impact",
-      "content": "Detailed content about immigration policy/enforcement",
-      "source_url": "https://trusted-source-url.com",
+      "title": "Immigration breaking news from CNN/NBC/Fox/NPR",
+      "summary": "Immigration impact summary in 2-3 sentences",
+      "content": "Detailed immigration policy/enforcement content", 
+      "source_url": "https://cnn.com/or-nbcnews.com/or-foxnews.com/or-npr.org/article",
       "is_urgent": false,
-      "tags": ["immigration", "breaking-news", "relevant-tag"]
+      "tags": ["immigration", "breaking-news", "specific-tag"]
     }
   ]
 }`;
