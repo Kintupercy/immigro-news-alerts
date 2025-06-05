@@ -145,13 +145,13 @@ const BreakingNewsAlert = () => {
   }
 
   return (
-    <div className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
+    <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-            <h3 className="font-bold text-red-900">Breaking Immigration News</h3>
-            <Badge variant="secondary" className="bg-red-100 text-red-800">
+            <AlertTriangle className="w-5 h-5 text-orange-600" />
+            <h3 className="font-bold text-orange-900">Breaking Immigration News</h3>
+            <Badge variant="secondary" className="bg-orange-100 text-orange-800">
               Live Updates
             </Badge>
           </div>
@@ -160,7 +160,7 @@ const BreakingNewsAlert = () => {
             size="sm"
             onClick={refreshBreakingNews}
             disabled={loading}
-            className="border-red-200 text-red-800 hover:bg-red-100"
+            className="border-orange-200 text-orange-800 hover:bg-orange-100"
           >
             Refresh
           </Button>
@@ -172,17 +172,17 @@ const BreakingNewsAlert = () => {
             const isOfficial = isOfficialSource(news.source_url);
             
             return (
-              <Card key={news.id} className="bg-white border-red-200 shadow-sm">
+              <Card key={news.id} className={`bg-white shadow-sm ${news.is_urgent ? 'border-red-200' : 'border-orange-200'}`}>
                 <div className="flex items-start gap-3 p-3">
                   {news.is_urgent && (
                     <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-red-900 text-sm leading-tight">
+                    <h4 className={`font-medium text-sm leading-tight ${news.is_urgent ? 'text-red-900' : 'text-orange-900'}`}>
                       {news.title}
                     </h4>
                     {news.summary && (
-                      <p className="text-red-700 text-xs mt-1 line-clamp-2">
+                      <p className={`text-xs mt-1 line-clamp-2 ${news.is_urgent ? 'text-red-700' : 'text-orange-700'}`}>
                         {news.summary}
                       </p>
                     )}
@@ -201,7 +201,7 @@ const BreakingNewsAlert = () => {
                           variant="link"
                           size="sm"
                           asChild
-                          className="text-red-600 hover:text-red-800 h-auto p-0 text-xs"
+                          className={`h-auto p-0 text-xs ${news.is_urgent ? 'text-red-600 hover:text-red-800' : 'text-orange-600 hover:text-orange-800'}`}
                         >
                           <a 
                             href={news.source_url} 
@@ -214,14 +214,14 @@ const BreakingNewsAlert = () => {
                           </a>
                         </Button>
                       )}
-                      <span className="text-red-600 text-xs">
+                      <span className={`text-xs ${news.is_urgent ? 'text-red-600' : 'text-orange-600'}`}>
                         {new Date(news.published_at).toLocaleTimeString()}
                       </span>
                     </div>
                     
                     {/* Attribution Footer */}
                     {news.source_url && (
-                      <div className="text-xs text-red-600/70 mt-2 border-t border-red-100 pt-1">
+                      <div className={`text-xs mt-2 pt-1 ${news.is_urgent ? 'text-red-600/70 border-t border-red-100' : 'text-orange-600/70 border-t border-orange-100'}`}>
                         Originally published by {sourceDomain}. Content aggregated for breaking news alerts.
                       </div>
                     )}
@@ -230,7 +230,7 @@ const BreakingNewsAlert = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => dismissNews(news.id)}
-                    className="text-red-600 hover:text-red-800 hover:bg-red-100 flex-shrink-0 h-auto p-1"
+                    className={`flex-shrink-0 h-auto p-1 ${news.is_urgent ? 'text-red-600 hover:text-red-800 hover:bg-red-100' : 'text-orange-600 hover:text-orange-800 hover:bg-orange-100'}`}
                   >
                     <X className="w-4 h-4" />
                   </Button>

@@ -81,7 +81,7 @@ const ArticleCard = ({
         </div>
         
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "default" : "secondary"}>
+          <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "warning" : "secondary"}>
             {currentLanguage === 'es' 
               ? translateCategory(categories.find(cat => cat.slug === article.category)?.name || article.category)
               : categories.find(cat => cat.slug === article.category)?.name || article.category
