@@ -58,19 +58,19 @@ const ArticleCard = ({
   
   return (
     <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${
-      isBreakingNews ? 'border-orange-200 bg-orange-50' : 
-      article.is_urgent ? 'border-red-200 bg-red-50' : ''
+      article.is_urgent ? 'border-red-200 bg-red-50' : 
+      isBreakingNews ? 'border-orange-200 bg-orange-50' : ''
     }`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <CardTitle className="text-lg leading-tight flex-1">
-            {isBreakingNews && (
+            {article.is_urgent && (
+              <AlertTriangle className="inline-block w-5 h-5 text-red-500 mr-2" />
+            )}
+            {isBreakingNews && !article.is_urgent && (
               <span className="inline-block bg-orange-500 text-white text-xs px-2 py-1 rounded mr-2">
                 BREAKING
               </span>
-            )}
-            {article.is_urgent && !isBreakingNews && (
-              <AlertTriangle className="inline-block w-5 h-5 text-red-500 mr-2" />
             )}
             {getDisplayText(article.title, article.id, 'title')}
           </CardTitle>
@@ -81,7 +81,7 @@ const ArticleCard = ({
         </div>
         
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant={isBreakingNews ? "warning" : article.is_urgent ? "destructive" : "secondary"}>
+          <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "warning" : "secondary"}>
             {currentLanguage === 'es' 
               ? translateCategory(categories.find(cat => cat.slug === article.category)?.name || article.category)
               : categories.find(cat => cat.slug === article.category)?.name || article.category
