@@ -90,6 +90,7 @@ const NewsTabs = ({
           value="breaking" 
           className="text-orange-600 text-xs sm:text-sm px-2 py-3 md:py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-orange-600"
         >
+          <Newspaper className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
           <span className="block sm:inline">
             {currentLanguage === 'es' ? 'Breaking' : 'Breaking'}
           </span>

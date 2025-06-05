@@ -149,7 +149,17 @@ function parseNewsContent(content: string, categorySlug: string) {
           if (article.title && article.source_url && isValidSource(article.source_url)) {
             // Check if this is an opinion piece and override urgency
             const isOpinion = isOpinionPiece(article.title, article.content || article.summary || '', article.source_url);
-            const shouldBeUrgent = (article.is_urgent || false) && !isOpinion;
+            
+            // Determine news classification using improved logic
+            const newsClassification = classifyNewsUrgency(article.title, article.content || article.summary || '', article.source_url);
+            
+            // Override AI urgency with our improved classification
+            const isUrgent = newsClassification.isUrgent && !isOpinion;
+            const isBreaking = newsClassification.isBreaking && !isOpinion && !isUrgent; // Breaking only if not urgent
+            
+            // Set appropriate tags based on classification
+            let tags = Array.isArray(article.tags) ? [...article.tags, categorySlug, 'immigration'] : [categorySlug, 'immigration'];
+            if (isBreaking) tags.push('breaking-news');
             
             articles.push({
               title: article.title,
@@ -157,15 +167,19 @@ function parseNewsContent(content: string, categorySlug: string) {
               summary: article.summary || article.title,
               source_url: article.source_url,
               category: categorySlug,
-              tags: Array.isArray(article.tags) ? [...article.tags, categorySlug, 'immigration'] : [categorySlug, 'immigration'],
-              is_urgent: shouldBeUrgent,
+              tags: tags,
+              is_urgent: isUrgent,
               status: 'published'
             });
             
             if (isOpinion) {
-              console.log(`Opinion piece detected, marking as non-urgent: ${article.title}`);
+              console.log(`Opinion piece detected, marking as regular: ${article.title}`);
+            } else if (isUrgent) {
+              console.log(`URGENT immigration article: ${article.title}`);
+            } else if (isBreaking) {
+              console.log(`BREAKING immigration article: ${article.title}`);
             } else {
-              console.log(`Valid immigration article: ${article.title}`);
+              console.log(`Regular immigration article: ${article.title}`);
             }
           } else {
             console.log(`Skipping invalid immigration article - missing required fields or invalid source`);
@@ -223,6 +237,51 @@ function parseNewsContent(content: string, categorySlug: string) {
   
   console.log(`Total immigration articles parsed for ${categorySlug}: ${articles.length}`);
   return articles;
+}
+
+function classifyNewsUrgency(title: string, content: string, sourceUrl: string): { isUrgent: boolean; isBreaking: boolean } {
+  const text = `${title} ${content}`.toLowerCase();
+  
+  // URGENT: Immediate impact, immediate implementation, can't miss news
+  const urgentIndicators = [
+    // Immediate bans and restrictions
+    'travel ban', 'entry ban', 'suspended entry', 'immediate suspension', 'effective immediately',
+    'executive order', 'presidential proclamation', 'emergency order',
+    // Immediate policy changes
+    'takes effect immediately', 'effective today', 'starting today', 'begins immediately',
+    // Court injunctions and immediate legal changes
+    'court blocks', 'injunction issued', 'temporary restraining order', 'immediate halt',
+    // Emergency deportation actions
+    'mass deportation', 'immediate deportation', 'emergency enforcement',
+    // Program terminations with immediate effect
+    'program terminated', 'immediately suspended', 'ends immediately'
+  ];
+  
+  // BREAKING: Important news that just happened but may have delayed implementation
+  const breakingIndicators = [
+    'breaking:', 'just announced', 'announces', 'unveils', 'reveals',
+    'court ruling', 'supreme court', 'federal judge', 'appeals court',
+    'ice raids', 'enforcement action', 'arrest', 'detention',
+    'new policy', 'policy change', 'rule change', 'regulation update',
+    'bill passed', 'legislation', 'congress', 'senate votes',
+    'dhs announces', 'uscis updates', 'state department'
+  ];
+  
+  const hasUrgentIndicator = urgentIndicators.some(indicator => text.includes(indicator));
+  const hasBreakingIndicator = breakingIndicators.some(indicator => text.includes(indicator));
+  
+  // Check if it's time-sensitive (happening now vs announced for future)
+  const immediateTiming = text.includes('today') || text.includes('immediately') || 
+                         text.includes('now') || text.includes('effective') ||
+                         text.includes('starts') || text.includes('begins');
+  
+  // Urgent takes precedence - must have urgent indicators AND immediate timing
+  const isUrgent = hasUrgentIndicator && immediateTiming;
+  
+  // Breaking is important news that just happened, but not necessarily immediate impact
+  const isBreaking = !isUrgent && hasBreakingIndicator;
+  
+  return { isUrgent, isBreaking };
 }
 
 function isOpinionPiece(title: string, content: string, sourceUrl: string): boolean {

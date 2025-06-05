@@ -243,21 +243,34 @@ function parseImmigrationBreakingNews(content: string) {
           if (article.title && article.source_url && isValidSource(article.source_url)) {
             // Check if this is an opinion piece and override urgency
             const isOpinion = isOpinionPiece(article.title, article.content || article.summary || '', article.source_url);
-            const shouldBeUrgent = (article.is_urgent || false) && !isOpinion;
+            
+            // Determine news classification using improved logic
+            const newsClassification = classifyBreakingNewsUrgency(article.title, article.content || article.summary || '', article.source_url);
+            
+            // Override AI urgency with our improved classification
+            const isUrgent = newsClassification.isUrgent && !isOpinion;
+            const isBreaking = !isUrgent; // Breaking news that's not urgent
+            
+            // Set appropriate tags
+            let tags = Array.isArray(article.tags) ? [...article.tags] : ['immigration'];
+            if (!tags.includes('breaking-news')) tags.push('breaking-news');
+            if (!tags.includes('immigration')) tags.push('immigration');
             
             articles.push({
               title: article.title,
               content: article.content || article.summary || '',
               summary: article.summary || article.title,
               source_url: article.source_url,
-              tags: Array.isArray(article.tags) ? article.tags : ['immigration', 'breaking-news'],
-              is_urgent: shouldBeUrgent
+              tags: tags,
+              is_urgent: isUrgent
             });
             
             if (isOpinion) {
-              console.log(`Opinion piece detected, marking as non-urgent: ${article.title}`);
+              console.log(`Opinion piece detected, marking as regular breaking: ${article.title}`);
+            } else if (isUrgent) {
+              console.log(`URGENT breaking immigration news: ${article.title}`);
             } else {
-              console.log(`Valid immigration breaking news: ${article.title}`);
+              console.log(`BREAKING immigration news: ${article.title}`);
             }
           } else {
             console.log(`Skipping invalid article - missing required fields or invalid source`);
@@ -313,6 +326,33 @@ function isImmigrationRelated(title: string, content: string): boolean {
   const hasExcludedTopic = excludedTopics.some(topic => text.includes(topic));
   
   return hasImmigrationKeyword && !hasExcludedTopic;
+}
+
+function classifyBreakingNewsUrgency(title: string, content: string, sourceUrl: string): { isUrgent: boolean } {
+  const text = `${title} ${content}`.toLowerCase();
+  
+  // URGENT: Immediate impact, immediate implementation, can't miss news
+  // For breaking news, we're extra strict about what qualifies as urgent
+  const urgentIndicators = [
+    // Immediate travel bans and restrictions
+    'travel ban', 'entry ban', 'suspended entry', 'effective immediately', 'takes effect immediately',
+    'executive order', 'presidential proclamation', 'emergency order',
+    // Immediate enforcement actions with broad impact
+    'mass deportation', 'immediate deportation', 'emergency enforcement',
+    // Court orders with immediate effect
+    'court blocks', 'injunction issued', 'temporary restraining order', 'immediate halt',
+    // Program terminations with immediate effect
+    'program terminated', 'immediately suspended', 'ends immediately'
+  ];
+  
+  // Must have urgent indicators AND immediate timing
+  const hasUrgentIndicator = urgentIndicators.some(indicator => text.includes(indicator));
+  const immediateTiming = text.includes('immediately') || text.includes('effective today') || 
+                         text.includes('starting today') || text.includes('begins today');
+  
+  const isUrgent = hasUrgentIndicator && immediateTiming;
+  
+  return { isUrgent };
 }
 
 function isOpinionPiece(title: string, content: string, sourceUrl: string): boolean {
