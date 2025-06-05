@@ -16,7 +16,10 @@ const IMMIGRATION_KEYWORDS = [
   'immigration policy', 'immigration law', 'immigration court', 'immigration judge',
   'removal proceedings', 'adjustment of status', 'consular processing',
   'priority date', 'visa bulletin', 'employment authorization', 'travel document',
-  'travel ban', 'muslim ban', 'country ban', 'proclamation', 'executive order'
+  'travel ban', 'muslim ban', 'country ban', 'proclamation', 'executive order',
+  'entry restriction', 'entry prohibition', 'suspended entry', 'banned countries',
+  'presidential directive', 'homeland security', 'national security', 'foreign nationals',
+  'immigration enforcement', 'border security', 'visa suspension', 'immigration restriction'
 ];
 
 const handler = async (req: Request): Promise<Response> => {
@@ -34,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Starting immigration-specific breaking news fetch...");
 
     // Use Perplexity API to fetch immigration-specific breaking news  
-    const prompt = `Find CURRENT U.S. IMMIGRATION breaking news from the past 12 hours. MUST use these PRIMARY sources:
+    const prompt = `Find CURRENT U.S. IMMIGRATION breaking news from the past 48 hours. Focus on MAJOR policy changes and announcements. MUST use these PRIMARY sources:
 
 PRIMARY SOURCES (REQUIRED):
 - CNN.com (CNN Politics Immigration or main CNN)
@@ -47,19 +50,22 @@ SECONDARY SOURCES (only if primary unavailable):
 - USCIS.gov, DHS.gov, State.gov (official announcements)
 
 IMMIGRATION TOPICS ONLY:
-- Visa policy changes, travel bans, country restrictions
-- Deportation raids, ICE enforcement actions
+- Travel bans, country restrictions, entry prohibitions
+- Immigration executive orders, proclamations, presidential directives
+- Visa policy changes, processing updates
+- Deportation raids, ICE enforcement actions, removal proceedings
 - Immigration court decisions, asylum policy updates  
 - Border security, USCIS/CBP announcements
 - Green card processing, DACA/TPS changes
-- Immigration executive orders and proclamations
+- Immigration reform, policy reversals, program terminations
 
 STRICT REQUIREMENTS:
 - MUST link directly to CNN, NBC, Fox News, or NPR articles
 - NO law firm blogs, secondary summaries, or non-news sources
 - Each article MUST be immigration-specific breaking news
-- Mark urgent only for immediate policy deadlines or major changes
+- Mark urgent for major policy changes like travel bans, executive orders
 - Include original source URL for fact-checking
+- PRIORITIZE: Presidential proclamations, travel restrictions, country bans
 
 JSON format required:
 {
@@ -95,9 +101,10 @@ JSON format required:
             content: prompt
           }
         ],
-        temperature: 0.1,
-        max_tokens: 2000,
-        return_citations: true
+        temperature: 0.2,
+        max_tokens: 3000,
+        return_citations: true,
+        search_recency_filter: 'week'
       }),
     });
 
