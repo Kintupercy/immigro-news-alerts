@@ -201,6 +201,12 @@ Tags: [immigration, relevant, tags]`;
 
           const newsItems = parseNewsContent(content, category.slug);
 
+          // Skip if no valid news items found
+          if (newsItems.length === 0) {
+            console.log(`No valid news items found for category: ${category.name}`);
+            return;
+          }
+
           // Insert valid immigration news items
           for (const item of newsItems) {
             try {

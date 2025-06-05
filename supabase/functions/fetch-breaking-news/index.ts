@@ -131,6 +131,20 @@ JSON format required:
     const articles = parseImmigrationBreakingNews(content);
     console.log(`Found ${articles.length} immigration breaking news articles`);
 
+    // Skip if no valid breaking news articles found
+    if (articles.length === 0) {
+      console.log('No valid immigration breaking news articles found');
+      return new Response(JSON.stringify({
+        success: true,
+        articlesAdded: 0,
+        urgentNewsFound: 0,
+        message: 'No new immigration breaking news found from major outlets'
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     for (const article of articles) {
       // Double-check immigration relevance
       if (!isImmigrationRelated(article.title, article.content)) {

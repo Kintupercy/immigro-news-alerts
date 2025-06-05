@@ -269,6 +269,12 @@ serve(async (req) => {
         
         console.log(`Found ${parsedArticles.length} immigration articles for ${cat.name}`);
         
+        // Skip if no valid articles found for this category
+        if (parsedArticles.length === 0) {
+          console.log(`No valid immigration articles found for category: ${cat.name}`);
+          continue;
+        }
+        
         for (const article of parsedArticles) {
           // Check for duplicates
           const { data: existing } = await supabase
