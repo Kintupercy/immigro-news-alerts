@@ -1,5 +1,5 @@
 
-import { Search, Crown } from "lucide-react";
+import { Search, Crown, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -28,6 +28,8 @@ interface NewsFiltersProps {
   userPreferredCategories: string[];
   getCategoriesToDisplay: () => Category[];
   isCategoryLocked: (categorySlug: string) => boolean;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 const NewsFilters = ({
@@ -39,7 +41,9 @@ const NewsFilters = ({
   currentLanguage,
   userPreferredCategories,
   getCategoriesToDisplay,
-  isCategoryLocked
+  isCategoryLocked,
+  onRefresh,
+  refreshing
 }: NewsFiltersProps) => {
   return (
     <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
@@ -117,6 +121,18 @@ const NewsFilters = ({
             >
               {currentLanguage === 'es' ? 'Todas' : 'All'}
             </Button>
+            {onRefresh && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRefresh}
+                disabled={refreshing}
+                className="bg-transparent text-cream-50 border-cream-200 hover:bg-cream-50 hover:text-navy-800"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {currentLanguage === 'es' ? 'Actualizar' : 'Refresh'}
+              </Button>
+            )}
           </div>
         </div>
 

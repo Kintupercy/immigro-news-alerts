@@ -490,6 +490,8 @@ const NewsFeed = () => {
           userPreferredCategories={userPreferredCategories}
           getCategoriesToDisplay={getCategoriesToDisplay}
           isCategoryLocked={isCategoryLocked}
+          onRefresh={() => refreshNews(true)}
+          refreshing={refreshing}
         />
 
         {/* Search Results Info */}
