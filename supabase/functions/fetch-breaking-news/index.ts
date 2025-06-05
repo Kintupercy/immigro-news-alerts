@@ -49,16 +49,18 @@ IMMIGRATION TOPICS ONLY:
 - Travel bans and country restrictions
 - Citizenship ceremony changes
 
-REQUIRED SOURCES - Major trusted outlets:
-- NBCNews.com, FoxNews.com, NPR.org, CNN.com
+PRIORITY SOURCES - Must use DIRECT article URLs from these major outlets:
+- CNN.com (highest priority for breaking news)
+- NBCNews.com, FoxNews.com, NPR.org
 - Reuters.com, AP News, Washington Post, ABC News
 - USCIS.gov, DHS.gov, State.gov official announcements
 
-STRICT REQUIREMENTS:
+CRITICAL REQUIREMENTS:
+- MUST link directly to the original news article, NOT secondary sources
+- NO immigration law firm websites, blogs, or summaries
 - MUST be directly related to U.S. immigration law, policy, or enforcement
 - NO general crime, politics, or non-immigration news
-- NO local news unless it's major immigration enforcement
-- Include valid URLs from trusted sources
+- Include valid URLs ONLY from the priority sources above
 - Mark urgent only for immediate policy changes or deadlines
 
 Return exactly 3-5 immigration-specific breaking news articles in JSON format:
