@@ -147,6 +147,10 @@ function parseNewsContent(content: string, categorySlug: string) {
         
         for (const article of parsed.articles) {
           if (article.title && article.source_url && isValidSource(article.source_url)) {
+            // Check if this is an opinion piece and override urgency
+            const isOpinion = isOpinionPiece(article.title, article.content || article.summary || '', article.source_url);
+            const shouldBeUrgent = (article.is_urgent || false) && !isOpinion;
+            
             articles.push({
               title: article.title,
               content: article.content || article.summary || '',
@@ -154,10 +158,15 @@ function parseNewsContent(content: string, categorySlug: string) {
               source_url: article.source_url,
               category: categorySlug,
               tags: Array.isArray(article.tags) ? [...article.tags, categorySlug, 'immigration'] : [categorySlug, 'immigration'],
-              is_urgent: article.is_urgent || false,
+              is_urgent: shouldBeUrgent,
               status: 'published'
             });
-            console.log(`Valid immigration article: ${article.title}`);
+            
+            if (isOpinion) {
+              console.log(`Opinion piece detected, marking as non-urgent: ${article.title}`);
+            } else {
+              console.log(`Valid immigration article: ${article.title}`);
+            }
           } else {
             console.log(`Skipping invalid immigration article - missing required fields or invalid source`);
           }
@@ -214,6 +223,39 @@ function parseNewsContent(content: string, categorySlug: string) {
   
   console.log(`Total immigration articles parsed for ${categorySlug}: ${articles.length}`);
   return articles;
+}
+
+function isOpinionPiece(title: string, content: string, sourceUrl: string): boolean {
+  const text = `${title} ${content}`.toLowerCase();
+  const url = sourceUrl.toLowerCase();
+  
+  // Check URL for opinion indicators
+  const opinionUrlPatterns = [
+    'opinion', 'editorial', 'commentary', 'op-ed', 'analysis', 'perspective',
+    'blog', 'columnist', 'pundit', '/opinion/', '/editorial/', '/commentary/'
+  ];
+  
+  const hasOpinionUrl = opinionUrlPatterns.some(pattern => url.includes(pattern));
+  
+  // Check content for opinion indicators
+  const opinionPhrases = [
+    'i think', 'i believe', 'in my opinion', 'i feel', 'my view',
+    'personally', 'it seems to me', 'i would argue', 'i suspect',
+    'afraid to travel', 'likens it to', 'described feeling', 'recounted',
+    'fears', 'anxiety about', 'concerns about', 'worries about'
+  ];
+  
+  const hasOpinionLanguage = opinionPhrases.some(phrase => text.includes(phrase));
+  
+  // Check for first-person narrative or subjective experiences
+  const subjectiveIndicators = [
+    'described heightened anxiety', 'she recounted', 'feeling anxious',
+    'personal experience', 'shared her concerns', 'expressed worry'
+  ];
+  
+  const hasSubjectiveContent = subjectiveIndicators.some(indicator => text.includes(indicator));
+  
+  return hasOpinionUrl || hasOpinionLanguage || hasSubjectiveContent;
 }
 
 serve(async (req) => {
