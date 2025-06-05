@@ -126,26 +126,20 @@ Keep it professional, informative, and engaging for immigration professionals an
       };
     }
 
-    // Get users who have newsletter notifications enabled
-    const { data: userProfiles, error: profilesError } = await supabase
-      .from('user_profiles')
-      .select('user_id, first_name, notification_preferences')
-      .eq('onboarding_completed', true);
+    // Get active email subscriptions
+    const { data: emailSubscriptions, error: subscriptionsError } = await supabase
+      .from('email_subscriptions')
+      .select('email, preferences')
+      .eq('is_active', true);
 
-    if (profilesError) {
-      throw new Error('Error fetching user profiles: ' + profilesError.message);
+    if (subscriptionsError) {
+      throw new Error('Error fetching email subscriptions: ' + subscriptionsError.message);
     }
 
-    // Filter users who have newsletter notifications enabled
-    const newsletterUsers = userProfiles?.filter(profile => {
-      const preferences = profile.notification_preferences;
-      return preferences && preferences.email === true && preferences.newsletter === true;
-    }) || [];
+    console.log(`Found ${emailSubscriptions?.length || 0} active email subscriptions`);
 
-    console.log(`Found ${newsletterUsers.length} users subscribed to newsletter`);
-
-    if (newsletterUsers.length === 0) {
-      return new Response(JSON.stringify({ message: 'No users subscribed to newsletter' }), {
+    if (!emailSubscriptions || emailSubscriptions.length === 0) {
+      return new Response(JSON.stringify({ message: 'No active email subscriptions found' }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -153,15 +147,8 @@ Keep it professional, informative, and engaging for immigration professionals an
 
     // Send newsletter emails
     let emailsSent = 0;
-    const emailPromises = newsletterUsers.map(async (profile) => {
+    const emailPromises = emailSubscriptions.map(async (subscription) => {
       try {
-        const { data: user, error: userError } = await supabase.auth.admin.getUserById(profile.user_id);
-        
-        if (userError || !user) {
-          console.error(`Error fetching user ${profile.user_id}:`, userError);
-          return null;
-        }
-
         // Send newsletter email
         const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-email-notification`, {
           method: 'POST',
@@ -170,11 +157,11 @@ Keep it professional, informative, and engaging for immigration professionals an
             'Authorization': `Bearer ${supabaseServiceKey}`,
           },
           body: JSON.stringify({
-            to: user.user.email,
+            to: subscription.email,
             subject: newsletterContent.subject_line,
             type: 'newsletter',
             content: {
-              firstName: profile.first_name,
+              firstName: subscription.preferences?.firstName || '',
               executiveSummary: newsletterContent.executive_summary,
               categoryHighlights: newsletterContent.category_highlights,
               importantDevelopments: newsletterContent.important_developments,
@@ -189,16 +176,16 @@ Keep it professional, informative, and engaging for immigration professionals an
         });
 
         if (emailResponse.ok) {
-          console.log(`Newsletter sent to: ${user.user.email}`);
+          console.log(`Newsletter sent to: ${subscription.email}`);
           emailsSent++;
-          return { email: user.user.email, status: 'sent' };
+          return { email: subscription.email, status: 'sent' };
         } else {
-          console.error(`Failed to send newsletter to: ${user.user.email}`);
-          return { email: user.user.email, status: 'failed' };
+          console.error(`Failed to send newsletter to: ${subscription.email}`);
+          return { email: subscription.email, status: 'failed' };
         }
       } catch (error) {
-        console.error(`Error sending newsletter to user ${profile.user_id}:`, error);
-        return { email: 'unknown', status: 'error' };
+        console.error(`Error sending newsletter to ${subscription.email}:`, error);
+        return { email: subscription.email, status: 'error' };
       }
     });
 
@@ -208,7 +195,7 @@ Keep it professional, informative, and engaging for immigration professionals an
 
     return new Response(JSON.stringify({ 
       message: `Weekly newsletter sent successfully`,
-      totalSubscribers: newsletterUsers.length,
+      totalSubscribers: emailSubscriptions.length,
       emailsSent,
       articlesIncluded: articles.length,
       weekPeriod: oneWeekAgo
