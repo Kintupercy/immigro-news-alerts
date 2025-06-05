@@ -108,16 +108,8 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col items-center gap-4">
-            {/* Subscribe button */}
-            <Button asChild size="lg" className="px-8 py-3 text-base bg-navy-800 text-cream-50 hover:bg-navy-700 font-medium transition-all duration-200 rounded-full">
-              <Link to="/auth" className="flex items-center gap-2">
-                <Mail className="w-5 h-5" />
-                Subscribe to Alerts
-              </Link>
-            </Button>
-
             {/* Get Started button */}
-            <Button asChild size="lg" variant="outline" className="px-8 py-3 text-base border-navy-300 text-navy-700 hover:bg-navy-50 font-medium transition-all duration-200 rounded-full">
+            <Button asChild size="lg" className="px-8 py-3 text-base bg-navy-800 text-cream-50 hover:bg-navy-700 font-medium transition-all duration-200 rounded-full">
               <Link to="/news" className="flex items-center gap-2">
                 <ArrowRight className="w-5 h-5" />
                 Get Started
