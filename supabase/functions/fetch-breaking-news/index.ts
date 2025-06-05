@@ -37,35 +37,41 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Starting immigration-specific breaking news fetch...");
 
     // Use Perplexity API to fetch immigration-specific breaking news  
-    const prompt = `Find CURRENT U.S. IMMIGRATION breaking news from the past 48 hours. Focus on MAJOR policy changes and announcements. MUST use these PRIMARY sources:
+    const prompt = `Find BREAKING U.S. IMMIGRATION NEWS from the past 48 hours. PRIORITIZE URGENT policy announcements and presidential actions. Search for terms like "BREAKING:", "URGENT:", "Trump announces", "Biden announces", "White House announces".
 
-PRIMARY SOURCES (REQUIRED):
-- CNN.com (CNN Politics Immigration or main CNN)
-- NBCNews.com (NBC News Immigration) 
-- FoxNews.com (Fox News Politics Immigration)
-- NPR.org (NPR Immigration coverage)
+PRIMARY SOURCES (REQUIRED - search these FIRST):
+- CNN.com (CNN Politics Immigration, CNN Breaking News)
+- NBCNews.com (NBC News Immigration, NBC Breaking News) 
+- FoxNews.com (Fox News Politics Immigration, Fox Breaking News)
+- NPR.org (NPR Immigration coverage, NPR News)
 
 SECONDARY SOURCES (only if primary unavailable):
 - Reuters.com, AP News, NYTimes.com, WashingtonPost.com
-- USCIS.gov, DHS.gov, State.gov (official announcements)
+- USCIS.gov, DHS.gov, State.gov, WhiteHouse.gov (official announcements)
 
-IMMIGRATION TOPICS ONLY:
-- Travel bans, country restrictions, entry prohibitions
-- Immigration executive orders, proclamations, presidential directives
-- Visa policy changes, processing updates
-- Deportation raids, ICE enforcement actions, removal proceedings
-- Immigration court decisions, asylum policy updates  
-- Border security, USCIS/CBP announcements
-- Green card processing, DACA/TPS changes
-- Immigration reform, policy reversals, program terminations
+URGENT IMMIGRATION TOPICS (PRIORITIZE):
+- BREAKING: Travel bans, country restrictions, entry prohibitions
+- URGENT: Immigration executive orders, proclamations, presidential directives  
+- NEW: Visa policy changes, processing suspensions, program terminations
+- IMMEDIATE: Deportation raids, ICE enforcement actions, removal proceedings
+- COURT: Immigration court decisions, asylum policy updates
+- ENFORCEMENT: Border security, USCIS/CBP announcements, detention policies
+- PROGRAMS: Green card processing changes, DACA/TPS updates
+- REFORM: Immigration reform, policy reversals, legislative changes
+
+SEARCH INSTRUCTIONS:
+- Look for headlines with "BREAKING", "URGENT", "Trump announces", "Biden announces" 
+- Search for SAME-DAY presidential announcements and White House statements
+- Include articles published within last 48 hours with immigration policy impact
+- Focus on immediate implementation or announcement of new policies
 
 STRICT REQUIREMENTS:
-- MUST link directly to CNN, NBC, Fox News, or NPR articles
-- NO law firm blogs, secondary summaries, or non-news sources
-- Each article MUST be immigration-specific breaking news
-- Mark urgent for major policy changes like travel bans, executive orders
-- Include original source URL for fact-checking
-- PRIORITIZE: Presidential proclamations, travel restrictions, country bans
+- MUST link directly to CNN.com, NBCNews.com, FoxNews.com, or NPR.org articles
+- NO law firm blogs, opinion pieces, or secondary analysis
+- Each article MUST be BREAKING immigration-specific news
+- Mark urgent=true for travel bans, executive orders, immediate policy changes
+- Include original source URL for verification
+- HIGHEST PRIORITY: Presidential proclamations, travel restrictions, country bans, executive orders
 
 JSON format required:
 {
