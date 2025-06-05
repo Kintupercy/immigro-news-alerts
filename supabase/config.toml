@@ -45,3 +45,12 @@ enable_signup = true
 
 [functions.fetch-immigration-news]
 verify_jwt = false
+
+[functions.scheduled-news-fetch]
+verify_jwt = false
+
+[functions.optimized-news-scheduler]
+verify_jwt = false
+
+[functions.fetch-breaking-news]
+verify_jwt = false
