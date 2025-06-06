@@ -3,8 +3,8 @@ import DOMPurify from 'dompurify';
 // HTML Sanitization
 export const sanitizeHtml = (dirty: string): string => {
   return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
     FORBID_TAGS: ['script', 'object', 'embed', 'form', 'input', 'textarea', 'select'],
     FORBID_ATTR: ['onclick', 'onerror', 'onload', 'onmouseover']
   });
