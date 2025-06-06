@@ -69,7 +69,7 @@ const ArticleCard = ({
             )}
             {isBreakingNews && !article.is_urgent && (
               <span className="inline-block bg-orange-500 text-white text-xs px-2 py-1 rounded mr-2">
-                BREAKING
+                {currentLanguage === 'es' ? 'ÚLTIMA HORA' : 'BREAKING'}
               </span>
             )}
             {getDisplayText(article.title, article.id, 'title')}

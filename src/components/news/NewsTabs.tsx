@@ -93,7 +93,7 @@ const NewsTabs = ({
         >
           <Newspaper className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
           <span className="block sm:inline">
-            {currentLanguage === 'es' ? 'Breaking' : 'Breaking'}
+            {currentLanguage === 'es' ? 'Últimas' : 'Breaking'}
           </span>
           <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
             ({breakingNewsArticles.length})

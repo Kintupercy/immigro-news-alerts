@@ -34,6 +34,13 @@ const translations: Record<string, string> = {
   'Fetching Latest': 'Obteniendo Últimas',
   'Related Resources': 'Recursos Relacionados',
   
+  // Breaking News Alert
+  'Breaking Immigration News': 'Noticias de Inmigración de Última Hora',
+  'Live Updates': 'Actualizaciones en Vivo',
+  'Read Full Story': 'Leer Historia Completa',
+  'Originally published by': 'Publicado originalmente por',
+  'Content aggregated for breaking news alerts': 'Contenido agregado para alertas de noticias de última hora',
+  
   // Categories
   'Green Card': 'Tarjeta Verde',
   'Work Visas': 'Visas de Trabajo',
