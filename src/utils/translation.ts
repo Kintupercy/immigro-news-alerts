@@ -145,43 +145,39 @@ export const translateText = async (text: string, targetLanguage: 'es' | 'en'): 
     return translations[text];
   }
 
-  // For titles and shorter content (less than 300 characters), try phrase-by-phrase translation
+  // Always try to translate key terms regardless of length
+  let result = text;
+  let hasTranslations = false;
+  
+  // Apply all translation rules
+  for (const [english, spanish] of Object.entries(translations)) {
+    const regex = new RegExp(`\\b${english}\\b`, 'gi');
+    const newResult = result.replace(regex, spanish);
+    if (newResult !== result) {
+      hasTranslations = true;
+      result = newResult;
+    }
+  }
+  
+  // For shorter content, try phrase-by-phrase translation first
   if (text.length <= 300) {
     const translatedText = translatePhrase(text);
     if (translatedText !== text) {
       return translatedText;
     }
     
-    // If no direct translation found, try word-by-word for key terms
-    let result = text;
-    for (const [english, spanish] of Object.entries(translations)) {
-      const regex = new RegExp(`\\b${english}\\b`, 'gi');
-      result = result.replace(regex, spanish);
+    // Return the key term translations if we found any
+    if (hasTranslations) {
+      return result;
     }
-    
-    // If we made some translations, return the result
-    if (result !== text) {
+  } else {
+    // For longer content, return key term translations without notes for breaking news and important content
+    if (hasTranslations) {
       return result;
     }
   }
 
-  // For longer content, try to translate key terms and add note
-  if (text.length > 300) {
-    let result = text;
-    for (const [english, spanish] of Object.entries(translations)) {
-      const regex = new RegExp(`\\b${english}\\b`, 'gi');
-      result = result.replace(regex, spanish);
-    }
-    
-    // If we made some translations, return the result with note
-    if (result !== text) {
-      return `[Traducción parcial con términos clave] ${result}`;
-    }
-    
-    return `[Traducción disponible con API de traducción] ${text}`;
-  }
-
-  // For shorter text that couldn't be translated, return original
+  // For content that couldn't be translated, return original
   return text;
 };
 
