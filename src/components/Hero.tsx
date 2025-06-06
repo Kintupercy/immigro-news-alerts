@@ -271,6 +271,18 @@ const Hero = () => {
           <p className="text-sm text-navy-500 mt-6">
             Join 3,000+ getting urgent immigration law alerts in their inbox
           </p>
+          
+          <div className="mt-4 flex justify-center">
+            <a href="https://www.producthunt.com/products/immigronews?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-immigronews" target="_blank" rel="noopener noreferrer">
+              <img 
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=974601&theme=light&t=1749226044351" 
+                alt="ImmigroNews - One Source For The Latest US Immigration News & Policy | Product Hunt" 
+                style={{width: '250px', height: '54px'}} 
+                width="250" 
+                height="54" 
+              />
+            </a>
+          </div>
         </div>
       </div>
 
