@@ -39,18 +39,21 @@ const RelatedResources = ({
     try {
       setLoading(true);
       
-      // Category mapping for better matching
+      // Category mapping for better matching - enhanced for comprehensive cross-referencing
       const categoryKeywords: Record<string, string[]> = {
-        'green-card': ['Green Card Guide', 'Marriage', 'Family Immigration'],
-        'citizenship': ['Citizenship Guide', 'Naturalization'],
-        'f1-student-visa': ['Student Visas', 'OPT', 'CPT'],
-        'h1b-visa': ['Work Visas', 'Employment'],
-        'family-based': ['Family Immigration', 'Marriage'],
-        'employment-based': ['Employment', 'Work Visas'],
-        'breaking-news': ['Immigration Guides', 'Legal Issues'],
-        'daca': ['Legal Issues', 'Immigration Guides'],
+        'green-card': ['Green Card Guide', 'Marriage', 'Family Immigration', 'Employment'],
+        'citizenship': ['Citizenship Guide', 'Naturalization', 'Immigration Guides'],
+        'f1-student-visa': ['Student Visas', 'OPT', 'CPT', 'Legal Issues'],
+        'student-visas': ['Student Visas', 'F1 Guide', 'Legal Issues', 'Immigration Guides'],
+        'h1b-visa': ['Work Visas', 'Employment', 'Immigration Guides'],
+        'work-visas': ['Work Visas', 'Employment', 'H1B Guide'],
+        'family-based': ['Family Immigration', 'Marriage', 'Green Card Guide'],
+        'employment-based': ['Employment', 'Work Visas', 'Green Card Guide'],
+        'breaking-news': ['Immigration Guides', 'Legal Issues', 'Student Visas'],
+        'daca': ['Legal Issues', 'Immigration Guides', 'Student Visas'],
         'refugees-asylees': ['Legal Issues', 'Immigration Guides'],
-        'undocumented': ['Legal Issues', 'Immigration Guides']
+        'undocumented': ['Legal Issues', 'Immigration Guides', 'Student Visas'],
+        'policy-changes': ['Immigration Guides', 'Legal Issues', 'Student Visas', 'Work Visas']
       };
 
       const relevantCategories = categoryKeywords[articleCategory] || ['Immigration Guides'];

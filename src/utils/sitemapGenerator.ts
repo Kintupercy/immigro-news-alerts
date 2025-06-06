@@ -83,8 +83,43 @@ export const generateSitemap = async (): Promise<string> => {
       });
     }
 
+    // Fetch blog articles for sitemap - enhanced cross-referencing
+    const { data: blogArticles } = await supabase
+      .from('blog_articles')
+      .select('slug, updated_at, created_at, category, featured')
+      .eq('status', 'published')
+      .order('updated_at', { ascending: false })
+      .limit(500); // Include blog articles in sitemap
+
+    if (blogArticles) {
+      blogArticles.forEach((article, index) => {
+        const daysSinceUpdate = Math.floor((Date.now() - new Date(article.updated_at).getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Higher priority for recent and featured blog articles
+        let priority = 0.7;
+        if (article.featured) priority = 0.8;
+        if (daysSinceUpdate <= 7) priority = 0.8;
+        else if (daysSinceUpdate <= 30) priority = 0.75;
+        else priority = 0.7;
+
+        // Frequency based on recency and category importance
+        let changefreq: 'daily' | 'weekly' | 'monthly' = 'weekly';
+        if (daysSinceUpdate <= 7) changefreq = 'daily';
+        else if (daysSinceUpdate <= 30) changefreq = 'weekly';
+        else changefreq = 'monthly';
+
+        urls.push({
+          loc: `${baseUrl}/blog/${article.slug}`,
+          lastmod: new Date(article.updated_at).toISOString().split('T')[0],
+          changefreq,
+          priority
+        });
+      });
+    }
+
     // Add important immigration-related pages
     const immigrationPages = [
+      { path: '/blog', priority: 0.85 },
       { path: '/visa-updates', priority: 0.85 },
       { path: '/green-card-news', priority: 0.85 },
       { path: '/citizenship-updates', priority: 0.85 },

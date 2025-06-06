@@ -54,6 +54,14 @@ serve(async (req) => {
     // 3. Update homepage Latest Posts section (this happens automatically via the existing news feed)
     await logAction(supabase, post_id, 'homepage_update', 'success', 'Homepage will automatically show latest posts');
 
+    // 4. Check and establish cross-references with existing content
+    try {
+      await establishContentCrossReferences(supabase, post_id, category);
+    } catch (error) {
+      console.error('Cross-reference establishment failed:', error);
+      await logAction(supabase, post_id, 'cross_reference', 'failed', `Cross-reference failed: ${error.message}`);
+    }
+
     // Final success log
     await logAction(supabase, post_id, 'automation_completed', 'success', 'Blog post automation completed');
 
@@ -203,4 +211,71 @@ async function requestGoogleIndexing(supabase: any, postId: string, postUrl: str
   const responseData = await response.json();
   
   await logAction(supabase, postId, 'google_indexing', 'success', 'Google indexing requested successfully', responseData);
+}
+
+async function establishContentCrossReferences(supabase: any, postId: string, category: string) {
+  // Category mapping for cross-referencing with immigration news
+  const categoryMappings: Record<string, string[]> = {
+    'Green Card Guide': ['green-card', 'family-based', 'employment-based'],
+    'Citizenship Guide': ['citizenship', 'naturalization'],
+    'Student Visas': ['f1-student-visa', 'student-visas'],
+    'Work Visas': ['h1b-visa', 'employment-based', 'work-visas'],
+    'Family Immigration': ['family-based', 'marriage'],
+    'Employment': ['employment-based', 'h1b-visa', 'work-visas'],
+    'Legal Issues': ['daca', 'refugees-asylees', 'undocumented', 'breaking-news'],
+    'Immigration Guides': ['breaking-news', 'policy-changes']
+  };
+
+  const relevantNewsCategories = categoryMappings[category] || [];
+  
+  if (relevantNewsCategories.length === 0) {
+    await logAction(supabase, postId, 'cross_reference', 'info', `No specific news categories mapped for blog category: ${category}`);
+    return;
+  }
+
+  // Find recent relevant immigration news articles (last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { data: relatedNews, error } = await supabase
+    .from('immigration_news')
+    .select('id, title, category, published_at')
+    .in('category', relevantNewsCategories)
+    .eq('status', 'published')
+    .gte('published_at', thirtyDaysAgo.toISOString())
+    .order('published_at', { ascending: false })
+    .limit(5);
+
+  if (error) {
+    throw new Error(`Failed to fetch related news: ${error.message}`);
+  }
+
+  // Find other blog articles in similar categories
+  const { data: relatedBlogs, error: blogError } = await supabase
+    .from('blog_articles')
+    .select('id, title, category, published_at')
+    .eq('category', category)
+    .eq('status', 'published')
+    .neq('id', postId)
+    .order('published_at', { ascending: false })
+    .limit(3);
+
+  if (blogError) {
+    throw new Error(`Failed to fetch related blogs: ${blogError.message}`);
+  }
+
+  const crossReferenceData = {
+    relatedNewsArticles: relatedNews || [],
+    relatedBlogArticles: relatedBlogs || [],
+    categoryMappings: relevantNewsCategories
+  };
+
+  await logAction(
+    supabase, 
+    postId, 
+    'cross_reference', 
+    'success', 
+    `Cross-references established: ${relatedNews?.length || 0} news articles, ${relatedBlogs?.length || 0} blog articles`,
+    crossReferenceData
+  );
 }
