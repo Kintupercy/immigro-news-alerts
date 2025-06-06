@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      automation_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          message: string | null
+          post_id: string | null
+          response_data: Json | null
+          status: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          post_id?: string | null
+          response_data?: Json | null
+          status: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          post_id?: string | null
+          response_data?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_logs_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_articles: {
         Row: {
           author: string
