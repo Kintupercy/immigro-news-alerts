@@ -54,14 +54,6 @@ serve(async (req) => {
     // 3. Update homepage Latest Posts section (this happens automatically via the existing news feed)
     await logAction(supabase, post_id, 'homepage_update', 'success', 'Homepage will automatically show latest posts');
 
-    // 4. Share on X (Twitter)
-    try {
-      await shareOnX(supabase, post_id, title, postUrl, category);
-    } catch (error) {
-      console.error('X sharing failed:', error);
-      await logAction(supabase, post_id, 'x_sharing', 'failed', `X sharing failed: ${error.message}`);
-    }
-
     // Final success log
     await logAction(supabase, post_id, 'automation_completed', 'success', 'Blog post automation completed');
 
@@ -211,73 +203,4 @@ async function requestGoogleIndexing(supabase: any, postId: string, postUrl: str
   const responseData = await response.json();
   
   await logAction(supabase, postId, 'google_indexing', 'success', 'Google indexing requested successfully', responseData);
-}
-
-async function shareOnX(supabase: any, postId: string, title: string, postUrl: string, category: string) {
-  const xBearerToken = Deno.env.get('X_BEARER_TOKEN');
-  
-  if (!xBearerToken) {
-    throw new Error('X (Twitter) Bearer Token not configured');
-  }
-
-  // Generate hashtags based on category
-  const hashtags = generateHashtags(category);
-  
-  // Create tweet text (under 280 characters)
-  const tweetText = `${title}
-
-${postUrl}
-
-${hashtags}`;
-
-  if (tweetText.length > 280) {
-    // Truncate title if needed
-    const maxTitleLength = 280 - postUrl.length - hashtags.length - 10; // 10 for spacing and ellipsis
-    const truncatedTitle = title.length > maxTitleLength ? 
-      `${title.substring(0, maxTitleLength - 3)}...` : title;
-    
-    const finalTweetText = `${truncatedTitle}
-
-${postUrl}
-
-${hashtags}`;
-  }
-
-  // X API v2 endpoint for creating tweets
-  const apiUrl = 'https://api.twitter.com/2/tweets';
-  
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${xBearerToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      text: tweetText
-    })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`X API error: ${response.status} - ${errorText}`);
-  }
-
-  const responseData = await response.json();
-  
-  await logAction(supabase, postId, 'x_sharing', 'success', 'Successfully shared on X', responseData);
-}
-
-function generateHashtags(category: string): string {
-  const categoryHashtags: { [key: string]: string[] } = {
-    'Student Visas': ['#StudentVisa', '#StudyInUSA'],
-    'Work Visas': ['#WorkVisa', '#ImmigrationJobs'],
-    'Family Immigration': ['#FamilyVisa', '#ImmigrationFamily'],
-    'Citizenship': ['#USCitizenship', '#Naturalization'],
-    'Green Card': ['#GreenCard', '#PermanentResident'],
-    'Policy Updates': ['#ImmigrationPolicy', '#USImmigration'],
-    'default': ['#Immigration', '#USVisa']
-  };
-
-  const hashtags = categoryHashtags[category] || categoryHashtags.default;
-  return hashtags.join(' ');
 }
