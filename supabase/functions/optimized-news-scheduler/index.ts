@@ -215,16 +215,47 @@ Tags: [immigration, relevant, tags]`;
                 continue;
               }
 
-              // Check for duplicates
-              const { data: existing } = await supabaseClient
+              // Enhanced duplicate checking
+              const { data: existingByTitle } = await supabaseClient
                 .from('immigration_news')
-                .select('id')
+                .select('id, title, source_url')
                 .eq('title', item.title)
                 .limit(1);
 
-              if (existing && existing.length > 0) {
-                console.log(`Duplicate immigration article: ${item.title}`);
+              if (existingByTitle && existingByTitle.length > 0) {
+                console.log(`Duplicate found by title: ${item.title}`);
                 continue;
+              }
+
+              // Check for duplicates by source URL if available
+              if (item.source_url) {
+                const { data: existingByUrl } = await supabaseClient
+                  .from('immigration_news')
+                  .select('id, title')
+                  .eq('source_url', item.source_url)
+                  .limit(1);
+
+                if (existingByUrl && existingByUrl.length > 0) {
+                  console.log(`Duplicate found by URL: ${item.title} (existing: ${existingByUrl[0].title})`);
+                  continue;
+                }
+              }
+
+              // Check for similar titles (to catch slight variations)
+              const { data: similarTitles } = await supabaseClient
+                .from('immigration_news')
+                .select('id, title')
+                .ilike('title', `%${item.title.split(' ').slice(0, 5).join(' ')}%`)
+                .limit(3);
+
+              if (similarTitles && similarTitles.length > 0) {
+                const exactMatch = similarTitles.find(existing => 
+                  existing.title.toLowerCase().trim() === item.title.toLowerCase().trim()
+                );
+                if (exactMatch) {
+                  console.log(`Similar title found, skipping: ${item.title}`);
+                  continue;
+                }
               }
 
               const { error: insertError } = await supabaseClient

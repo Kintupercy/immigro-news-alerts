@@ -152,17 +152,47 @@ JSON format required:
         continue;
       }
 
-      // Check if article already exists
-      const { data: existingArticle } = await supabase
+      // Enhanced duplicate checking
+      const { data: existingByTitle } = await supabase
         .from('immigration_news')
-        .select('id')
+        .select('id, title, source_url')
         .eq('title', article.title)
-        .eq('source_url', article.source_url)
-        .single();
+        .limit(1);
 
-      if (existingArticle) {
-        console.log(`Duplicate found: ${article.title}`);
+      if (existingByTitle && existingByTitle.length > 0) {
+        console.log(`Duplicate found by title: ${article.title}`);
         continue;
+      }
+
+      // Check for duplicates by source URL if available
+      if (article.source_url) {
+        const { data: existingByUrl } = await supabase
+          .from('immigration_news')
+          .select('id, title')
+          .eq('source_url', article.source_url)
+          .limit(1);
+
+        if (existingByUrl && existingByUrl.length > 0) {
+          console.log(`Duplicate found by URL: ${article.title} (existing: ${existingByUrl[0].title})`);
+          continue;
+        }
+      }
+
+      // Check for similar titles (to catch slight variations)
+      const { data: similarTitles } = await supabase
+        .from('immigration_news')
+        .select('id, title')
+        .ilike('title', `%${article.title.split(' ').slice(0, 5).join(' ')}%`)
+        .limit(3);
+
+      if (similarTitles && similarTitles.length > 0) {
+        const exactMatch = similarTitles.find(existing => 
+          existing.title.toLowerCase().trim() === article.title.toLowerCase().trim()
+        );
+        if (exactMatch) {
+          console.log(`Similar title found, skipping: ${article.title}`);
+          continue;
+        }
       }
 
       // Insert the article
