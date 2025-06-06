@@ -55,21 +55,24 @@ const BlogArticle = () => {
   };
 
   const formatContent = (content: string) => {
-    // Clean up and properly structure the content
+    // Clean up and properly structure the content for government-style formatting
     return content
       .replace(/^# .+$/gm, '') // Remove main title
-      // Handle markdown headers
-      .replace(/^## (.+)$/gm, '<h2 class="text-xl lg:text-2xl font-bold mt-8 lg:mt-10 mb-4 lg:mb-5 text-gray-900 font-playfair">$1</h2>')
-      .replace(/^### (.+)$/gm, '<h3 class="text-lg lg:text-xl font-bold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-900 font-playfair">$1</h3>')
-      // Handle question-style subtitles (lines ending with ?)
-      .replace(/^([^?\n]*\?)\s*$/gm, '<h3 class="text-lg lg:text-xl font-bold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-900 font-playfair">$1</h3>')
-      // Handle colon-style sub-subtitles (standalone lines ending with :)
-      .replace(/^([A-Z][^:\n]*:)\s*$/gm, '<h4 class="text-base lg:text-lg font-bold mt-4 lg:mt-6 mb-2 lg:mb-3 text-gray-900">$1</h4>')
+      // Handle markdown headers with government-style spacing
+      .replace(/^## (.+)$/gm, '<h2 class="text-2xl lg:text-3xl font-bold mt-10 lg:mt-12 mb-6 lg:mb-8 text-gray-900 border-b border-gray-200 pb-3 lg:pb-4">$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3 class="text-xl lg:text-2xl font-bold mt-8 lg:mt-10 mb-4 lg:mb-6 text-gray-900">$1</h3>')
+      // Handle question-style headings (common in government explainers)
+      .replace(/^([^?\n]*\?)\s*$/gm, '<h3 class="text-xl lg:text-2xl font-bold mt-8 lg:mt-10 mb-4 lg:mb-6 text-gray-900 bg-gray-50 p-4 lg:p-6 rounded-lg border-l-4 border-blue-500">$1</h3>')
+      // Handle colon-style sub-headings
+      .replace(/^([A-Z][^:\n]*:)\s*$/gm, '<h4 class="text-lg lg:text-xl font-semibold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-800">$1</h4>')
       // Handle bold text
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+      // Handle numbered lists
+      .replace(/^\d+\.\s+(.+)$/gm, '<li class="mb-3 lg:mb-4 text-gray-700 leading-relaxed">$1</li>')
+      .replace(/(<li class="mb-3 lg:mb-4 text-gray-700 leading-relaxed">.*?<\/li>\s*)+/gs, '<ol class="list-decimal pl-6 lg:pl-8 mb-8 lg:mb-10 space-y-3 lg:space-y-4 bg-blue-50 p-4 lg:p-6 rounded-lg">$&</ol>')
       // Handle bullet points
-      .replace(/^- (.+)$/gm, '<li class="mb-2 text-gray-700">$1</li>')
-      .replace(/(<li class="mb-2 text-gray-700">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-4 lg:pl-6 mb-6 lg:mb-8 space-y-2 lg:space-y-3">$&</ul>')
+      .replace(/^- (.+)$/gm, '<li class="mb-3 lg:mb-4 text-gray-700 leading-relaxed">$1</li>')
+      .replace(/(<li class="mb-3 lg:mb-4 text-gray-700 leading-relaxed">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-6 lg:pl-8 mb-8 lg:mb-10 space-y-3 lg:space-y-4 bg-gray-50 p-4 lg:p-6 rounded-lg">$&</ul>')
       // Split content and process paragraphs
       .split('\n\n')
       .map(paragraph => {
@@ -80,11 +83,12 @@ const BlogArticle = () => {
             paragraph.startsWith('<h3') || 
             paragraph.startsWith('<h4') || 
             paragraph.startsWith('<ul') || 
+            paragraph.startsWith('<ol') ||
             paragraph.startsWith('<strong')) {
           return paragraph;
         }
-        // Format regular paragraphs with better spacing
-        return `<p class="mb-4 lg:mb-6 leading-relaxed text-gray-700 text-sm lg:text-base">${paragraph}</p>`;
+        // Format regular paragraphs with government-style spacing and readability
+        return `<p class="mb-6 lg:mb-8 leading-relaxed text-gray-700 text-base lg:text-lg max-w-none">${paragraph}</p>`;
       })
       .filter(Boolean)
       .join('\n');
