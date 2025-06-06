@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Share2, MessageSquare, Facebook, Linkedin } from "lucide-react";
+import { Share2, MessageSquare, Facebook, Linkedin, Instagram } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SocialShareButtonProps {
@@ -33,6 +33,31 @@ const SocialShareButton = ({ title, url, className }: SocialShareButtonProps) =>
     const text = `${title} - ${url}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const shareOnInstagram = async () => {
+    const shareText = `${title}\n\n${url}`;
+    
+    // Try to use Web Share API first (works on mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          text: shareText,
+          url: url,
+        });
+      } catch (shareError) {
+        // Fallback to copying to clipboard
+        copyToClipboard(shareText);
+      }
+    } else {
+      // Desktop fallback: copy to clipboard
+      copyToClipboard(shareText);
+      toast({
+        title: "Copied to clipboard",
+        description: "Content copied! Open Instagram and paste to share.",
+      });
+    }
   };
 
   const shareViaText = async () => {
@@ -97,6 +122,10 @@ const SocialShareButton = ({ title, url, className }: SocialShareButtonProps) =>
         <DropdownMenuItem onClick={shareOnLinkedIn}>
           <Linkedin className="w-4 h-4 mr-2" />
           Share on LinkedIn
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={shareOnInstagram}>
+          <Instagram className="w-4 h-4 mr-2" />
+          Share on Instagram
         </DropdownMenuItem>
         <DropdownMenuItem onClick={shareOnWhatsApp}>
           <MessageSquare className="w-4 h-4 mr-2" />
