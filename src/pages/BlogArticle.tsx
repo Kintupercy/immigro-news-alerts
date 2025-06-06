@@ -58,18 +58,33 @@ const BlogArticle = () => {
     // Clean up and properly structure the content
     return content
       .replace(/^# .+$/gm, '') // Remove main title
-      .replace(/^## (.+)$/gm, '<h2 class="text-xl lg:text-2xl font-bold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-900 font-playfair">$1</h2>')
+      // Handle markdown headers
+      .replace(/^## (.+)$/gm, '<h2 class="text-xl lg:text-2xl font-bold mt-8 lg:mt-10 mb-4 lg:mb-5 text-gray-900 font-playfair">$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3 class="text-lg lg:text-xl font-bold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-900 font-playfair">$1</h3>')
+      // Handle question-style subtitles (lines ending with ?)
+      .replace(/^([^?\n]*\?)\s*$/gm, '<h3 class="text-lg lg:text-xl font-bold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-900 font-playfair">$1</h3>')
+      // Handle colon-style sub-subtitles (standalone lines ending with :)
+      .replace(/^([A-Z][^:\n]*:)\s*$/gm, '<h4 class="text-base lg:text-lg font-bold mt-4 lg:mt-6 mb-2 lg:mb-3 text-gray-900">$1</h4>')
+      // Handle bold text
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
-      .replace(/^- (.+)$/gm, '<li class="mb-2">$1</li>')
-      .replace(/(<li class="mb-2">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-4 lg:pl-6 mb-4 lg:mb-6 space-y-1 lg:space-y-2">$&</ul>')
+      // Handle bullet points
+      .replace(/^- (.+)$/gm, '<li class="mb-2 text-gray-700">$1</li>')
+      .replace(/(<li class="mb-2 text-gray-700">.*?<\/li>\s*)+/gs, '<ul class="list-disc pl-4 lg:pl-6 mb-6 lg:mb-8 space-y-2 lg:space-y-3">$&</ul>')
+      // Split content and process paragraphs
       .split('\n\n')
       .map(paragraph => {
         paragraph = paragraph.trim();
         if (!paragraph) return '';
-        if (paragraph.startsWith('<h2') || paragraph.startsWith('<ul')) {
+        // Skip already formatted elements
+        if (paragraph.startsWith('<h2') || 
+            paragraph.startsWith('<h3') || 
+            paragraph.startsWith('<h4') || 
+            paragraph.startsWith('<ul') || 
+            paragraph.startsWith('<strong')) {
           return paragraph;
         }
-        return `<p class="mb-3 lg:mb-4 leading-relaxed text-gray-700 text-sm lg:text-base">${paragraph}</p>`;
+        // Format regular paragraphs with better spacing
+        return `<p class="mb-4 lg:mb-6 leading-relaxed text-gray-700 text-sm lg:text-base">${paragraph}</p>`;
       })
       .filter(Boolean)
       .join('\n');
