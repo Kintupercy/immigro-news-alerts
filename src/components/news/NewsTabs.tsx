@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Newspaper } from "lucide-react";
 import { EmptyState } from "../LoadingStates";
 import ArticleCard from "./ArticleCard";
+import { translateText } from "@/utils/translation";
 
 interface NewsArticle {
   id: string;

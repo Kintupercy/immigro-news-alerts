@@ -93,7 +93,7 @@ const ArticleCard = ({
             className={`text-xs ${isOfficial ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
           >
             {isOfficial && <Shield className="w-3 h-3 mr-1" />}
-            Source: {sourceDomain}
+            {currentLanguage === 'es' ? 'Fuente' : 'Source'}: {sourceDomain}
           </Badge>
           
           {article.tags?.map((tag, index) => (
@@ -160,7 +160,7 @@ const ArticleCard = ({
         {article.source_url && (
           <div className="text-xs text-muted-foreground border-t pt-2">
             <p>
-              Originally published by{' '}
+              {currentLanguage === 'es' ? 'Publicado originalmente por' : 'Originally published by'}{' '}
               <a 
                 href={article.source_url} 
                 target="_blank" 
@@ -169,7 +169,10 @@ const ArticleCard = ({
               >
                 {sourceDomain}
               </a>
-              . Content aggregated for educational purposes under fair use.
+              {currentLanguage === 'es' 
+                ? '. Contenido agregado con fines educativos bajo uso justo.'
+                : '. Content aggregated for educational purposes under fair use.'
+              }
             </p>
           </div>
         )}

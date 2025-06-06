@@ -163,10 +163,10 @@ const NewsFeed = () => {
     setCurrentLanguage(language);
     
     if (language === 'es') {
-      // Translate current articles if switching to Spanish
+      // Translate all filtered articles if switching to Spanish, not just paginated ones
       const newTranslatedContent: Record<string, any> = {};
       
-      for (const article of paginatedArticles) {
+      for (const article of filteredArticles) {
         if (!translatedContent[article.id]) {
           try {
             const [translatedTitle, translatedSummary, translatedContent] = await Promise.all([
