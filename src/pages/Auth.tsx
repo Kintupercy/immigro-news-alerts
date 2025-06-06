@@ -91,6 +91,19 @@ const Auth = () => {
           throw error;
         }
       } else {
+        // Send welcome email
+        try {
+          await supabase.functions.invoke('send-welcome-email', {
+            body: { 
+              email: sanitizedEmail,
+              firstName: sanitizedFirstName
+            }
+          });
+        } catch (welcomeError) {
+          console.error('Welcome email failed:', welcomeError);
+          // Don't fail the subscription if welcome email fails
+        }
+
         toast({
           title: "Successfully subscribed!",
           description: "You'll receive the latest immigration news updates.",
