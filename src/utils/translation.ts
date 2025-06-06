@@ -82,7 +82,32 @@ const translations: Record<string, string> = {
   'Application Process': 'Proceso de Solicitud',
   'Filing Fee': 'Tarifa de Presentación',
   'Priority Date': 'Fecha de Prioridad',
-  'Adjustment of Status': 'Ajuste de Estatus'
+  'Adjustment of Status': 'Ajuste de Estatus',
+  
+  // Government and official terms
+  'Department of Homeland Security': 'Departamento de Seguridad Nacional',
+  'Homeland Security': 'Seguridad Nacional',
+  'Secretary of Homeland Security': 'Secretario de Seguridad Nacional',
+  'Temporary Protected Status': 'Estatus de Protección Temporal',
+  'TPS': 'TPS',
+  'Federal Register': 'Registro Federal',
+  'United States': 'Estados Unidos',
+  'the United States': 'los Estados Unidos',
+  'conditions': 'condiciones',
+  'requirements': 'requisitos',
+  'statutory requirements': 'requisitos legales',
+  'designation': 'designación',
+  'termination': 'terminación',
+  'beneficiaries': 'beneficiarios',
+  'determined': 'determinó',
+  'announced': 'anunció',
+  'publication': 'publicación',
+  'notice': 'aviso',
+  'effect': 'efecto',
+  'prepare': 'prepararse',
+  'return': 'regresar',
+  'lawful basis': 'base legal',
+  'remaining': 'permanecer'
 };
 
 // Helper function to translate individual words and phrases
@@ -140,8 +165,19 @@ export const translateText = async (text: string, targetLanguage: 'es' | 'en'): 
     }
   }
 
-  // For longer content or if no translation was found, return with translation note
+  // For longer content, try to translate key terms and add note
   if (text.length > 300) {
+    let result = text;
+    for (const [english, spanish] of Object.entries(translations)) {
+      const regex = new RegExp(`\\b${english}\\b`, 'gi');
+      result = result.replace(regex, spanish);
+    }
+    
+    // If we made some translations, return the result with note
+    if (result !== text) {
+      return `[Traducción parcial con términos clave] ${result}`;
+    }
+    
     return `[Traducción disponible con API de traducción] ${text}`;
   }
 
