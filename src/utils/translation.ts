@@ -88,11 +88,16 @@ const translations: Record<string, string> = {
   'Department of Homeland Security': 'Departamento de Seguridad Nacional',
   'Homeland Security': 'Seguridad Nacional',
   'Secretary of Homeland Security': 'Secretario de Seguridad Nacional',
+  'Secretary': 'Secretario',
   'Temporary Protected Status': 'Estatus de Protección Temporal',
   'TPS': 'TPS',
   'Federal Register': 'Registro Federal',
   'United States': 'Estados Unidos',
   'the United States': 'los Estados Unidos',
+  'U.S.': 'EE.UU.',
+  'Services': 'Servicios',
+  'CBP': 'CBP',
+  'ICE': 'ICE',
   'conditions': 'condiciones',
   'requirements': 'requisitos',
   'statutory requirements': 'requisitos legales',
@@ -107,7 +112,63 @@ const translations: Record<string, string> = {
   'prepare': 'prepararse',
   'return': 'regresar',
   'lawful basis': 'base legal',
-  'remaining': 'permanecer'
+  'remaining': 'permanecer',
+  
+  // Common action words and terms
+  'has': 'ha',
+  'have': 'tienen',
+  'directed': 'dirigido',
+  'to': 'a',
+  'and': 'y',
+  'are': 'están',
+  'intensify': 'intensificar',
+  'reviews': 'revisiones',
+  'of': 'de',
+  'records': 'registros',
+  'take': 'tomar',
+  'immediate': 'inmediato',
+  'action': 'acción',
+  'on': 'en',
+  'overstays': 'permanencias excesivas',
+  'At': 'En',
+  'the': 'la',
+  'direction': 'dirección',
+  'multiple': 'múltiples',
+  'agencies': 'agencias',
+  'including': 'incluyendo',
+  'ramping': 'aumentando',
+  'up': 'las',
+  'address': 'abordar',
+  'administration': 'administración',
+  'cites': 'cita',
+  'previous': 'anterior',
+  'Administration': 'Administración',
+  'failure': 'fallo',
+  'enforce': 'hacer cumplir',
+  'law': 'ley',
+  'as': 'como',
+  'reason': 'razón',
+  'for': 'por',
+  'this': 'esta',
+  'enforcement': 'aplicación',
+  'automatically': 'automáticamente',
+  'extended': 'extendido',
+  'six': 'seis',
+  'months': 'meses',
+  'from': 'desde',
+  'May': 'Mayo',
+  'through': 'hasta',
+  'November': 'Noviembre',
+  'This': 'Esta',
+  'extension': 'extensión',
+  'allows': 'permite',
+  'eligible': 'elegibles',
+  'nationals': 'nacionales',
+  'maintain': 'mantener',
+  'their': 'su',
+  'related': 'relacionada',
+  'during': 'durante',
+  'period': 'período'
 };
 
 // Helper function to translate individual words and phrases
@@ -145,40 +206,22 @@ export const translateText = async (text: string, targetLanguage: 'es' | 'en'): 
     return translations[text];
   }
 
-  // Always try to translate key terms regardless of length
+  // Apply comprehensive translation - replace all known terms
   let result = text;
-  let hasTranslations = false;
   
   // Apply all translation rules
   for (const [english, spanish] of Object.entries(translations)) {
     const regex = new RegExp(`\\b${english}\\b`, 'gi');
-    const newResult = result.replace(regex, spanish);
-    if (newResult !== result) {
-      hasTranslations = true;
-      result = newResult;
-    }
+    result = result.replace(regex, spanish);
   }
   
-  // For shorter content, try phrase-by-phrase translation first
-  if (text.length <= 300) {
-    const translatedText = translatePhrase(text);
-    if (translatedText !== text) {
-      return translatedText;
-    }
-    
-    // Return the key term translations if we found any
-    if (hasTranslations) {
-      return result;
-    }
-  } else {
-    // For longer content, return key term translations without notes for breaking news and important content
-    if (hasTranslations) {
-      return result;
-    }
+  // If any translations were made, return the result
+  if (result !== text) {
+    return result;
   }
 
-  // For content that couldn't be translated, return original
-  return text;
+  // For content that couldn't be translated, add translation note
+  return `[Contenido en proceso de traducción] ${text}`;
 };
 
 export const translateCategory = (category: string): string => {
