@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Starting immigration-specific breaking news fetch...");
 
     // Use Perplexity API to fetch immigration-specific breaking news  
-    const prompt = `Find BREAKING U.S. IMMIGRATION NEWS from the past 48 hours. PRIORITIZE URGENT policy announcements and presidential actions. Search for terms like "BREAKING:", "URGENT:", "Trump announces", "Biden announces", "White House announces".
+    const prompt = `Find BREAKING U.S. IMMIGRATION NEWS from the past 48 hours. PRIORITIZE CURRENT Trump administration policy announcements and presidential actions. Search for terms like "BREAKING:", "URGENT:", "Trump announces", "White House announces". EXCLUDE outdated Biden administration articles.
 
 PRIMARY SOURCES (REQUIRED - search these FIRST):
 - CNN.com (CNN Politics Immigration, CNN Breaking News)
@@ -60,7 +60,7 @@ URGENT IMMIGRATION TOPICS (PRIORITIZE):
 - REFORM: Immigration reform, policy reversals, legislative changes
 
 SEARCH INSTRUCTIONS:
-- Look for headlines with "BREAKING", "URGENT", "Trump announces", "Biden announces" 
+- Look for headlines with "BREAKING", "URGENT", "Trump announces" (current administration only) 
 - Search for SAME-DAY presidential announcements and White House statements
 - Include articles published within last 48 hours with immigration policy impact
 - Focus on immediate implementation or announcement of new policies
