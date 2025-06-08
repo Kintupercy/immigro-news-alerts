@@ -128,6 +128,19 @@ const SubscriptionPage = () => {
           throw error;
         }
       } else {
+        // Send welcome email
+        try {
+          await supabase.functions.invoke('send-welcome-email', {
+            body: { 
+              email: sanitizedEmail,
+              firstName: sanitizedFirstName
+            }
+          });
+        } catch (welcomeError) {
+          console.error('Welcome email failed:', welcomeError);
+          // Don't fail the subscription if welcome email fails
+        }
+
         setIsSubscribed(true);
         toast({
           title: "Successfully subscribed!",
