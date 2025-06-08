@@ -215,6 +215,28 @@ Tags: [immigration, relevant, tags]`;
                 continue;
               }
 
+              // Validate source URL before proceeding
+              let urlValid = false;
+              if (item.source_url) {
+                try {
+                  const urlResponse = await fetch(item.source_url, { 
+                    method: 'HEAD',
+                    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NewsBot/1.0)' }
+                  });
+                  urlValid = urlResponse.ok;
+                  console.log(`URL validation for ${item.source_url}: ${urlValid ? 'VALID' : 'INVALID'}`);
+                } catch (error) {
+                  console.log(`URL validation error for ${item.source_url}: ${error.message}`);
+                  urlValid = false;
+                }
+              }
+              
+              // Skip articles with invalid URLs
+              if (!urlValid) {
+                console.log(`Skipping article with invalid URL: ${item.title}`);
+                continue;
+              }
+
               // Enhanced duplicate checking
               const { data: existingByTitle } = await supabaseClient
                 .from('immigration_news')

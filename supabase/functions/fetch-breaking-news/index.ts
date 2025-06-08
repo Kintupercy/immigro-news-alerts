@@ -152,6 +152,28 @@ JSON format required:
         continue;
       }
 
+      // Validate source URL before proceeding
+      let urlValid = false;
+      if (article.source_url) {
+        try {
+          const urlResponse = await fetch(article.source_url, { 
+            method: 'HEAD',
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NewsBot/1.0)' }
+          });
+          urlValid = urlResponse.ok;
+          console.log(`URL validation for ${article.source_url}: ${urlValid ? 'VALID' : 'INVALID'}`);
+        } catch (error) {
+          console.log(`URL validation error for ${article.source_url}: ${error.message}`);
+          urlValid = false;
+        }
+      }
+      
+      // Skip articles with invalid URLs
+      if (!urlValid) {
+        console.log(`Skipping article with invalid URL: ${article.title}`);
+        continue;
+      }
+
       // Enhanced duplicate checking
       const { data: existingByTitle } = await supabase
         .from('immigration_news')
