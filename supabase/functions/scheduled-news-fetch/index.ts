@@ -68,6 +68,21 @@ serve(async (req) => {
 
     console.log('Breaking news fetch response:', breakingData);
 
+    // Run automated link validation (once per day during morning slot)
+    if (timeSlot === 'morning') {
+      try {
+        const { data: validationData, error: validationError } = await supabaseClient.functions.invoke('automated-link-validation');
+
+        if (validationError) {
+          console.error('Error running automated link validation:', validationError);
+        } else {
+          console.log('Automated link validation completed:', validationData);
+        }
+      } catch (validationError) {
+        console.error('Failed to run automated link validation:', validationError);
+      }
+    }
+
     // Optionally send notifications for urgent news (only during business hours)
     if (timeSlot === 'morning' || timeSlot === 'afternoon' || timeSlot === 'evening') {
       try {
