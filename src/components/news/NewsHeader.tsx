@@ -1,5 +1,5 @@
 
-import { Shield, Languages } from "lucide-react";
+import { Shield, Languages, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NewsHeaderProps {
@@ -7,13 +7,17 @@ interface NewsHeaderProps {
   onLanguageChange: (language: 'en' | 'es') => void;
   user: any;
   userPreferredCategories: string[];
+  onValidateNews?: () => void;
+  refreshing?: boolean;
 }
 
 const NewsHeader = ({
   currentLanguage,
   onLanguageChange,
   user,
-  userPreferredCategories
+  userPreferredCategories,
+  onValidateNews,
+  refreshing
 }: NewsHeaderProps) => {
   return (
     <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
@@ -27,7 +31,19 @@ const NewsHeader = ({
             {currentLanguage === 'es' ? 'BUSCAR, GUARDAR Y COMPARTIR NOTICIAS + BREAKING NEWS' : 'SEARCH, SAVE & SHARE NEWS + BREAKING NEWS'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {onValidateNews && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onValidateNews}
+              disabled={refreshing}
+              className="bg-cream-50 text-navy-800 hover:bg-cream-100 border-cream-200"
+            >
+              <CheckCircle className="w-4 h-4 mr-1" />
+              {currentLanguage === 'es' ? 'Validar Enlaces' : 'Validate Links'}
+            </Button>
+          )}
           <Languages className="w-4 h-4 text-cream-200" />
           <div className="flex rounded-lg border overflow-hidden">
             <Button

@@ -350,6 +350,38 @@ const NewsFeed = () => {
     }
   };
 
+  const validateRecentNews = async () => {
+    try {
+      setRefreshing(true);
+      
+      toast({
+        title: "Validating recent articles...",
+        description: "Checking links from the last 2 days and removing broken ones.",
+      });
+
+      const response = await supabase.functions.invoke('validate-recent-news');
+
+      if (response.data?.success) {
+        toast({
+          title: "Validation complete!",
+          description: `Checked ${response.data.articlesChecked} articles. Removed ${response.data.invalidArticles} with broken links.`,
+        });
+        
+        if (response.data.invalidArticles > 0) {
+          enhancedCache.delete(cacheKeys.news('all', '', 1));
+          await fetchAllArticles();
+          setCurrentPage(1);
+        }
+      } else {
+        throw new Error(response.error?.message || 'Validation failed');
+      }
+    } catch (error) {
+      handleError(error as Error, 'validating news');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   // Reset page when category or search changes
   useEffect(() => {
     setCurrentPage(1);
@@ -478,6 +510,8 @@ const NewsFeed = () => {
           onLanguageChange={handleLanguageChange}
           user={user}
           userPreferredCategories={userPreferredCategories}
+          onValidateNews={validateRecentNews}
+          refreshing={refreshing}
         />
 
         {/* Filters Section */}
