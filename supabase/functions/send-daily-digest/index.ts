@@ -72,14 +72,14 @@ const handler = async (req: Request): Promise<Response> => {
         await resend.emails.send({
           from: "ImmigrowNews <updates@immigronews.com>",
           to: [subscription.email],
-          subject: `Daily Immigration News Digest - ${urgentNews.length} Important Update${urgentNews.length > 1 ? 's' : ''}`,
+          subject: `Weekly Immigration News Digest - ${urgentNews.length} Important Update${urgentNews.length > 1 ? 's' : ''}`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h1 style="color: #1e3a8a; margin-bottom: 24px;">Today's Immigration News</h1>
+              <h1 style="color: #1e3a8a; margin-bottom: 24px;">This Week's Immigration News</h1>
               
               ${firstName ? `<p>Hi ${firstName},</p>` : '<p>Hello!</p>'}
               
-              <p>Here are today's most important immigration news updates:</p>
+              <p>Here are this week's most important immigration news updates:</p>
               
               ${newsHtml}
               
