@@ -35,7 +35,8 @@ const approvedDomains = [
   "nytimes.com", "cnbc.com",
   "reuters.com", "apnews.com", "bbc.com", "washingtonpost.com", 
   "abcnews.go.com", "cbsnews.com",
-  "politico.com", "axios.com", "bloomberg.com", "wsj.com"
+  "politico.com", "axios.com", "bloomberg.com", "wsj.com",
+  "aila.org"
 ];
 
 function isValidSource(url: string): boolean {
@@ -65,6 +66,7 @@ ADDITIONAL TRUSTED SOURCES:
 - NYTimes.com, CNBC.com, Reuters.com, AP News
 - Washington Post, ABC News, CBS News, Politico, Bloomberg
 - USCIS.gov, DHS.gov, State.gov, ICE.gov, CBP.gov
+- AILA.org (American Immigration Lawyers Association daily news clips)
 
 Return exactly 4-5 IMMIGRATION-SPECIFIC news articles in this JSON format:
 {
@@ -82,7 +84,7 @@ Return exactly 4-5 IMMIGRATION-SPECIFIC news articles in this JSON format:
 
 Requirements:
 - MUST be about U.S. immigration law, visas, green cards, citizenship, deportation, asylum, or border policy
-- Include valid URLs from NBC News, Fox News, NPR, CNN, or other specified sources
+- Include valid URLs from NBC News, Fox News, NPR, CNN, AILA.org, or other specified sources
 - Focus on policy changes, court decisions, enforcement updates, application changes
 - Mark urgent only for breaking immigration policy news or immediate deadlines
 - NO general politics unless directly related to immigration law
@@ -103,7 +105,7 @@ Requirements:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert U.S. immigration news researcher. Focus ONLY on immigration law, visa updates, policy changes, court decisions, and enforcement actions. Always return valid JSON with verified source URLs from NBC News, Fox News, NPR, CNN, or other approved immigration news sources. Never include general political news unless directly related to immigration law.'
+            content: 'You are an expert U.S. immigration news researcher. Focus ONLY on immigration law, visa updates, policy changes, court decisions, and enforcement actions. Always return valid JSON with verified source URLs from NBC News, Fox News, NPR, CNN, AILA.org, or other approved immigration news sources. Never include general political news unless directly related to immigration law.'
           },
           {
             role: 'user',
