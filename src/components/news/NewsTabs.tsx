@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Newspaper } from "lucide-react";
 import { EmptyState } from "../LoadingStates";
 import ArticleCard from "./ArticleCard";
-import { translateText } from "@/utils/translation";
+import AllTabContent from "./AllTabContent";
 
 interface NewsArticle {
   id: string;
@@ -115,43 +115,20 @@ const NewsTabs = ({
       </TabsList>
 
       <TabsContent value="all" className="mt-0">
-        <div className="space-y-4">
-          {allArticlesForAllTab.length === 0 ? (
-            <EmptyState
-              icon={Newspaper}
-              title={searchTerm 
-                ? (currentLanguage === 'es' 
-                    ? `No se encontraron artículos que coincidan con "${searchTerm}"`
-                    : `No articles found matching "${searchTerm}"`)
-                : (currentLanguage === 'es' 
-                    ? 'No se encontraron artículos verificados'
-                    : 'No verified articles found')
-              }
-              description={searchTerm 
-                ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
-                : (currentLanguage === 'es' 
-                    ? 'Las noticias se actualizan automáticamente dos veces al día con las últimas fuentes oficiales.'
-                    : 'News is automatically updated twice daily from the latest official sources.')
-              }
-            />
-          ) : (
-            allArticlesForAllTab.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
-              <div key={article.id}>
-                <ArticleCard 
-                  article={article}
-                  categories={categories}
-                  currentLanguage={currentLanguage}
-                  translatedContent={translatedContent}
-                  expandedArticle={expandedArticle}
-                  setExpandedArticle={setExpandedArticle}
-                  getDisplayText={getDisplayText}
-                  getSourceDomain={getSourceDomain}
-                  isOfficialSource={isOfficialSource}
-                />
-              </div>
-            ))
-          )}
-        </div>
+        <AllTabContent
+          articles={allArticlesForAllTab}
+          categories={categories}
+          currentLanguage={currentLanguage}
+          translatedContent={translatedContent}
+          expandedArticle={expandedArticle}
+          setExpandedArticle={setExpandedArticle}
+          searchTerm={searchTerm}
+          getDisplayText={getDisplayText}
+          getSourceDomain={getSourceDomain}
+          isOfficialSource={isOfficialSource}
+          ARTICLES_PER_PAGE={ARTICLES_PER_PAGE}
+          currentPage={currentPage}
+        />
       </TabsContent>
 
       <TabsContent value="urgent" className="mt-0">
