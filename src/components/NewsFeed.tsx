@@ -142,6 +142,24 @@ const NewsFeed = () => {
   };
 
   const filteredArticles = getFilteredArticles();
+  
+  // For the "All" tab, show all articles regardless of category filter (but respect search filter)
+  const getAllArticlesForAllTab = () => {
+    let allForTab = allArticles;
+    
+    // Only filter by search term, ignore category filter
+    if (searchTerm) {
+      allForTab = allForTab.filter(article =>
+        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.content.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return allForTab.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+  };
+
+  const allArticlesForAllTab = getAllArticlesForAllTab();
 
   // Paginate the filtered articles
   const getPaginatedArticles = () => {
@@ -518,6 +536,7 @@ const NewsFeed = () => {
             <NewsTabs
               paginatedArticles={paginatedArticles}
               filteredArticles={filteredArticles}
+              allArticlesForAllTab={allArticlesForAllTab}
               urgentArticles={urgentArticles}
               breakingNewsArticles={breakingNewsArticles}
               regularArticles={regularArticles}

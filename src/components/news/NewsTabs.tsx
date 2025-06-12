@@ -27,6 +27,7 @@ interface Category {
 interface NewsTabsProps {
   paginatedArticles: NewsArticle[];
   filteredArticles: NewsArticle[];
+  allArticlesForAllTab: NewsArticle[];
   urgentArticles: NewsArticle[];
   breakingNewsArticles: NewsArticle[];
   regularArticles: NewsArticle[];
@@ -46,6 +47,7 @@ interface NewsTabsProps {
 const NewsTabs = ({
   paginatedArticles,
   filteredArticles,
+  allArticlesForAllTab,
   urgentArticles,
   breakingNewsArticles,
   regularArticles,
@@ -72,7 +74,7 @@ const NewsTabs = ({
             {currentLanguage === 'es' ? 'Todas' : 'All'}
           </span>
           <span className="block sm:inline ml-0 sm:ml-1 text-xs opacity-75">
-            ({filteredArticles.length})
+            ({allArticlesForAllTab.length})
           </span>
         </TabsTrigger>
         <TabsTrigger 
@@ -114,7 +116,7 @@ const NewsTabs = ({
 
       <TabsContent value="all" className="mt-0">
         <div className="space-y-4">
-          {paginatedArticles.length === 0 ? (
+          {allArticlesForAllTab.length === 0 ? (
             <EmptyState
               icon={Newspaper}
               title={searchTerm 
@@ -133,7 +135,7 @@ const NewsTabs = ({
               }
             />
           ) : (
-            paginatedArticles.map((article, index) => (
+            allArticlesForAllTab.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE).map((article, index) => (
               <div key={article.id}>
                 <ArticleCard 
                   article={article}
