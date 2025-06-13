@@ -134,7 +134,8 @@ serve(async (req) => {
           // Get category-specific search terms to avoid overlap
           const categorySearchTerms = getCategorySearchTerms(category.slug);
 
-          const prompt = `Find VERIFIED U.S. IMMIGRATION news about ${categorySearchTerms} from the past 12-24 hours. Focus on CURRENT Trump administration policies and announcements. EXCLUDE outdated Biden administration articles. MUST use DIRECT links from these PRIMARY sources:
+          const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          const prompt = `Find ONLY the most recent VERIFIED U.S. IMMIGRATION news about ${categorySearchTerms} published within the last 24 hours (on or after ${today}). STRICTLY EXCLUDE any articles older than 24 hours. Focus on CURRENT Trump administration policies and announcements. EXCLUDE outdated Biden administration articles. MUST use DIRECT links from these PRIMARY sources:
 
 PRIMARY SOURCES (HIGHEST PRIORITY):
 - CNN.com/politics/immigration or CNN.com (CNN breaking immigration news)

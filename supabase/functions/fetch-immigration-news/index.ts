@@ -54,7 +54,8 @@ function isValidSource(url: string): boolean {
 }
 
 async function fetchNewsFromPerplexity(categoryName: string) {
-  const prompt = `Find recent U.S. IMMIGRATION news specifically about ${categoryName} from the past 48 hours. Focus ONLY on immigration law, policy changes, visa updates, deportation news, asylum cases, and citizenship matters.
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const prompt = `Find ONLY the most recent U.S. IMMIGRATION news specifically about ${categoryName} from the past 24 hours (published on or after ${today}). STRICTLY EXCLUDE any articles older than 24 hours. Focus ONLY on immigration law, policy changes, visa updates, deportation news, asylum cases, and citizenship matters.
 
 REQUIRED SOURCES - Prioritize these major outlets:
 - NBCNews.com (NBC News immigration coverage)
