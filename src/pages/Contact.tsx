@@ -3,6 +3,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Mail } from "lucide-react";
+import { icons } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,6 +91,16 @@ const Contact = () => {
     window.open('https://twitter.com/ImmigroNews', '_blank', 'noopener,noreferrer');
   };
 
+  const handleFollowOnInstagram = () => {
+    window.open('https://instagram.com/ImmigroNews', '_blank', 'noopener,noreferrer');
+  };
+
+  const handleFollowOnTikTok = () => {
+    window.open('https://tiktok.com/@ImmigroNews', '_blank', 'noopener,noreferrer');
+  };
+
+  const InstagramIcon = icons.Instagram;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -129,15 +140,40 @@ const Contact = () => {
                   <Separator />
 
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">Follow us on X</h3>
-                    <Button 
-                      onClick={handleFollowOnX}
-                      variant="outline" 
-                      className="w-full bg-black hover:bg-gray-800 text-white border-black"
-                    >
-                      @ImmigroNews
-                    </Button>
-                    <p className="text-sm text-gray-500 mt-2">Get the latest updates on immigration news</p>
+                    <h3 className="font-semibold text-gray-900 mb-3">Follow Us</h3>
+                    <div className="space-y-3">
+                      {/* X (Twitter) */}
+                      <Button 
+                        onClick={handleFollowOnX}
+                        variant="outline" 
+                        className="w-full bg-black hover:bg-gray-800 text-white border-black flex items-center justify-center gap-2"
+                      >
+                        <span>@ImmigroNews</span>
+                      </Button>
+                      
+                      {/* Instagram */}
+                      <Button 
+                        onClick={handleFollowOnInstagram}
+                        variant="outline" 
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-purple-500 flex items-center justify-center gap-2"
+                      >
+                        <InstagramIcon className="w-4 h-4" />
+                        <span>@ImmigroNews</span>
+                      </Button>
+                      
+                      {/* TikTok */}
+                      <Button 
+                        onClick={handleFollowOnTikTok}
+                        variant="outline" 
+                        className="w-full bg-black hover:bg-gray-800 text-white border-black flex items-center justify-center gap-2"
+                      >
+                        <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                          <span className="text-black text-xs font-bold">T</span>
+                        </div>
+                        <span>@ImmigroNews</span>
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-3">Get the latest updates on immigration news</p>
                   </div>
                 </CardContent>
               </Card>
