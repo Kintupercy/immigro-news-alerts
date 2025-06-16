@@ -104,6 +104,11 @@ Keep it professional, informative, and engaging for immigration professionals an
     let newsletterContent;
     
     try {
+      // Check if API response has expected structure
+      if (!perplexityData.choices || perplexityData.choices.length === 0) {
+        throw new Error("No choices in AI response");
+      }
+      
       const aiResponse = perplexityData.choices[0].message.content;
       // Try to extract JSON from the response
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);

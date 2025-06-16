@@ -95,8 +95,8 @@ const SEO = ({
           {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
           {author && <meta property="article:author" content={author} />}
           {section && <meta property="article:section" content={section} />}
-          {tags.map((tag, index) => (
-            <meta key={index} property="article:tag" content={tag} />
+          {tags.map((tag) => (
+            <meta key={tag} property="article:tag" content={tag} />
           ))}
           <meta property="article:publisher" content="https://www.facebook.com/ImmigroNews" />
         </>

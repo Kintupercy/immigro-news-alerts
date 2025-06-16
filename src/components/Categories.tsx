@@ -3,18 +3,18 @@ import { Check } from 'lucide-react';
 
 const Categories = () => {
   const categories = [
-    { name: "Green Card / Permanent Residency", emoji: "🟢" },
-    { name: "Citizenship & Naturalization", emoji: "🇺🇸" }, 
-    { name: "Work Visas & Employment-Based", emoji: "💼" },
-    { name: "Student Visas", emoji: "🎓" },
-    { name: "Family-Based Immigration", emoji: "👨‍👩‍👧‍👦" },
-    { name: "Investor & Entrepreneur Visas", emoji: "💰" },
-    { name: "Asylum & Refugee", emoji: "🤝" },
-    { name: "Deportation & Removal", emoji: "⚖️" },
-    { name: "DACA & Dreamers", emoji: "🌟" },
-    { name: "Border & Enforcement", emoji: "🛡️" },
-    { name: "Temporary Visitors & Tourists", emoji: "✈️" },
-    { name: "Religious Worker Visas", emoji: "⛪" }
+    { name: "Green Card / Permanent Residency", emoji: "🟢", slug: "green-card" },
+    { name: "Citizenship & Naturalization", emoji: "🇺🇸", slug: "citizenship" }, 
+    { name: "Work Visas & Employment-Based", emoji: "💼", slug: "work-visas" },
+    { name: "Student Visas", emoji: "🎓", slug: "student-visas" },
+    { name: "Family-Based Immigration", emoji: "👨‍👩‍👧‍👦", slug: "family-based" },
+    { name: "Investor & Entrepreneur Visas", emoji: "💰", slug: "investor-visas" },
+    { name: "Asylum & Refugee", emoji: "🤝", slug: "asylum-refugee" },
+    { name: "Deportation & Removal", emoji: "⚖️", slug: "deportation" },
+    { name: "DACA & Dreamers", emoji: "🌟", slug: "daca-dreamers" },
+    { name: "Border & Enforcement", emoji: "🛡️", slug: "border-enforcement" },
+    { name: "Temporary Visitors & Tourists", emoji: "✈️", slug: "temporary-visitors" },
+    { name: "Religious Worker Visas", emoji: "⛪", slug: "religious-worker" }
   ];
 
   return (
@@ -31,9 +31,9 @@ const Categories = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <div
-              key={index}
+              key={category.slug}
               className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200"
             >
               <div className="flex items-center">

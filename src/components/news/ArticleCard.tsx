@@ -96,8 +96,8 @@ const ArticleCard = ({
             {currentLanguage === 'es' ? 'Fuente' : 'Source'}: {sourceDomain}
           </Badge>
           
-          {article.tags?.map((tag, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
+          {article.tags?.map((tag) => (
+            <Badge key={tag} variant="outline" className="text-xs">
               {tag}
             </Badge>
           ))}
