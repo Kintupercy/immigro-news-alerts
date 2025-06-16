@@ -25,7 +25,6 @@ interface NewsFiltersProps {
   handleCategoryClick: (category: string) => void;
   categories: Category[];
   currentLanguage: 'en' | 'es';
-  userPreferredCategories: string[];
   getCategoriesToDisplay: () => Category[];
   isCategoryLocked: (categorySlug: string) => boolean;
 }
@@ -37,7 +36,6 @@ const NewsFilters = ({
   handleCategoryClick,
   categories,
   currentLanguage,
-  userPreferredCategories,
   getCategoriesToDisplay,
   isCategoryLocked
 }: NewsFiltersProps) => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
-import { Crown } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { 
   Pagination,
@@ -53,17 +53,11 @@ const NewsFeed = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [userPreferredCategories, setUserPreferredCategories] = useState<string[]>([]);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
-
-  // Free tier: limit to 3 categories
-  const FREE_CATEGORIES_LIMIT = 3;
-  const FREE_TIER_CATEGORIES = ['green-card', 'citizenship', 'work-visas-employment'];
 
   // Filter articles based on selected category and search term
   const getFilteredArticles = () => {
@@ -211,12 +205,7 @@ const NewsFeed = () => {
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-
-        // Skip user preferences for public site
-        setUserPreferredCategories([]);
+        // Public site - no user authentication needed
 
         // Load categories and articles in parallel with enhanced caching
         await Promise.all([
@@ -279,7 +268,7 @@ const NewsFeed = () => {
             .eq('status', 'published')
             .not('source_url', 'is', null)
             .order('published_at', { ascending: false })
-            .limit(500); // Load 500 articles for all users
+            .limit(500); // Load 500 articles
 
           const { data, error } = await query;
           if (error) throw error;
@@ -495,8 +484,6 @@ const NewsFeed = () => {
         <NewsHeader
           currentLanguage={currentLanguage}
           onLanguageChange={handleLanguageChange}
-          user={user}
-          userPreferredCategories={userPreferredCategories}
         />
 
         {/* Filters Section */}
@@ -507,7 +494,6 @@ const NewsFeed = () => {
           handleCategoryClick={handleCategoryClick}
           categories={categories}
           currentLanguage={currentLanguage}
-          userPreferredCategories={userPreferredCategories}
           getCategoriesToDisplay={getCategoriesToDisplay}
           isCategoryLocked={isCategoryLocked}
         />

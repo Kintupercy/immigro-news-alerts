@@ -5,15 +5,11 @@ import { Button } from "@/components/ui/button";
 interface NewsHeaderProps {
   currentLanguage: 'en' | 'es';
   onLanguageChange: (language: 'en' | 'es') => void;
-  user: any;
-  userPreferredCategories: string[];
 }
 
 const NewsHeader = ({
   currentLanguage,
-  onLanguageChange,
-  user,
-  userPreferredCategories
+  onLanguageChange
 }: NewsHeaderProps) => {
   return (
     <div className="bg-navy-800 text-cream-50 p-4 lg:p-6 rounded-lg mb-6">
