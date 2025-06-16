@@ -83,7 +83,8 @@ Keep it professional and actionable.`;
       });
 
       const perplexityData = await perplexityResponse.json();
-      if (perplexityData.choices && perplexityData.choices[0]) {
+      // Safely check for AI response structure  
+      if (perplexityData.choices && perplexityData.choices.length > 0 && perplexityData.choices[0]?.message?.content) {
         urgencyContext = perplexityData.choices[0].message.content;
       }
     } catch (aiError) {

@@ -443,8 +443,8 @@ const NewsFeed = () => {
             />
           </PaginationItem>
           
-          {getPageNumbers().map((page, index) => (
-            <PaginationItem key={index}>
+          {getPageNumbers().map((page) => (
+            <PaginationItem key={`page-${page}`}>
               {page === '...' ? (
                 <PaginationEllipsis />
               ) : (

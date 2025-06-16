@@ -54,8 +54,8 @@ const Pricing = () => {
                   "Category filtering",
                   "Mobile-friendly design",
                   "Always up-to-date"
-                ].map((feature, index) => (
-                  <li key={index} className="flex items-center">
+                ].map((feature) => (
+                  <li key={feature} className="flex items-center">
                     <Check className="w-5 h-5 mr-3 flex-shrink-0 text-emerald-500" />
                     <span className="text-gray-700">{feature}</span>
                   </li>

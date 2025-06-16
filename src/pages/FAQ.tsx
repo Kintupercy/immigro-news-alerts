@@ -7,10 +7,10 @@ import { ChevronDown, ChevronUp, HelpCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const FAQ = () => {
-  const [openQuestions, setOpenQuestions] = useState<number[]>([]);
+  const [openQuestions, setOpenQuestions] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const toggleQuestion = (index: number) => {
+  const toggleQuestion = (index: string) => {
     setOpenQuestions(prev => 
       prev.includes(index) 
         ? prev.filter(i => i !== index)
@@ -194,19 +194,19 @@ const FAQ = () => {
         </div>
 
         <div className="space-y-8">
-          {filteredFaqData.map((category, categoryIndex) => (
-            <section key={categoryIndex} className="bg-white rounded-lg shadow-md p-6">
+          {filteredFaqData.map((category) => (
+            <section key={category.category} className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold text-navy-800 mb-6 border-b border-gray-200 pb-3">
                 {category.category}
               </h2>
               
               <div className="space-y-4">
                 {category.questions.map((faq, questionIndex) => {
-                  const globalIndex = categoryIndex * 100 + questionIndex;
+                  const globalIndex = `${category.category}-${questionIndex}`;
                   const isOpen = openQuestions.includes(globalIndex);
                   
                   return (
-                    <div key={questionIndex} className="border border-gray-200 rounded-lg">
+                    <div key={`${category.category}-${faq.question.slice(0, 30)}`} className="border border-gray-200 rounded-lg">
                       <button
                         onClick={() => toggleQuestion(globalIndex)}
                         className="w-full text-left p-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-inset transition-colors duration-200"
