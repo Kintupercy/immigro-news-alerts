@@ -111,7 +111,7 @@ const Disclaimer = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Removal Requests</h3>
               <p className="text-gray-700">
                 If you are a copyright holder and believe your content has been used inappropriately, 
-                please contact us immediately at legal@immigronews.com with:
+                please contact us immediately at support@immigronews.com with:
               </p>
               <ul className="text-gray-700 space-y-1 mt-2">
                 <li>• Identification of the copyrighted work</li>
@@ -179,8 +179,8 @@ const Disclaimer = () => {
               please contact us at:
             </p>
             <div className="mt-4 text-blue-700">
-              <p><strong>Legal/Copyright Issues:</strong> legal@immigronews.com</p>
-              <p><strong>General Contact:</strong> contact@immigronews.com</p>
+              <p><strong>Legal/Copyright Issues:</strong> support@immigronews.com</p>
+              <p><strong>General Contact:</strong> support@immigronews.com</p>
             </div>
           </section>
 

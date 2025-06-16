@@ -70,7 +70,7 @@ const FAQ = () => {
         },
         {
           question: "Can I submit news tips or suggestions?",
-          answer: "Yes! We welcome news tips and suggestions from our community. Please email us at tips@immigronews.com with relevant immigration news or policy updates you think our users should know about."
+          answer: "Yes! We welcome news tips and suggestions from our community. Please email us at support@immigronews.com with relevant immigration news or policy updates you think our users should know about."
         },
         {
           question: "Do you have original content or just aggregated news?",
@@ -95,7 +95,7 @@ const FAQ = () => {
         },
         {
           question: "How do I unsubscribe from emails?",
-          answer: "Every email we send includes an unsubscribe link at the bottom. You can also contact us at contact@immigronews.com to remove your email from our lists."
+          answer: "Every email we send includes an unsubscribe link at the bottom. You can also contact us at support@immigronews.com to remove your email from our lists."
         }
       ]
     },
@@ -129,7 +129,7 @@ const FAQ = () => {
         },
         {
           question: "Can I delete my account and data?",
-          answer: "Yes, you can request deletion of your account and associated data by contacting us at privacy@immigronews.com. We'll process your request in accordance with applicable privacy laws."
+          answer: "Yes, you can request deletion of your account and associated data by contacting us at support@immigronews.com. We'll process your request in accordance with applicable privacy laws."
         }
       ]
     },
@@ -138,7 +138,7 @@ const FAQ = () => {
       questions: [
         {
           question: "How can I contact ImmigrowNews?",
-          answer: "You can reach us through multiple channels: email us at contact@immigronews.com, use our contact form on the website, or connect with us on social media. We typically respond within 24-48 hours."
+          answer: "You can reach us through multiple channels: email us at support@immigronews.com, use our contact form on the website, or connect with us on social media. We typically respond within 24-48 hours."
         },
         {
           question: "Do you offer customer support?",
@@ -146,7 +146,7 @@ const FAQ = () => {
         },
         {
           question: "Can I advertise on your website?",
-          answer: "We do accept relevant advertising from immigration-related businesses and services. Please contact our advertising team at advertising@immigronews.com for more information about advertising opportunities."
+          answer: "We do accept relevant advertising from immigration-related businesses and services. Please contact our advertising team at support@immigronews.com for more information about advertising opportunities."
         }
       ]
     }
