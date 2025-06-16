@@ -66,14 +66,12 @@ ${articlesContent}
 Please create:
 1. A compelling subject line
 2. An executive summary (2-3 sentences)
-3. Key highlights organized by category
-4. Most important developments section
-5. Looking ahead section
+3. Most important developments section
+4. Looking ahead section
 
 Format the response as JSON with these fields:
 - subject_line
 - executive_summary
-- category_highlights (object with category names as keys)
 - important_developments (array of strings)
 - looking_ahead
 
@@ -120,7 +118,6 @@ Keep it professional, informative, and engaging for immigration professionals an
       newsletterContent = {
         subject_line: "ImmigroNews Weekly Roundup",
         executive_summary: "This week's immigration news roundup featuring the latest updates and developments.",
-        category_highlights: articlesByCategory,
         important_developments: articles.filter(a => a.is_urgent).map(a => a.title),
         looking_ahead: "Stay tuned for more immigration updates next week."
       };
@@ -163,7 +160,6 @@ Keep it professional, informative, and engaging for immigration professionals an
             content: {
               firstName: subscription.preferences?.firstName || '',
               executiveSummary: newsletterContent.executive_summary,
-              categoryHighlights: newsletterContent.category_highlights,
               importantDevelopments: newsletterContent.important_developments,
               lookingAhead: newsletterContent.looking_ahead,
               weeklyStats: {
