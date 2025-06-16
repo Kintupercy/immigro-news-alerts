@@ -121,6 +121,12 @@ JSON format required:
     }
 
     const data = await response.json();
+    
+    // Safely check for AI response structure
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error("No choices in AI response");
+    }
+    
     const content = data.choices[0]?.message?.content;
     console.log("Perplexity immigration breaking news response:", content);
 
