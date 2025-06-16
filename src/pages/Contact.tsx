@@ -143,10 +143,10 @@ const Contact = () => {
 
                   <Separator />
 
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">Follow Us</h3>
-                    <div className="space-y-3">
-                      {/* X (Twitter) */}
+                  <div className="space-y-6">
+                    {/* X (Twitter) */}
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-3">Follow us on X</h3>
                       <Button 
                         onClick={handleFollowOnX}
                         variant="outline" 
@@ -155,8 +155,12 @@ const Contact = () => {
                         <Twitter className="w-4 h-4" />
                         <span>@ImmigroNews</span>
                       </Button>
-                      
-                      {/* Instagram */}
+                      <p className="text-sm text-gray-500 mt-2">Get the latest updates on immigration news</p>
+                    </div>
+                    
+                    {/* Instagram */}
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-3">Follow us on Instagram</h3>
                       <Button 
                         onClick={handleFollowOnInstagram}
                         variant="outline" 
@@ -165,8 +169,12 @@ const Contact = () => {
                         <Instagram className="w-4 h-4" />
                         <span>@ImmigroNews</span>
                       </Button>
-                      
-                      {/* TikTok */}
+                      <p className="text-sm text-gray-500 mt-2">See behind-the-scenes immigration insights</p>
+                    </div>
+                    
+                    {/* TikTok */}
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-3">Follow us on TikTok</h3>
                       <Button 
                         onClick={handleFollowOnTikTok}
                         variant="outline" 
@@ -175,8 +183,8 @@ const Contact = () => {
                         <TikTokIcon />
                         <span>@ImmigroNews</span>
                       </Button>
+                      <p className="text-sm text-gray-500 mt-2">Quick immigration tips and updates</p>
                     </div>
-                    <p className="text-sm text-gray-500 mt-3">Get the latest updates on immigration news</p>
                   </div>
                 </CardContent>
               </Card>
