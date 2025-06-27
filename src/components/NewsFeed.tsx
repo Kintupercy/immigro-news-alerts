@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
-
 import { Button } from "@/components/ui/button";
 import { 
   Pagination,
@@ -23,6 +22,7 @@ import { translateText } from "@/utils/translation";
 import NewsHeader from "./news/NewsHeader";
 import NewsFilters from "./news/NewsFilters";
 import NewsTabs from "./news/NewsTabs";
+import ArticleModal from "./ArticleModal";
 
 interface NewsArticle {
   id: string;
@@ -53,11 +53,41 @@ const NewsFeed = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
   const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const { handleError, retry, canRetry } = useErrorHandler();
+
+  // Check for article parameter in URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('article');
+    
+    if (articleId && allArticles.length > 0) {
+      const article = allArticles.find(a => a.id === articleId);
+      if (article) {
+        setSelectedArticle(article);
+        // Update URL to include article parameter for proper linking
+        window.history.replaceState({}, '', `${window.location.pathname}?article=${articleId}`);
+      }
+    }
+  }, [allArticles]);
+
+  // Handle article selection from cards
+  const handleArticleClick = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    // Update URL for proper linking
+    window.history.pushState({}, '', `${window.location.pathname}?article=${article.id}`);
+  };
+
+  // Handle closing article modal
+  const handleCloseArticle = () => {
+    setSelectedArticle(null);
+    // Remove article parameter from URL
+    window.history.pushState({}, '', window.location.pathname);
+  };
 
   // Filter articles based on selected category and search term
   const getFilteredArticles = () => {
@@ -357,7 +387,6 @@ const NewsFeed = () => {
     }
   };
 
-
   // Reset page when category or search changes
   useEffect(() => {
     setCurrentPage(1);
@@ -537,13 +566,25 @@ const NewsFeed = () => {
               isOfficialSource={isOfficialSource}
               ARTICLES_PER_PAGE={ARTICLES_PER_PAGE}
               currentPage={currentPage}
+              onArticleClick={handleArticleClick}
             />
             
             {/* Pagination */}
             {renderPagination()}
           </div>
-
         </div>
+
+        {/* Article Modal */}
+        <ArticleModal
+          article={selectedArticle}
+          categories={categories}
+          currentLanguage={currentLanguage}
+          translatedContent={translatedContent}
+          getDisplayText={getDisplayText}
+          getSourceDomain={getSourceDomain}
+          isOfficialSource={isOfficialSource}
+          onClose={handleCloseArticle}
+        />
       </div>
     </ErrorBoundary>
   );

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8';
 
@@ -52,9 +53,15 @@ const handler = async (req: Request): Promise<Response> => {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Create content for AI summary
-    const articlesContent = articles.map(article => 
-      `Title: ${article.title}\nCategory: ${article.category}\nSummary: ${article.summary || article.content.substring(0, 200)}\nUrgent: ${article.is_urgent ? 'Yes' : 'No'}\n---`
+    // Create content for AI summary with proper article links
+    const articlesWithLinks = articles.map(article => ({
+      ...article,
+      articleUrl: `https://immigronews.com/news?article=${article.id}`,
+      sourceUrl: article.source_url
+    }));
+
+    const articlesContent = articlesWithLinks.map(article => 
+      `Title: ${article.title}\nCategory: ${article.category}\nSummary: ${article.summary || article.content.substring(0, 200)}\nUrgent: ${article.is_urgent ? 'Yes' : 'No'}\nArticle Link: ${article.articleUrl}\nSource: ${article.sourceUrl || 'N/A'}\n---`
     ).join('\n');
 
     // Use Perplexity to create newsletter content
@@ -66,16 +73,16 @@ ${articlesContent}
 Please create:
 1. A compelling subject line
 2. An executive summary (2-3 sentences)
-3. Most important developments section
+3. Most important developments section (include article links for readers to read full articles)
 4. Looking ahead section
 
 Format the response as JSON with these fields:
 - subject_line
 - executive_summary
-- important_developments (array of strings)
+- important_developments (array of objects with title, summary, and link fields)
 - looking_ahead
 
-Keep it professional, informative, and engaging for immigration professionals and those seeking immigration services.`;
+Keep it professional, informative, and engaging for immigration professionals and those seeking immigration services. Make sure to include the article links so readers can access the full articles.`;
 
     const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -88,7 +95,7 @@ Keep it professional, informative, and engaging for immigration professionals an
         messages: [
           {
             role: 'system',
-            content: 'You are an expert immigration law newsletter writer. Create professional, informative content.'
+            content: 'You are an expert immigration law newsletter writer. Create professional, informative content with proper links.'
           },
           {
             role: 'user',
@@ -119,11 +126,18 @@ Keep it professional, informative, and engaging for immigration professionals an
       }
     } catch (parseError) {
       console.error("Error parsing AI response, using fallback structure");
-      // Fallback structure
+      // Fallback structure with proper links
       newsletterContent = {
         subject_line: "ImmigroNews Weekly Roundup",
         executive_summary: "This week's immigration news roundup featuring the latest updates and developments.",
-        important_developments: articles.filter(a => a.is_urgent).map(a => a.title),
+        important_developments: articlesWithLinks
+          .filter(a => a.is_urgent)
+          .slice(0, 5)
+          .map(a => ({
+            title: a.title,
+            summary: a.summary || a.content.substring(0, 150) + '...',
+            link: a.articleUrl
+          })),
         looking_ahead: "Stay tuned for more immigration updates next week."
       };
     }
@@ -171,7 +185,15 @@ Keep it professional, informative, and engaging for immigration professionals an
                 totalArticles: articles.length,
                 urgentNews: articles.filter(a => a.is_urgent).length,
                 categories: Object.keys(articlesByCategory).length
-              }
+              },
+              // Include featured articles with proper links
+              featuredArticles: articlesWithLinks.slice(0, 3).map(article => ({
+                title: article.title,
+                summary: article.summary || article.content.substring(0, 100) + '...',
+                link: article.articleUrl,
+                category: article.category,
+                isUrgent: article.is_urgent
+              }))
             }
           }),
         });

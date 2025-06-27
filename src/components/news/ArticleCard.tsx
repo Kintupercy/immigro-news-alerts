@@ -38,6 +38,7 @@ interface ArticleCardProps {
   getDisplayText: (text: string, articleId?: string, field?: string) => string;
   getSourceDomain: (url: string | null) => string;
   isOfficialSource: (url: string | null) => boolean;
+  showExpandButton?: boolean;
 }
 
 const ArticleCard = ({
@@ -49,7 +50,8 @@ const ArticleCard = ({
   setExpandedArticle,
   getDisplayText,
   getSourceDomain,
-  isOfficialSource
+  isOfficialSource,
+  showExpandButton = true
 }: ArticleCardProps) => {
   const isExpanded = expandedArticle === article.id;
   const sourceDomain = getSourceDomain(article.source_url);
@@ -81,7 +83,7 @@ const ArticleCard = ({
         </div>
         
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "warning" : "secondary"}>
+          <Badge variant={article.is_urgent ? "destructive" : isBreakingNews ? "default" : "secondary"}>
             {currentLanguage === 'es' 
               ? translateCategory(categories.find(cat => cat.slug === article.category)?.name || article.category)
               : categories.find(cat => cat.slug === article.category)?.name || article.category
@@ -111,7 +113,7 @@ const ArticleCard = ({
           </p>
         )}
         
-        {isExpanded && (
+        {isExpanded && showExpandButton && (
           <div className="prose max-w-none mb-4">
             <p className="whitespace-pre-wrap">
               {getDisplayText(article.content, article.id, 'content')}
@@ -120,16 +122,21 @@ const ArticleCard = ({
         )}
         
         <div className="flex items-center gap-2 flex-wrap mb-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setExpandedArticle(isExpanded ? null : article.id)}
-          >
-            {isExpanded 
-              ? (currentLanguage === 'es' ? 'Mostrar Menos' : 'Show Less')
-              : (currentLanguage === 'es' ? 'Leer Más' : 'Read More')
-            }
-          </Button>
+          {showExpandButton && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpandedArticle(isExpanded ? null : article.id);
+              }}
+            >
+              {isExpanded 
+                ? (currentLanguage === 'es' ? 'Mostrar Menos' : 'Show Less')
+                : (currentLanguage === 'es' ? 'Leer Más' : 'Read More')
+              }
+            </Button>
+          )}
           
           {article.source_url && (
             <Button
@@ -137,6 +144,7 @@ const ArticleCard = ({
               size="sm"
               asChild
               className="bg-navy-800 hover:bg-navy-700"
+              onClick={(e) => e.stopPropagation()}
             >
               <a 
                 href={article.source_url} 
@@ -150,10 +158,12 @@ const ArticleCard = ({
             </Button>
           )}
 
-          <SocialShareButton 
-            title={article.title}
-            url={`https://immigronews.com/news`}
-          />
+          <div onClick={(e) => e.stopPropagation()}>
+            <SocialShareButton 
+              title={article.title}
+              url={`https://immigronews.com/news?article=${article.id}`}
+            />
+          </div>
         </div>
 
         {/* Enhanced Attribution Section */}
@@ -166,6 +176,7 @@ const ArticleCard = ({
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-blue-600 hover:underline font-medium"
+                onClick={(e) => e.stopPropagation()}
               >
                 {sourceDomain}
               </a>
@@ -178,12 +189,14 @@ const ArticleCard = ({
         )}
 
         {/* Related Resources Section */}
-        <RelatedResources
-          articleCategory={article.category}
-          articleTags={article.tags}
-          articleTitle={article.title}
-          currentLanguage={currentLanguage}
-        />
+        {showExpandButton && (
+          <RelatedResources
+            articleCategory={article.category}
+            articleTags={article.tags}
+            articleTitle={article.title}
+            currentLanguage={currentLanguage}
+          />
+        )}
       </CardContent>
     </Card>
   );

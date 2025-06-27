@@ -38,6 +38,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Processing notifications for news:', news.title);
 
+    // Generate proper article link
+    const articleUrl = `https://immigronews.com/news?article=${news.id}`;
+
     // Get users who want notifications for this category
     const { data: profiles, error: profilesError } = await supabase
       .from('user_profiles')
@@ -98,6 +101,8 @@ const handler = async (req: Request): Promise<Response> => {
               category: news.category,
               isUrgent: news.is_urgent,
               firstName: profile.first_name,
+              articleUrl: articleUrl,
+              sourceUrl: news.source_url
             }),
           });
 

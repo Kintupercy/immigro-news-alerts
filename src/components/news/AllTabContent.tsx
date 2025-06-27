@@ -1,5 +1,4 @@
-import { Newspaper } from "lucide-react";
-import { EmptyState } from "../LoadingStates";
+
 import ArticleCard from "./ArticleCard";
 
 interface NewsArticle {
@@ -28,12 +27,10 @@ interface AllTabContentProps {
   translatedContent: Record<string, any>;
   expandedArticle: string | null;
   setExpandedArticle: (id: string | null) => void;
-  searchTerm: string;
   getDisplayText: (text: string, articleId?: string, field?: string) => string;
   getSourceDomain: (url: string | null) => string;
   isOfficialSource: (url: string | null) => boolean;
-  ARTICLES_PER_PAGE: number;
-  currentPage: number;
+  onArticleClick?: (article: NewsArticle) => void;
 }
 
 const AllTabContent = ({
@@ -43,52 +40,45 @@ const AllTabContent = ({
   translatedContent,
   expandedArticle,
   setExpandedArticle,
-  searchTerm,
   getDisplayText,
   getSourceDomain,
   isOfficialSource,
-  ARTICLES_PER_PAGE,
-  currentPage
+  onArticleClick
 }: AllTabContentProps) => {
-  const paginatedArticles = articles.slice((currentPage - 1) * ARTICLES_PER_PAGE, currentPage * ARTICLES_PER_PAGE);
+  
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        {currentLanguage === 'es' 
+          ? 'No se encontraron artículos que coincidan con sus criterios de búsqueda.'
+          : 'No articles found matching your search criteria.'
+        }
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      {paginatedArticles.length === 0 ? (
-        <EmptyState
-          icon={Newspaper}
-          title={searchTerm 
-            ? (currentLanguage === 'es' 
-                ? `No se encontraron artículos que coincidan con "${searchTerm}"`
-                : `No articles found matching "${searchTerm}"`)
-            : (currentLanguage === 'es' 
-                ? 'No se encontraron artículos verificados'
-                : 'No verified articles found')
-          }
-          description={searchTerm 
-            ? (currentLanguage === 'es' ? 'Prueba con diferentes palabras clave.' : 'Try different keywords.')
-            : (currentLanguage === 'es' 
-                ? 'Las noticias se actualizan automáticamente dos veces al día con las últimas fuentes oficiales.'
-                : 'News is automatically updated twice daily from the latest official sources.')
-          }
-        />
-      ) : (
-        paginatedArticles.map((article) => (
-          <div key={article.id}>
-            <ArticleCard 
-              article={article}
-              categories={categories}
-              currentLanguage={currentLanguage}
-              translatedContent={translatedContent}
-              expandedArticle={expandedArticle}
-              setExpandedArticle={setExpandedArticle}
-              getDisplayText={getDisplayText}
-              getSourceDomain={getSourceDomain}
-              isOfficialSource={isOfficialSource}
-            />
-          </div>
-        ))
-      )}
+      {articles.map((article) => (
+        <div 
+          key={article.id} 
+          className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+          onClick={() => onArticleClick?.(article)}
+        >
+          <ArticleCard
+            article={article}
+            categories={categories}
+            currentLanguage={currentLanguage}
+            translatedContent={translatedContent}
+            expandedArticle={expandedArticle}
+            setExpandedArticle={setExpandedArticle}
+            getDisplayText={getDisplayText}
+            getSourceDomain={getSourceDomain}
+            isOfficialSource={isOfficialSource}
+            showExpandButton={false} // Disable expand since we're using modal
+          />
+        </div>
+      ))}
     </div>
   );
 };
