@@ -186,10 +186,10 @@ Keep it professional, informative, and engaging for immigration professionals an
                 urgentNews: articles.filter(a => a.is_urgent).length,
                 categories: Object.keys(articlesByCategory).length
               },
-              // Include featured articles with proper links
-              featuredArticles: articlesWithLinks.slice(0, 3).map(article => ({
+              // Include featured articles with proper links for the main content
+              featuredArticles: articlesWithLinks.slice(0, 5).map(article => ({
                 title: article.title,
-                summary: article.summary || article.content.substring(0, 100) + '...',
+                summary: article.summary || article.content.substring(0, 150) + '...',
                 link: article.articleUrl,
                 category: article.category,
                 isUrgent: article.is_urgent
