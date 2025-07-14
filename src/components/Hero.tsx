@@ -260,7 +260,7 @@ const Hero = () => {
             </SecureForm>
 
             {/* Get Started button */}
-            <Button asChild size="lg" variant="outline" className="px-8 py-3 text-base bg-transparent text-navy-800 border-navy-300 hover:bg-navy-50 font-medium transition-all duration-200 rounded-full">
+            <Button asChild size="lg" className="px-8 py-3 text-base bg-navy-800 text-cream-50 hover:bg-navy-700 font-medium transition-all duration-200 rounded-full">
               <Link to="/news" className="flex items-center gap-2">
                 <ArrowRight className="w-5 h-5" />
                 Browse News
@@ -271,18 +271,6 @@ const Hero = () => {
           <p className="text-sm text-navy-500 mt-6">
             Join 3,000+ getting urgent immigration law alerts in their inbox
           </p>
-          
-          <div className="mt-4 flex justify-center">
-            <a href="https://www.producthunt.com/products/immigronews?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-immigronews" target="_blank" rel="noopener noreferrer">
-              <img 
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=974601&theme=light&t=1749226044351" 
-                alt="ImmigroNews - One Source For The Latest US Immigration News & Policy | Product Hunt" 
-                style={{width: '250px', height: '54px'}} 
-                width="250" 
-                height="54" 
-              />
-            </a>
-          </div>
         </div>
       </div>
 
