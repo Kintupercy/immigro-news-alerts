@@ -6,6 +6,7 @@ const TrustedBy = () => {
     { name: "Migration Policy Institute", logo: "📊" },
     { name: "American Immigration Council", logo: "⚖️" },
     { name: "Immigration Prof", logo: "📚" },
+    { name: "The Washington Post", logo: "📰" },
   ];
 
   return (
