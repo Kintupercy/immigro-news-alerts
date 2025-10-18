@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -293,10 +293,10 @@ export type Database = {
       get_scheduled_jobs: {
         Args: Record<PropertyKey, never>
         Returns: {
+          active: boolean
+          command: string
           jobname: string
           schedule: string
-          command: string
-          active: boolean
         }[]
       }
     }
