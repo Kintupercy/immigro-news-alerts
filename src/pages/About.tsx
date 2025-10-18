@@ -1,11 +1,19 @@
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { GraduationCap, Globe, Heart, Users, Target, Award } from "lucide-react";
 
 const About = () => {
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO 
+        title="About Us - Immigration News Built by Immigrants"
+        description="Learn about ImmigrowNews, founded by a former F1 student who successfully navigated the path to permanent residency. We provide personalized immigration news and connect you with trusted legal experts."
+        keywords={['about immigronews', 'immigration news platform', 'founder story', 'immigrant experience', 'trusted immigration source', 'immigration advocacy']}
+        url="https://immigronews.com/about"
+        type="website"
+      />
       <Header />
       
       <div className="pt-24 pb-16">

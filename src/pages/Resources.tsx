@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Users, Shield, Clock, Mail, MapPin, Globe, FileText, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -204,6 +205,13 @@ const Resources = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO 
+        title="Find Immigration Lawyers & Legal Help - Free Consultation"
+        description="Get matched with vetted immigration lawyers in your area. Free 10-minute consultations available. Anonymous requests accepted. Connect with experienced immigration attorneys for visa, green card, and citizenship help."
+        keywords={['immigration lawyer', 'legal help', 'immigration attorney', 'free consultation', 'immigration legal services', 'find immigration lawyer', 'visa lawyer', 'green card attorney']}
+        url="https://immigronews.com/resources"
+        type="website"
+      />
       <Header />
       
       <div className="pt-16 sm:pt-24 pb-8 sm:pb-16 px-4 sm:px-0">

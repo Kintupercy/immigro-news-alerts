@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Mail, Twitter, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,6 +108,13 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO 
+        title="Contact Us - Get Immigration News Support"
+        description="Have questions about immigration news or need assistance? Contact ImmigroNews support team. We're here to help with subscription questions, technical issues, and general inquiries about immigration updates."
+        keywords={['contact immigronews', 'immigration news support', 'immigration help', 'customer service', 'immigration questions']}
+        url="https://immigronews.com/contact"
+        type="website"
+      />
       <Header />
       
       <div className="pt-24 pb-16">
