@@ -13,6 +13,26 @@ interface WelcomeEmailRequest {
   firstName?: string;
 }
 
+// Rate limiter storage
+const rateLimits = new Map<string, { count: number; resetTime: number }>();
+
+const checkRateLimit = (identifier: string, maxAttempts: number, windowMs: number): boolean => {
+  const now = Date.now();
+  const record = rateLimits.get(identifier);
+
+  if (!record || now > record.resetTime) {
+    rateLimits.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+
+  if (record.count >= maxAttempts) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,15 +41,50 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, firstName }: WelcomeEmailRequest = await req.json();
 
+    // Server-side validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email) || email.length > 254) {
+      console.warn('Invalid email format attempted');
+      return new Response(
+        JSON.stringify({ error: 'Invalid email address' }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Prevent email header injection
+    const sanitizedEmail = email.trim().toLowerCase();
+    if (sanitizedEmail.includes('\n') || sanitizedEmail.includes('\r')) {
+      console.warn('Email header injection attempted:', sanitizedEmail);
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Sanitize firstName (remove HTML, limit length)
+    const sanitizedFirstName = firstName 
+      ? firstName.trim().slice(0, 50).replace(/<[^>]*>/g, '') 
+      : undefined;
+
+    // Rate limiting (5 requests per 15 minutes per IP)
+    const clientId = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
+    if (!checkRateLimit(clientId, 5, 15 * 60 * 1000)) {
+      console.warn('Rate limit exceeded for:', clientId);
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const emailResponse = await resend.emails.send({
       from: "ImmigrowNews <updates@immigronews.com>",
-      to: [email],
+      to: [sanitizedEmail],
       subject: "Welcome to ImmigrowNews - Your Immigration News Source",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1e3a8a; margin-bottom: 24px;">Welcome to ImmigrowNews!</h1>
           
-          ${firstName ? `<p>Hi ${firstName},</p>` : '<p>Hello!</p>'}
+          ${sanitizedFirstName ? `<p>Hi ${sanitizedFirstName},</p>` : '<p>Hello!</p>'}
           
           <p>Thank you for subscribing to ImmigrowNews, your trusted source for US immigration news and updates.</p>
           
@@ -62,8 +117,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending welcome email:", error);
+    // Don't expose internal error details to client
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to send welcome email. Please try again later." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
