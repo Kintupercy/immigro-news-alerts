@@ -14,14 +14,15 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting scheduled news fetch function');
+    const { priorityOnly = false } = await req.json().catch(() => ({}));
+    console.log(`Starting scheduled news fetch function (priorityOnly: ${priorityOnly})`);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Check which time slot this is (morning: 8am, afternoon: 2pm, evening: 6pm Central)
+    // Check which time slot this is (morning: 8am, evening: 6pm Central)
     const now = new Date();
     const centralTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Chicago"}));
     const hour = centralTime.getHours();
@@ -29,19 +30,18 @@ serve(async (req) => {
     let timeSlot = 'unknown';
     if (hour >= 7 && hour <= 9) {
       timeSlot = 'morning';
-    } else if (hour >= 13 && hour <= 15) {
-      timeSlot = 'afternoon';
     } else if (hour >= 17 && hour <= 19) {
       timeSlot = 'evening';
     }
 
-    console.log(`Scheduled news fetch triggered at ${centralTime.toLocaleString()} Central (${timeSlot} slot)`);
+    console.log(`Scheduled news fetch triggered at ${centralTime.toLocaleString()} Central (${timeSlot} slot, priorityOnly: ${priorityOnly})`);
 
-    // Call the optimized news scheduler function
+    // Call the optimized news scheduler function with priority filter
     const { data: newsData, error: newsError } = await supabaseClient.functions.invoke('optimized-news-scheduler', {
       body: { 
         scheduledRun: true,
         timeSlot: timeSlot,
+        priorityOnly: priorityOnly,
         centralTime: centralTime.toISOString()
       }
     });

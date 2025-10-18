@@ -28,13 +28,30 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const { scheduledRun = false, timeSlot = 'unknown' } = await req.json().catch(() => ({}));
+    
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const perplexityApiKey = Deno.env.get("PERPLEXITY_API_KEY")!;
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Starting immigration-specific breaking news fetch...");
+    // Smart trigger: Only run breaking news in morning slot or if manually triggered
+    if (scheduledRun && timeSlot !== 'morning') {
+      console.log(`Skipping breaking news fetch during ${timeSlot} slot (only runs in morning or manual trigger)`);
+      return new Response(JSON.stringify({
+        success: true,
+        articlesAdded: 0,
+        urgentNewsFound: 0,
+        skipped: true,
+        message: `Breaking news only fetched in morning slot. Current: ${timeSlot}`
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`Starting immigration-specific breaking news fetch (timeSlot: ${timeSlot}, scheduled: ${scheduledRun})...`);
 
     // Use Perplexity API to fetch immigration-specific breaking news  
     const prompt = `Find BREAKING U.S. IMMIGRATION NEWS from the past 48 hours. PRIORITIZE CURRENT Trump administration policy announcements and presidential actions. Search for terms like "BREAKING:", "URGENT:", "Trump announces", "White House announces". EXCLUDE outdated Biden administration articles.

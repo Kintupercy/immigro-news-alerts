@@ -68,6 +68,17 @@ function isValidSource(url: string): boolean {
   return approvedDomains.some(domain => url.toLowerCase().includes(domain));
 }
 
+// Category priority system for cost optimization
+const HIGH_PRIORITY = ['policy-updates', 'work-visas-employment', 'breaking-news', 'border-enforcement'];
+const MEDIUM_PRIORITY = ['green-card', 'deportation-removal', 'family-based-immigration', 'daca-dreamer', 'citizenship', 'student-visas', 'asylum-refugee', 'investor-entrepreneur-visas'];
+const LOW_PRIORITY = ['resources', 'community', 'state-news'];
+
+function getCategoryPriority(slug: string): 'high' | 'medium' | 'low' {
+  if (HIGH_PRIORITY.includes(slug)) return 'high';
+  if (MEDIUM_PRIORITY.includes(slug)) return 'medium';
+  return 'low';
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -86,7 +97,8 @@ serve(async (req) => {
       );
     }
 
-    console.log('Starting optimized immigration news fetch function');
+    const { priorityOnly = false } = await req.json().catch(() => ({}));
+    console.log(`Starting optimized immigration news fetch (priorityOnly: ${priorityOnly})`);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -99,12 +111,19 @@ serve(async (req) => {
     }
 
     // Get categories with caching check
-    const { data: categories, error: categoriesError } = await supabaseClient
+    const { data: allCategories, error: categoriesError } = await supabaseClient
       .from('immigration_categories')
       .select('*')
       .order('name');
 
     if (categoriesError) throw categoriesError;
+
+    // Filter categories based on priority setting
+    const categories = priorityOnly 
+      ? allCategories.filter((c: Category) => getCategoryPriority(c.slug) === 'high')
+      : allCategories;
+
+    console.log(`Processing ${categories.length} categories (${priorityOnly ? 'high priority only' : 'all'})`);
 
     let totalArticlesAdded = 0;
     const batchSize = 2; // Process categories in smaller batches
@@ -115,19 +134,22 @@ serve(async (req) => {
       
       await Promise.all(batch.map(async (category: Category) => {
         try {
-          console.log(`Processing immigration category: ${category.name}`);
+          console.log(`Processing immigration category: ${category.name} (${getCategoryPriority(category.slug)} priority)`);
 
-          // Check if we have recent articles for this category (within 2 hours)
-          const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+          // Extended deduplication windows based on priority
+          const priority = getCategoryPriority(category.slug);
+          const cacheWindow = priority === 'high' ? 4 : priority === 'medium' ? 6 : 12; // hours
+          const cacheWindowAgo = new Date(Date.now() - cacheWindow * 60 * 60 * 1000).toISOString();
+          
           const { data: recentArticles } = await supabaseClient
             .from('immigration_news')
             .select('id')
             .eq('category', category.slug)
-            .gte('created_at', twoHoursAgo)
+            .gte('created_at', cacheWindowAgo)
             .limit(1);
 
           if (recentArticles && recentArticles.length > 0) {
-            console.log(`Recent immigration articles found for ${category.name}, skipping...`);
+            console.log(`Recent immigration articles found for ${category.name} within ${cacheWindow}h, skipping...`);
             return;
           }
 
@@ -162,6 +184,7 @@ Source: [Direct URL to CNN/NBC/Fox/NPR article]
 Urgent: [true/false for immediate policy changes]
 Tags: [immigration, relevant, tags]`;
 
+          // Use cheaper model for regular news (70% cost reduction)
           const response = await fetch('https://api.perplexity.ai/chat/completions', {
             method: 'POST',
             headers: {
@@ -169,7 +192,7 @@ Tags: [immigration, relevant, tags]`;
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'sonar-pro',
+              model: 'llama-3.1-sonar-small-128k-online', // Cheaper model for regular news
               messages: [
                 {
                   role: 'system',
@@ -180,7 +203,7 @@ Tags: [immigration, relevant, tags]`;
                   content: prompt
                 }
               ],
-              max_tokens: 3000,
+              max_tokens: 2000, // Reduced from 3000 to save costs
               temperature: 0.1,
               top_p: 0.9,
               return_citations: true
