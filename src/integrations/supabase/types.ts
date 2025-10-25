@@ -253,7 +253,7 @@ export type Database = {
           details: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string | null
         }
@@ -262,7 +262,7 @@ export type Database = {
           details?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -271,7 +271,7 @@ export type Database = {
           details?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -282,16 +282,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_old_immigration_news: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_orphaned_bookmarks: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      cleanup_old_immigration_news: { Args: never; Returns: number }
+      cleanup_orphaned_bookmarks: { Args: never; Returns: number }
       get_scheduled_jobs: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active: boolean
           command: string
