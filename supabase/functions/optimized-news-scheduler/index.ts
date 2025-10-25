@@ -192,7 +192,7 @@ Tags: [immigration, relevant, tags]`;
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'llama-3.1-sonar-small-128k-online', // Cheaper model for regular news
+              model: 'sonar-pro', // Proven working model
               messages: [
                 {
                   role: 'system',
@@ -203,7 +203,7 @@ Tags: [immigration, relevant, tags]`;
                   content: prompt
                 }
               ],
-              max_tokens: 2000, // Reduced from 3000 to save costs
+              max_tokens: 3000, // Original working configuration
               temperature: 0.1,
               top_p: 0.9,
               return_citations: true
@@ -211,7 +211,8 @@ Tags: [immigration, relevant, tags]`;
           });
 
           if (!response.ok) {
-            console.error(`API error for immigration category ${category.name}: ${response.status}`);
+            const errorBody = await response.text();
+            console.error(`API error for immigration category ${category.name}: ${response.status} - ${errorBody}`);
             return;
           }
 
