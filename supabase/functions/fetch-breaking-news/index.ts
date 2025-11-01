@@ -139,6 +139,13 @@ JSON format required:
 
     const data = await response.json();
     
+    // Extract real citation URLs from Perplexity
+    const citations = data.citations || [];
+    console.log(`Perplexity returned ${citations.length} real citation URLs`);
+    if (citations.length > 0) {
+      console.log("Citations:", citations);
+    }
+    
     // Safely check for AI response structure
     if (!data.choices || data.choices.length === 0) {
       throw new Error("No choices in AI response");
@@ -150,8 +157,8 @@ JSON format required:
     let totalArticlesAdded = 0;
     let urgentNewsFound = 0;
 
-    // Parse the response
-    const articles = parseImmigrationBreakingNews(content);
+    // Parse the response with real citations
+    const articles = parseImmigrationBreakingNews(content, citations);
     console.log(`Found ${articles.length} immigration breaking news articles`);
 
     // Skip if no valid breaking news articles found
@@ -303,7 +310,7 @@ JSON format required:
   }
 };
 
-function parseImmigrationBreakingNews(content: string) {
+function parseImmigrationBreakingNews(content: string, citations: string[] = []) {
   const articles: any[] = [];
   
   try {
@@ -316,11 +323,32 @@ function parseImmigrationBreakingNews(content: string) {
         
         for (const article of parsed.articles) {
           if (article.title && article.source_url && isValidSource(article.source_url)) {
+            // Match AI-generated URL with real citation URL
+            let realUrl = article.source_url;
+            
+            if (citations.length > 0) {
+              // Try to find citation with matching domain
+              const aiDomain = getDomainFromUrl(article.source_url);
+              const matchingCitation = citations.find(citationUrl => {
+                const citationDomain = getDomainFromUrl(citationUrl);
+                return citationDomain === aiDomain;
+              });
+              
+              if (matchingCitation) {
+                console.log(`Matched article "${article.title}" with real citation: ${matchingCitation}`);
+                realUrl = matchingCitation;
+              } else if (citations[0]) {
+                // Fallback: use first citation if no domain match
+                console.log(`No domain match for "${article.title}", using first citation: ${citations[0]}`);
+                realUrl = citations[0];
+              }
+            }
+            
             // Check if this is an opinion piece and override urgency
-            const isOpinion = isOpinionPiece(article.title, article.content || article.summary || '', article.source_url);
+            const isOpinion = isOpinionPiece(article.title, article.content || article.summary || '', realUrl);
             
             // Determine news classification using improved logic
-            const newsClassification = classifyBreakingNewsUrgency(article.title, article.content || article.summary || '', article.source_url);
+            const newsClassification = classifyBreakingNewsUrgency(article.title, article.content || article.summary || '', realUrl);
             
             // Override AI urgency with our improved classification
             const isUrgent = newsClassification.isUrgent && !isOpinion;
@@ -335,7 +363,7 @@ function parseImmigrationBreakingNews(content: string) {
               title: article.title,
               content: article.content || article.summary || '',
               summary: article.summary || article.title,
-              source_url: article.source_url,
+              source_url: realUrl, // Use real citation URL
               tags: tags,
               is_urgent: isUrgent
             });
@@ -358,6 +386,16 @@ function parseImmigrationBreakingNews(content: string) {
   }
   
   return articles;
+}
+
+function getDomainFromUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    // Remove 'www.' prefix for better matching
+    return urlObj.hostname.replace('www.', '');
+  } catch {
+    return '';
+  }
 }
 
 function isValidSource(url: string): boolean {
