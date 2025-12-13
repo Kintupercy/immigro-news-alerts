@@ -79,6 +79,45 @@ function getCategoryPriority(slug: string): 'high' | 'medium' | 'low' {
   return 'low';
 }
 
+// Retry flag helper functions
+async function checkRetryFlag(supabaseClient: any): Promise<{ pending: boolean; retryCount: number }> {
+  const { data } = await supabaseClient
+    .from('system_config')
+    .select('value')
+    .eq('key', 'perplexity_retry_pending')
+    .single();
+  
+  return {
+    pending: data?.value?.pending === true,
+    retryCount: data?.value?.retry_count || 0
+  };
+}
+
+async function setRetryFlag(supabaseClient: any, pending: boolean, error?: string): Promise<void> {
+  const { data: existing } = await supabaseClient
+    .from('system_config')
+    .select('value')
+    .eq('key', 'perplexity_retry_pending')
+    .single();
+
+  const currentRetryCount = existing?.value?.retry_count || 0;
+  
+  await supabaseClient
+    .from('system_config')
+    .upsert({
+      key: 'perplexity_retry_pending',
+      value: { 
+        pending, 
+        error: error || null,
+        last_attempt: new Date().toISOString(),
+        retry_count: pending ? currentRetryCount + 1 : 0
+      },
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'key' });
+  
+  console.log(`Retry flag set: pending=${pending}, retryCount=${pending ? currentRetryCount + 1 : 0}`);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -125,7 +164,14 @@ serve(async (req) => {
 
     console.log(`Processing ${categories.length} categories (${priorityOnly ? 'high priority only' : 'all'})`);
 
+    // Check if there's a pending retry from previous credit/rate limit error
+    const retryStatus = await checkRetryFlag(supabaseClient);
+    if (retryStatus.pending) {
+      console.log(`Retry flag detected from previous credit/rate limit error (attempt #${retryStatus.retryCount}) - attempting retry...`);
+    }
+
     let totalArticlesAdded = 0;
+    let creditExhausted = false;
     const batchSize = 2; // Process categories in smaller batches
     
     // Process categories in batches to avoid overwhelming the API
@@ -213,6 +259,14 @@ Tags: [immigration, relevant, tags]`;
           if (!response.ok) {
             const errorBody = await response.text();
             console.error(`API error for immigration category ${category.name}: ${response.status} - ${errorBody}`);
+            
+            // Check for credit exhaustion or rate limit errors
+            if (response.status === 402 || response.status === 429 || 
+                errorBody.toLowerCase().includes('credit') || errorBody.toLowerCase().includes('rate limit')) {
+              console.log('Perplexity credit/rate limit error detected - setting retry flag');
+              await setRetryFlag(supabaseClient, true, `${response.status}: ${errorBody.substring(0, 200)}`);
+              creditExhausted = true;
+            }
             return;
           }
 
@@ -333,10 +387,22 @@ Tags: [immigration, relevant, tags]`;
         }
       }));
 
+      // Stop processing if credits are exhausted
+      if (creditExhausted) {
+        console.log('Stopping batch processing due to credit/rate limit error');
+        break;
+      }
+
       // Rate limiting delay between batches
       if (i + batchSize < categories.length) {
         await new Promise(resolve => setTimeout(resolve, 3000));
       }
+    }
+
+    // Clear retry flag if we successfully added articles
+    if (totalArticlesAdded > 0) {
+      await setRetryFlag(supabaseClient, false);
+      console.log('Retry flag cleared after successful article insertion');
     }
 
     return new Response(
