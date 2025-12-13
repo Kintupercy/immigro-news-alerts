@@ -22,6 +22,45 @@ const IMMIGRATION_KEYWORDS = [
   'immigration enforcement', 'border security', 'visa suspension', 'immigration restriction'
 ];
 
+// Retry flag helper functions
+async function checkRetryFlag(supabaseClient: any): Promise<{ pending: boolean; retryCount: number }> {
+  const { data } = await supabaseClient
+    .from('system_config')
+    .select('value')
+    .eq('key', 'perplexity_retry_pending')
+    .single();
+  
+  return {
+    pending: data?.value?.pending === true,
+    retryCount: data?.value?.retry_count || 0
+  };
+}
+
+async function setRetryFlag(supabaseClient: any, pending: boolean, error?: string): Promise<void> {
+  const { data: existing } = await supabaseClient
+    .from('system_config')
+    .select('value')
+    .eq('key', 'perplexity_retry_pending')
+    .single();
+
+  const currentRetryCount = existing?.value?.retry_count || 0;
+  
+  await supabaseClient
+    .from('system_config')
+    .upsert({
+      key: 'perplexity_retry_pending',
+      value: { 
+        pending, 
+        error: error || null,
+        last_attempt: new Date().toISOString(),
+        retry_count: pending ? currentRetryCount + 1 : 0
+      },
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'key' });
+  
+  console.log(`Retry flag set: pending=${pending}, retryCount=${pending ? currentRetryCount + 1 : 0}`);
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -134,6 +173,25 @@ JSON format required:
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Perplexity API error: ${response.status} - ${errorText}`);
+      
+      // Check for credit exhaustion or rate limit errors
+      if (response.status === 402 || response.status === 429 || 
+          errorText.toLowerCase().includes('credit') || errorText.toLowerCase().includes('rate limit')) {
+        console.log('Perplexity credit/rate limit error detected - setting retry flag');
+        await setRetryFlag(supabase, true, `${response.status}: ${errorText.substring(0, 200)}`);
+        
+        return new Response(JSON.stringify({
+          success: false,
+          articlesAdded: 0,
+          urgentNewsFound: 0,
+          error: 'Credit/rate limit error - will retry on next scheduled run',
+          retryPending: true
+        }), {
+          status: 200, // Return 200 so scheduler doesn't fail
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      
       throw new Error(`Perplexity API error: ${response.status}`);
     }
 
@@ -284,6 +342,12 @@ JSON format required:
           console.error('Error triggering urgent alert:', alertError);
         }
       }
+    }
+
+    // Clear retry flag if we successfully added articles
+    if (totalArticlesAdded > 0) {
+      await setRetryFlag(supabase, false);
+      console.log('Retry flag cleared after successful article insertion');
     }
 
     console.log(`Immigration breaking news fetch completed: ${totalArticlesAdded} articles added, ${urgentNewsFound} urgent alerts sent`);
