@@ -1,0 +1,17 @@
+# Cloudflare Pages Redirects for SEO
+# Normalize www to non-www (301 permanent redirect)
+https://www.immigronews.com/* https://immigronews.com/:splat 301!
+
+# Remove trailing slashes (301 permanent redirect)
+/news/ /news 301
+/about/ /about 301
+/contact/ /contact 301
+/privacy/ /privacy 301
+/terms/ /terms 301
+/disclaimer/ /disclaimer 301
+/faq/ /faq 301
+/resources/ /resources 301
+/blog/ /blog 301
+
+# SPA fallback - serve index.html for client-side routing
+/* /index.html 200

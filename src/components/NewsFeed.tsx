@@ -207,10 +207,10 @@ const NewsFeed = () => {
   // Simplified language change handler
   const handleLanguageChange = async (language: 'en' | 'es') => {
     setCurrentLanguage(language);
-    
+
     if (language === 'es') {
       // Translate all filtered articles if switching to Spanish, not just paginated ones
-      const newTranslatedContent: Record<string, any> = {};
+      const newTranslatedContent: Record<string, TranslatedArticleContent> = {};
       
       for (const article of filteredArticles) {
         if (!translatedContent[article.id]) {

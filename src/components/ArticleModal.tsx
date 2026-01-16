@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { Helmet } from 'react-helmet-async';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,9 +72,64 @@ const ArticleModal = ({
   const sourceDomain = getSourceDomain(article.source_url);
   const isOfficial = isOfficialSource(article.source_url);
   const isBreakingNews = article.category === 'breaking-news';
-  
+  const articleUrl = `https://immigronews.com/news?article=${article.id}`;
+  const categoryName = categories.find(cat => cat.slug === article.category)?.name || article.category;
+
+  // NewsArticle structured data for Google News eligibility
+  const newsArticleSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": article.title,
+    "description": article.summary || article.content.substring(0, 160),
+    "image": "https://immigronews.com/og-hero-preview.jpg",
+    "datePublished": article.published_at,
+    "dateModified": article.published_at,
+    "author": {
+      "@type": "Organization",
+      "name": "ImmigroNews",
+      "url": "https://immigronews.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ImmigroNews",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://immigronews.com/logo.png",
+        "width": 512,
+        "height": 512
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": articleUrl
+    },
+    "articleSection": categoryName,
+    "keywords": article.tags?.join(", ") || "immigration news",
+    "isAccessibleForFree": true,
+    "inLanguage": "en-US"
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <>
+      {/* SEO meta tags for the article when modal is open */}
+      <Helmet>
+        <title>{article.title} | ImmigroNews</title>
+        <meta name="description" content={article.summary || article.content.substring(0, 160)} />
+        <link rel="canonical" href={articleUrl} />
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.summary || article.content.substring(0, 160)} />
+        <meta property="og:url" content={articleUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="article:published_time" content={article.published_at} />
+        <meta property="article:section" content={categoryName} />
+        {article.tags?.map(tag => (
+          <meta key={tag} property="article:tag" content={tag} />
+        ))}
+        <script type="application/ld+json">
+          {JSON.stringify(newsArticleSchema)}
+        </script>
+      </Helmet>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start justify-between gap-3">
@@ -197,6 +253,7 @@ const ArticleModal = ({
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 };
 

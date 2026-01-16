@@ -35,8 +35,17 @@ const SEO = ({
   const siteTitle = 'ImmigroNews';
   const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
   const keywordString = [...keywords, ...tags].join(', ');
-  const canonical = canonicalUrl || url;
-  const fullImageUrl = image.startsWith('http') ? image : `${url}${image}`;
+
+  // Normalize URL: remove trailing slash and ensure non-www
+  const normalizeUrl = (urlStr: string): string => {
+    let normalized = urlStr.replace(/\/$/, ''); // Remove trailing slash
+    normalized = normalized.replace('://www.', '://'); // Remove www
+    return normalized;
+  };
+
+  const canonical = normalizeUrl(canonicalUrl || url);
+  const normalizedUrl = normalizeUrl(url);
+  const fullImageUrl = image.startsWith('http') ? image : `${normalizedUrl}${image}`;
 
   // Enhanced description for SEO
   const enhancedDescription = type === 'article' 
@@ -75,7 +84,7 @@ const SEO = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={`${fullTitle} - Immigration News & Legal Help`} />
-      <meta property="og:url" content={url} />
+      <meta property="og:url" content={normalizedUrl} />
       <meta property="og:site_name" content={siteTitle} />
       <meta property="og:locale" content="en_US" />
       
