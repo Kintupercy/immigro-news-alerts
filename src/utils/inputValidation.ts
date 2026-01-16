@@ -56,7 +56,7 @@ export const validatePassword = (password: string): { valid: boolean; error?: st
   const hasLowercase = /[a-z]/.test(password);
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /\d/.test(password);
-  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
 
   const criteriaMet = [hasLowercase, hasUppercase, hasNumber, hasSpecialChar].filter(Boolean).length;
 

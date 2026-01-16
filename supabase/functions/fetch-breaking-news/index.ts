@@ -419,7 +419,7 @@ function parseImmigrationBreakingNews(content: string, citations: string[] = [])
             const isBreaking = !isUrgent; // Breaking news that's not urgent
             
             // Set appropriate tags
-            let tags = Array.isArray(article.tags) ? [...article.tags] : ['immigration'];
+            const tags = Array.isArray(article.tags) ? [...article.tags] : ['immigration'];
             if (!tags.includes('breaking-news')) tags.push('breaking-news');
             if (!tags.includes('immigration')) tags.push('immigration');
             

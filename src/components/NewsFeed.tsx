@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { 
   Pagination,
   PaginationContent,
@@ -43,22 +41,28 @@ interface Category {
   slug: string;
 }
 
+interface TranslatedArticleContent {
+  title: string;
+  summary: string | null;
+  content: string;
+}
+
 const ARTICLES_PER_PAGE = 10;
 
 const NewsFeed = () => {
   const [allArticles, setAllArticles] = useState<NewsArticle[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
-  const [translatedContent, setTranslatedContent] = useState<Record<string, any>>({});
+  const [translatedContent, setTranslatedContent] = useState<Record<string, TranslatedArticleContent>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
-  const { handleError, retry, canRetry } = useErrorHandler();
+  const { handleError } = useErrorHandler();
 
   // Check for article parameter in URL on component mount
   useEffect(() => {
@@ -292,7 +296,7 @@ const NewsFeed = () => {
       const result = await enhancedCache.backgroundRefresh(
         cacheKey,
         async () => {
-          let query = supabase
+          const query = supabase
             .from('immigration_news')
             .select('*')
             .eq('status', 'published')
@@ -408,7 +412,7 @@ const NewsFeed = () => {
     return officialDomains.some(domain => url.includes(domain));
   };
 
-  const getDisplayText = (text: string, articleId?: string, field?: string) => {
+  const getDisplayText = (text: string, articleId?: string, field?: keyof TranslatedArticleContent) => {
     if (currentLanguage === 'es' && articleId && field && translatedContent[articleId]) {
       return translatedContent[articleId][field] || text;
     }
@@ -419,7 +423,7 @@ const NewsFeed = () => {
     setSelectedCategory(categorySlug);
   };
 
-  const isCategoryLocked = (categorySlug: string) => {
+  const isCategoryLocked = (_categorySlug: string) => {
     return false; // All categories are free now
   };
 

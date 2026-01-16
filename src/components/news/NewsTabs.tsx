@@ -22,6 +22,12 @@ interface Category {
   slug: string;
 }
 
+interface TranslatedArticleContent {
+  title: string;
+  summary: string | null;
+  content: string;
+}
+
 interface NewsTabsProps {
   paginatedArticles: NewsArticle[];
   filteredArticles: NewsArticle[];
@@ -31,7 +37,7 @@ interface NewsTabsProps {
   regularArticles: NewsArticle[];
   categories: Category[];
   currentLanguage: 'en' | 'es';
-  translatedContent: Record<string, any>;
+  translatedContent: Record<string, TranslatedArticleContent>;
   expandedArticle: string | null;
   setExpandedArticle: (id: string | null) => void;
   searchTerm: string;

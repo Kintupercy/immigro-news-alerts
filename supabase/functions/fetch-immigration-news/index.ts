@@ -167,7 +167,7 @@ function parseNewsContent(content: string, categorySlug: string) {
             const isBreaking = newsClassification.isBreaking && !isOpinion && !isUrgent; // Breaking only if not urgent
             
             // Set appropriate tags based on classification
-            let tags = Array.isArray(article.tags) ? [...article.tags, categorySlug, 'immigration'] : [categorySlug, 'immigration'];
+            const tags = Array.isArray(article.tags) ? [...article.tags, categorySlug, 'immigration'] : [categorySlug, 'immigration'];
             if (isBreaking) tags.push('breaking-news');
             
             articles.push({

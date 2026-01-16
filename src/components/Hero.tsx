@@ -17,7 +17,7 @@ const Hero = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubscribe = async (data: any, csrfToken: string) => {
+  const handleSubscribe = async (_data: Record<string, unknown>, _csrfToken: string) => {
     const clientId = generateClientFingerprint();
     
     // Check honeypot field

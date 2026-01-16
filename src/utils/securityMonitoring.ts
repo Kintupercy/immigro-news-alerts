@@ -1,10 +1,18 @@
 // Security monitoring and logging utilities
 
+interface SecurityEventDetails {
+  form?: string;
+  remainingAttempts?: number;
+  issue?: string;
+  emailLength?: number;
+  [key: string]: string | number | boolean | undefined;
+}
+
 interface SecurityEvent {
   type: 'rate_limit_exceeded' | 'csrf_validation_failed' | 'suspicious_input' | 'honeypot_triggered' | 'invalid_token';
   timestamp: number;
   clientId: string;
-  details?: any;
+  details?: SecurityEventDetails;
 }
 
 class SecurityMonitor {
@@ -41,8 +49,9 @@ class SecurityMonitor {
     // Example: Analytics, LogRocket, Sentry, etc.
     try {
       // Placeholder for monitoring service integration
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'security_incident', {
+      const win = window as Window & { gtag?: (command: string, action: string, params: Record<string, string>) => void };
+      if (typeof window !== 'undefined' && win.gtag) {
+        win.gtag('event', 'security_incident', {
           event_category: 'security',
           event_label: event.type,
           custom_parameter_1: event.clientId

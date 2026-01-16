@@ -35,7 +35,7 @@ serve(async (req) => {
 
     let validCount = 0;
     let invalidCount = 0;
-    let removedArticles: string[] = [];
+    const removedArticles: string[] = [];
 
     if (articles) {
       for (const article of articles) {

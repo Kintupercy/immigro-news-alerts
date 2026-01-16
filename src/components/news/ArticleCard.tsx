@@ -28,11 +28,17 @@ interface Category {
   slug: string;
 }
 
+interface TranslatedArticleContent {
+  title: string;
+  summary: string | null;
+  content: string;
+}
+
 interface ArticleCardProps {
   article: NewsArticle;
   categories: Category[];
   currentLanguage: 'en' | 'es';
-  translatedContent: Record<string, any>;
+  translatedContent: Record<string, TranslatedArticleContent>;
   expandedArticle: string | null;
   setExpandedArticle: (id: string | null) => void;
   getDisplayText: (text: string, articleId?: string, field?: string) => string;

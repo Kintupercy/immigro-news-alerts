@@ -41,7 +41,7 @@ export const useNewsFetching = () => {
       const result = await enhancedCache.backgroundRefresh(
         cacheKey,
         async () => {
-          let query = supabase
+          const query = supabase
             .from('immigration_news')
             .select('*')
             .eq('status', 'published')

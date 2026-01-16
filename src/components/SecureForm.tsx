@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface SecureFormProps {
   children: React.ReactNode;
-  onSubmit: (data: any, csrfToken: string) => Promise<void>;
+  onSubmit: (data: Record<string, unknown>, csrfToken: string) => Promise<void>;
   className?: string;
 }
 

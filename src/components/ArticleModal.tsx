@@ -28,11 +28,17 @@ interface Category {
   slug: string;
 }
 
+interface TranslatedArticleContent {
+  title: string;
+  summary: string | null;
+  content: string;
+}
+
 interface ArticleModalProps {
   article: NewsArticle | null;
   categories: Category[];
   currentLanguage: 'en' | 'es';
-  translatedContent: Record<string, any>;
+  translatedContent: Record<string, TranslatedArticleContent>;
   getDisplayText: (text: string, articleId?: string, field?: string) => string;
   getSourceDomain: (url: string | null) => string;
   isOfficialSource: (url: string | null) => boolean;
