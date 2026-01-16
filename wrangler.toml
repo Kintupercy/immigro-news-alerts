@@ -1,5 +1,0 @@
-name = "immigro-news-alerts"
-compatibility_date = "2024-01-01"
-
-[build]
-command = "npm install && npm run build"
