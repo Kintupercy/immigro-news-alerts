@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -15,7 +15,15 @@ const Hero = () => {
   const [email, setEmail] = useState("");
   const [honeypotValue, setHoneypotValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const { toast } = useToast();
+
+  // Preload hero background image
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/lovable-uploads/hero-background.png';
+    img.onload = () => setImageLoaded(true);
+  }, []);
 
   const handleSubscribe = async (_data: Record<string, unknown>, _csrfToken: string) => {
     const clientId = generateClientFingerprint();
@@ -134,12 +142,20 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex flex-col justify-between overflow-hidden">
       {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/lovable-uploads/hero-background.png)' }}
-      >
+      <div className="absolute inset-0">
+        {/* Placeholder background while image loads */}
+        <div className="absolute inset-0 bg-gradient-to-br from-cream-50 via-cream-100 to-stone-100" />
+        
+        {/* Actual background image with fade-in */}
+        <div 
+          className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ backgroundImage: 'url(/lovable-uploads/hero-background.png)' }}
+        />
+        
         {/* Semi-transparent overlay for text readability */}
-        <div className="absolute inset-0 bg-cream-50/80"></div>
+        <div className="absolute inset-0 bg-cream-50/80" />
       </div>
 
       {/* Main Content */}
