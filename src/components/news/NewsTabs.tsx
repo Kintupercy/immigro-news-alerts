@@ -93,7 +93,7 @@ const NewsTabs = ({
 
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
         <TabsTrigger value="all">
           {currentLanguage === 'es' ? 'Todas' : 'All'} ({allArticlesForAllTab.length})
         </TabsTrigger>

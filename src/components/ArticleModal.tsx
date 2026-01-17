@@ -130,7 +130,7 @@ const ArticleModal = ({
         </script>
       </Helmet>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-sm sm:max-w-lg md:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <div className="flex items-start justify-between gap-3">
             <DialogTitle className="text-xl leading-tight flex-1 pr-4">

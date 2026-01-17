@@ -69,7 +69,7 @@ const NewsFilters = ({
               <SelectTrigger className="bg-cream-50 text-navy-800 border-cream-200">
                 <SelectValue placeholder={currentLanguage === 'es' ? 'Seleccionar categoría' : 'Select category'} />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px] overflow-y-auto z-50">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[50vh] sm:max-h-[300px] overflow-y-auto z-50">
                 <SelectItem value="all">
                   {currentLanguage === 'es' ? 'Todas las Categorías' : 'All Categories'}
                 </SelectItem>

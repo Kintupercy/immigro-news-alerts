@@ -88,7 +88,9 @@ const Header = () => {
             <div className="md:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-cream-300 hover:text-cream-100 transition-colors duration-200"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-cream-300 hover:text-cream-100 hover:bg-navy-700 rounded-md transition-colors duration-200"
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isMenuOpen}
               >
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -102,7 +104,7 @@ const Header = () => {
                 <Link 
                   to="/" 
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
                   }`}
                 >
@@ -111,7 +113,7 @@ const Header = () => {
                 <Link 
                   to="/blog" 
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/blog') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
                   }`}
                 >
@@ -120,7 +122,7 @@ const Header = () => {
                 <Link 
                   to="/resources" 
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/resources') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
                   }`}
                 >
@@ -129,7 +131,7 @@ const Header = () => {
                 <Link 
                   to="/about" 
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/about') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
                   }`}
                 >
@@ -138,7 +140,7 @@ const Header = () => {
                 <Link 
                   to="/contact" 
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/contact') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
                   }`}
                 >
