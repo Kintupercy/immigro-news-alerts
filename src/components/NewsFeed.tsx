@@ -549,34 +549,30 @@ const NewsFeed = () => {
           }
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <NewsTabs
-              paginatedArticles={paginatedArticles}
-              filteredArticles={filteredArticles}
-              allArticlesForAllTab={allArticlesForAllTab}
-              urgentArticles={urgentArticles}
-              breakingNewsArticles={breakingNewsArticles}
-              regularArticles={regularArticles}
-              categories={categories}
-              currentLanguage={currentLanguage}
-              translatedContent={translatedContent}
-              expandedArticle={expandedArticle}
-              setExpandedArticle={setExpandedArticle}
-              searchTerm={searchTerm}
-              getDisplayText={getDisplayText}
-              getSourceDomain={getSourceDomain}
-              isOfficialSource={isOfficialSource}
-              ARTICLES_PER_PAGE={ARTICLES_PER_PAGE}
-              currentPage={currentPage}
-              onArticleClick={handleArticleClick}
-            />
-            
-            {/* Pagination */}
-            {renderPagination()}
-          </div>
-        </div>
+        {/* Main Content - Full Width to match header bars */}
+        <NewsTabs
+          paginatedArticles={paginatedArticles}
+          filteredArticles={filteredArticles}
+          allArticlesForAllTab={allArticlesForAllTab}
+          urgentArticles={urgentArticles}
+          breakingNewsArticles={breakingNewsArticles}
+          regularArticles={regularArticles}
+          categories={categories}
+          currentLanguage={currentLanguage}
+          translatedContent={translatedContent}
+          expandedArticle={expandedArticle}
+          setExpandedArticle={setExpandedArticle}
+          searchTerm={searchTerm}
+          getDisplayText={getDisplayText}
+          getSourceDomain={getSourceDomain}
+          isOfficialSource={isOfficialSource}
+          ARTICLES_PER_PAGE={ARTICLES_PER_PAGE}
+          currentPage={currentPage}
+          onArticleClick={handleArticleClick}
+        />
+
+        {/* Pagination */}
+        {renderPagination()}
 
         {/* Article Modal */}
         <ArticleModal

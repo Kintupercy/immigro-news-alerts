@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Menu, X, Globe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import UrgentNewsAlert from "./UrgentNewsAlert";
@@ -27,61 +26,57 @@ const Header = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <div className="flex items-center space-x-8 h-10">
-                <Link 
-                  to="/" 
-                  className={`flex items-center h-full transition-colors duration-200 ${
-                    isActive('/') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                  }`}
-                >
-                  Home
-                </Link>
-                <Link 
-                  to="/blog" 
-                  className={`flex items-center h-full transition-colors duration-200 ${
-                    isActive('/blog') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                  }`}
-                >
-                  Blog
-                </Link>
-                <Link 
-                  to="/resources" 
-                  className={`flex items-center h-full transition-colors duration-200 ${
-                    isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                  }`}
-                >
-                  Resources
-                </Link>
-                <Link 
-                  to="/about" 
-                  className={`flex items-center h-full transition-colors duration-200 ${
-                    isActive('/about') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                  }`}
-                >
-                  About
-                </Link>
-                <Link 
-                  to="/contact" 
-                  className={`flex items-center h-full transition-colors duration-200 ${
-                    isActive('/contact') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
-                  }`}
-                >
-                  Contact
-                </Link>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <Link to="/news">
-                  <Button 
-                    size="sm"
-                    variant="ghost"
-                    className="text-cream-300 hover:text-cream-100"
-                  >
-                    News
-                  </Button>
-                </Link>
-              </div>
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link
+                to="/"
+                className={`transition-colors duration-200 ${
+                  isActive('/') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/news"
+                className={`px-4 py-2 rounded-full transition-all duration-200 font-medium ${
+                  isActive('/news')
+                    ? 'bg-cream-100 text-navy-800'
+                    : 'bg-cream-200/20 text-cream-100 hover:bg-cream-200/30'
+                }`}
+              >
+                News
+              </Link>
+              <Link
+                to="/blog"
+                className={`transition-colors duration-200 ${
+                  isActive('/blog') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Blog
+              </Link>
+              <Link
+                to="/resources"
+                className={`transition-colors duration-200 ${
+                  isActive('/resources') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Resources
+              </Link>
+              <Link
+                to="/about"
+                className={`transition-colors duration-200 ${
+                  isActive('/about') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className={`transition-colors duration-200 ${
+                  isActive('/contact') ? 'text-cream-200 font-medium' : 'text-cream-300 hover:text-cream-100'
+                }`}
+              >
+                Contact
+              </Link>
             </nav>
 
             {/* Mobile menu button */}
@@ -101,8 +96,8 @@ const Header = () => {
           {isMenuOpen && (
             <div className="md:hidden">
               <div className="px-2 pt-2 pb-3 space-y-1 bg-navy-900 rounded-lg mt-2">
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   onClick={() => setIsMenuOpen(false)}
                   className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
@@ -110,8 +105,17 @@ const Header = () => {
                 >
                   Home
                 </Link>
-                <Link 
-                  to="/blog" 
+                <Link
+                  to="/news"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-4 py-3 rounded-md text-base font-semibold transition-colors duration-200 ${
+                    isActive('/news') ? 'bg-cream-100 text-navy-800' : 'bg-cream-200/20 text-cream-100 hover:bg-cream-200/30'
+                  }`}
+                >
+                  News
+                </Link>
+                <Link
+                  to="/blog"
                   onClick={() => setIsMenuOpen(false)}
                   className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/blog') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
@@ -119,8 +123,8 @@ const Header = () => {
                 >
                   Blog
                 </Link>
-                <Link 
-                  to="/resources" 
+                <Link
+                  to="/resources"
                   onClick={() => setIsMenuOpen(false)}
                   className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/resources') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
@@ -128,8 +132,8 @@ const Header = () => {
                 >
                   Resources
                 </Link>
-                <Link 
-                  to="/about" 
+                <Link
+                  to="/about"
                   onClick={() => setIsMenuOpen(false)}
                   className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/about') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
@@ -137,8 +141,8 @@ const Header = () => {
                 >
                   About
                 </Link>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   onClick={() => setIsMenuOpen(false)}
                   className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive('/contact') ? 'bg-navy-700 text-cream-200' : 'text-cream-300 hover:bg-navy-700 hover:text-cream-100'
@@ -146,18 +150,6 @@ const Header = () => {
                 >
                   Contact
                 </Link>
-
-                <div className="px-3 py-2 space-y-2">
-                  <Link to="/news" onClick={() => setIsMenuOpen(false)}>
-                    <Button 
-                      size="sm"
-                      variant="ghost"
-                      className="w-full bg-navy-700 text-cream-300 hover:bg-navy-600"
-                    >
-                      News
-                    </Button>
-                  </Link>
-                </div>
               </div>
             </div>
           )}
