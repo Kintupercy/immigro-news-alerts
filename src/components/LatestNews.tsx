@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, ExternalLink } from 'lucide-react';
@@ -10,6 +10,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel"
 
 interface NewsItem {
@@ -26,6 +27,25 @@ interface NewsItem {
 const LatestNews = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  // Track carousel state for dot indicators
+  useEffect(() => {
+    if (!api) return;
+    
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+    
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  const scrollTo = useCallback((index: number) => {
+    api?.scrollTo(index);
+  }, [api]);
 
   useEffect(() => {
     fetchLatestNews();
@@ -152,6 +172,7 @@ const LatestNews = () => {
             align: "start",
             loop: true,
           }}
+          setApi={setApi}
           className="w-full"
         >
           <CarouselContent className="-ml-2 md:-ml-4">
@@ -208,6 +229,24 @@ const LatestNews = () => {
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
+          
+          {/* Mobile dot indicators */}
+          {count > 1 && (
+            <div className="flex justify-center gap-2 mt-6 md:hidden">
+              {Array.from({ length: count }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollTo(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
+                    index === current 
+                      ? 'bg-navy-800 w-6' 
+                      : 'bg-navy-300 hover:bg-navy-400'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </Carousel>
       </div>
     </section>
