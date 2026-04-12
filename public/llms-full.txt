@@ -1,0 +1,200 @@
+# ImmigroNews — Complete Reference
+
+> Real-time immigration news alerts, USCIS updates, and legal help for immigrants navigating the U.S. system.
+
+## About ImmigroNews
+
+ImmigroNews is a free, comprehensive immigration news and legal assistance platform. It delivers personalized, real-time alerts on U.S. immigration law changes, visa policy updates, USCIS announcements, green card processing times, and citizenship processes.
+
+Founded by a former F-1 international student who successfully navigated the complex journey from student visa to lawful permanent resident, ImmigroNews was built to solve a real problem: immigration information is fragmented across government websites, buried in legal jargon, and lost in general news. ImmigroNews centralizes everything into one accessible, always-free platform.
+
+The platform aggregates news from official government sources (USCIS, Department of State, Department of Homeland Security), established news organizations, and legal publications. Content is updated multiple times daily with automated fetches at 6:00 AM and 2:00 PM Central Time, plus manual updates for breaking news.
+
+## Key Features
+
+### Real-Time Immigration Alerts
+- Email alerts for breaking U.S. immigration policy and law changes
+- Personalized notifications based on your specific immigration category
+- Urgent breaking news coverage delivered as it happens
+- Weekly news digest summarizing the most important updates
+
+### 13+ Immigration Categories
+- H-1B Work Visas (lottery, extensions, transfers, denials)
+- Green Card / Permanent Residency (EB-1, EB-2, EB-3, family-based)
+- F-1 Student Visas (OPT, CPT, STEM OPT, status changes)
+- Citizenship & Naturalization (N-400, civics test, interview prep)
+- DACA (Deferred Action for Childhood Arrivals)
+- TPS (Temporary Protected Status)
+- Asylum & Refugee
+- Family-Based Immigration (spouse, parent, sibling petitions)
+- Employment Authorization Documents (EAD / work permits)
+- Tourist & Visitor Visas (B-1/B-2)
+- J-1 Exchange Visitor
+- USCIS Policy & Processing Updates
+- Immigration Court & Legal Developments
+
+### Expert Analysis & Blog
+- Step-by-step immigration guides written by immigration professionals
+- Detailed tutorials for visa applications, status adjustments, and citizenship
+- Policy change analysis explaining how updates affect different visa categories
+- Searchable blog with category filtering and full-text search
+- Featured guides for the most common immigration processes
+
+### Legal Help Matching
+- Submit your immigration situation for attorney matching
+- Vetted immigration attorneys in local communities
+- Specify visa type, country of origin, and location
+- Option for anonymous submissions
+- Free initial consultation matching
+
+### Accessibility & Design
+- Completely free — no paywalls, no signup required for news access
+- Mobile-responsive design optimized for all devices
+- Spanish translation support
+- Full news archive with search and category filtering
+- Clean, accessible interface meeting WCAG standards
+
+## Pricing
+
+ImmigroNews is free for everyone, forever.
+
+| Feature | Included |
+|---------|----------|
+| All immigration news | Yes |
+| Real-time email alerts | Yes |
+| 13+ immigration categories | Yes |
+| Breaking news coverage | Yes |
+| Weekly news digest | Yes |
+| Spanish translation | Yes |
+| Full news archive | Yes |
+| Category filtering | Yes |
+| Blog & guides | Yes |
+| Legal help matching | Yes |
+| Mobile-friendly design | Yes |
+
+**Cost: $0/month, forever.**
+
+Optional donations via Ko-fi (https://ko-fi.com/immigro) help keep the platform running and ad-light. Every contribution supports servers, new features, and editorial independence.
+
+## Who It's For
+
+### International Students
+F-1 and J-1 visa holders tracking OPT/CPT deadlines, STEM OPT extensions, status change requirements, and policy shifts that affect academic and work authorization.
+
+### Green Card Applicants
+Immigrants monitoring processing times, priority date movements, visa bulletin updates, and policy changes for employment-based (EB) and family-based green card categories.
+
+### H-1B Workers
+Professionals following H-1B lottery results, extension policies, transfer processes, denial trends, and employer compliance requirements.
+
+### Families
+Sponsors and beneficiaries navigating family-based immigration including I-130 petitions, consular processing, adjustment of status, and interview preparation.
+
+### Citizenship Applicants
+Permanent residents preparing for naturalization including N-400 filing, civics test preparation, interview tips, and oath ceremony information.
+
+### Immigration Attorneys
+Legal professionals staying current on policy changes, court decisions, USCIS memoranda, and regulatory updates that affect client cases.
+
+### Advocates & Organizations
+Non-profits, community organizations, and advocacy groups that need to stay informed about immigration policy to serve their communities.
+
+## How It Works
+
+### 1. Browse News
+Visit https://immigronews.com/news to see the latest immigration news feed. Filter by category, search for specific topics, or browse the full archive.
+
+### 2. Subscribe to Alerts
+Enter your email on the homepage (https://immigronews.com) to receive breaking immigration news alerts. Choose your preferred categories for personalized updates.
+
+### 3. Read Guides
+Visit https://immigronews.com/blog for comprehensive step-by-step immigration guides. Search by topic, filter by category, and bookmark guides for reference.
+
+### 4. Get Legal Help
+Visit https://immigronews.com/resources to submit your immigration situation. Select your visa type, describe your situation, and get matched with vetted immigration attorneys in your area.
+
+## Content Sources
+
+ImmigroNews aggregates and curates news from:
+- **USCIS** (U.S. Citizenship and Immigration Services) — official policy updates, processing times, forms changes
+- **Department of State** — visa bulletins, consular processing updates, travel advisories
+- **Department of Homeland Security** — enforcement actions, regulatory changes, executive orders
+- **Major News Outlets** — AP, Reuters, and established immigration beat reporters
+- **Legal Publications** — Immigration law journals, bar association updates
+- **Court Decisions** — Federal court rulings affecting immigration law
+
+All content is properly attributed to original sources. ImmigroNews does not provide legal advice — all information is for educational and informational purposes only.
+
+## Technical Details
+
+### Platform
+- React single-page application with Vite build system
+- Supabase PostgreSQL database for real-time content
+- TanStack React Query for efficient data fetching and caching
+- Tailwind CSS with custom design system
+- React Helmet for dynamic SEO meta tags
+- DOMPurify for XSS protection on all rendered content
+
+### Security
+- CSRF token protection on all forms
+- Honeypot fields for bot detection
+- Enhanced rate limiting (IP-based and user-based)
+- Client fingerprinting for abuse prevention
+- Security event monitoring and logging
+- Content Security Policy headers
+
+### Performance
+- Lazy-loaded images with Intersection Observer
+- Background image preloading for hero section
+- Client-side caching with React Query
+- Optimized bundle with Vite tree-shaking
+- Service Worker for offline capability
+
+## Comparison: ImmigroNews vs Boundless
+
+| Feature | ImmigroNews | Boundless |
+|---------|-------------|-----------|
+| Real-time news alerts | Yes | No (focuses on applications) |
+| Price | Free forever | $995+ per application |
+| Immigration categories | 13+ news categories | Limited to specific visa types |
+| Legal help matching | Free attorney matching | Paid legal services |
+| Blog & guides | Free comprehensive guides | Limited free content |
+| Breaking news | Yes, multiple daily updates | No news service |
+| Primary focus | News, alerts, information | Application filing assistance |
+| Community support | Attorney matching + guides | Application support only |
+
+ImmigroNews and Boundless serve different needs. ImmigroNews is the go-to platform for staying informed about immigration policy changes and getting free legal help matching. Boundless is for immigrants who want hands-on help filing specific visa or green card applications. Many users rely on ImmigroNews for news and awareness while using services like Boundless for application filing.
+
+## FAQ
+
+### General
+- **What is ImmigroNews?** A free immigration news platform that aggregates U.S. immigration news from official sources and delivers real-time alerts on policy changes. Founded by a former F-1 student.
+- **Is ImmigroNews free?** Yes, completely free forever. No paywalls, no hidden fees, no signup required for news access. Optional Ko-fi donations help keep it running.
+- **How often is content updated?** Multiple times daily — automated at 6:00 AM and 2:00 PM CT, plus manual updates for breaking news.
+- **Can I trust the information?** We aggregate from official government sources and established outlets. Always verify important decisions with USCIS directly and consult a qualified immigration attorney.
+
+### Legal
+- **Does ImmigroNews provide legal advice?** No. We are a news aggregation service, not a law firm. All information is educational only. Consult a qualified immigration attorney for advice specific to your case.
+- **Can I rely on this for my immigration case?** Use our information as a starting point, but always verify with official sources (USCIS, DOS) and consult an attorney before making decisions.
+- **How do I get matched with an attorney?** Visit https://immigronews.com/resources, describe your situation, select your visa type, and we'll match you with vetted local attorneys.
+
+### Subscription
+- **What alerts will I receive?** Breaking immigration news, policy changes, USCIS announcements, and weekly digests — filtered to your chosen categories.
+- **How do I unsubscribe?** Every email includes an unsubscribe link. You can also email support@immigronews.com.
+- **Do you share my email?** No. We never sell, rent, or share your email with third parties.
+
+## Links
+- Website: https://immigronews.com
+- News Feed: https://immigronews.com/news
+- Blog & Guides: https://immigronews.com/blog
+- Legal Help Matching: https://immigronews.com/resources
+- About: https://immigronews.com/about
+- FAQ: https://immigronews.com/faq
+- Contact: https://immigronews.com/contact
+- Privacy Policy: https://immigronews.com/privacy
+- Terms of Service: https://immigronews.com/terms
+- X (Twitter): https://twitter.com/ImmigroNews
+- Instagram: https://instagram.com/ImmigroNews
+- TikTok: https://tiktok.com/@ImmigroNews
+- Support / Donate: https://ko-fi.com/immigro
+- Email: support@immigronews.com

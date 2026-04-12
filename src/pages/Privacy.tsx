@@ -7,13 +7,13 @@ import { Shield, Eye, Lock, Users, Globe, FileText, AlertTriangle, Cookie } from
 const Privacy = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEO 
-        title="Privacy Policy - Data Protection & GDPR Compliance"
-        description="ImmigrowNews privacy policy. Learn how we collect, use, and protect your personal information in compliance with GDPR and CCPA. Your immigration data is secure and private."
+      <SEO
+        title="Privacy Policy - ImmigroNews Data Protection"
+        description="ImmigroNews privacy policy. Learn how we collect, use, and protect your personal information in compliance with GDPR and CCPA. Your immigration data is secure and private."
         keywords={['privacy policy', 'data protection', 'GDPR', 'CCPA', 'data security', 'privacy rights']}
         url="https://immigronews.com/privacy"
+        canonicalUrl="https://immigronews.com/privacy"
         type="website"
-        noindex={false}
       />
       <Header />
       

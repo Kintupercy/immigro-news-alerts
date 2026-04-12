@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { safeGetItem, safeSetItem } from "@/utils/safeStorage";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,9 +22,13 @@ const AlertBanner = () => {
     fetchUrgentAlerts();
     
     // Load dismissed alerts from localStorage
-    const dismissed = localStorage.getItem('dismissedAlerts');
+    const dismissed = safeGetItem('dismissedAlerts');
     if (dismissed) {
-      setDismissedAlerts(JSON.parse(dismissed));
+      try {
+        setDismissedAlerts(JSON.parse(dismissed));
+      } catch {
+        // ignore corrupt data
+      }
     }
   }, []);
 
@@ -49,7 +54,7 @@ const AlertBanner = () => {
   const dismissAlert = (alertId: string) => {
     const newDismissed = [...dismissedAlerts, alertId];
     setDismissedAlerts(newDismissed);
-    localStorage.setItem('dismissedAlerts', JSON.stringify(newDismissed));
+    safeSetItem('dismissedAlerts', JSON.stringify(newDismissed));
   };
 
   const visibleAlerts = urgentAlerts.filter(alert => !dismissedAlerts.includes(alert.id));

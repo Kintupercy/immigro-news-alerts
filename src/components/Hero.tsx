@@ -147,7 +147,9 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-cream-50 via-cream-100 to-stone-100" />
         
         {/* Actual background image with fade-in */}
-        <div 
+        <div
+          role="img"
+          aria-label="Scenic background representing the American immigration journey"
           className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}

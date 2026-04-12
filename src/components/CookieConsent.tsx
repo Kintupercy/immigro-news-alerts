@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { safeGetItem, safeSetItem } from "@/utils/safeStorage";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,7 @@ const CookieConsent = () => {
 
   useEffect(() => {
     // Check if user has already made a choice
-    const cookieConsent = localStorage.getItem('immigro-cookie-consent');
+    const cookieConsent = safeGetItem('immigro-cookie-consent');
     if (!cookieConsent) {
       // Show banner after a short delay
       const timer = setTimeout(() => setShowBanner(true), 1000);
@@ -76,7 +77,7 @@ const CookieConsent = () => {
   };
 
   const savePreferences = (prefs: CookiePreferences) => {
-    localStorage.setItem('immigro-cookie-consent', JSON.stringify(prefs));
+    safeSetItem('immigro-cookie-consent', JSON.stringify(prefs));
     setPreferences(prefs);
     setShowBanner(false);
     

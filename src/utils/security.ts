@@ -53,11 +53,20 @@ export const createRateLimiter = (maxAttempts: number, windowMs: number) => {
   };
 };
 
-// CSRF Token generation (for forms) - Cryptographically secure
+// CSRF Token generation (for forms) - Cryptographically secure with fallback
 export const generateCSRFToken = (): string => {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  try {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  } catch {
+    // Fallback for environments where crypto.getRandomValues is unavailable
+    let token = '';
+    for (let i = 0; i < 64; i++) {
+      token += Math.floor(Math.random() * 16).toString(16);
+    }
+    return token;
+  }
 };
 
 // CSRF Token validation with timing-safe comparison

@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import Categories from "@/components/Categories";
 import Features from "@/components/Features";
+import FromTheBlog from "@/components/FromTheBlog";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import LatestNews from "@/components/LatestNews";
@@ -73,17 +74,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SEO 
-        title="ImmigroNews - Breaking Immigration News, Visa Updates & Expert Legal Help"
+      <SEO
+        title="ImmigroNews - Breaking Immigration News & Updates"
         description="Get real-time immigration news, policy updates, visa requirements, and green card information. Connect with trusted immigration lawyers and stay informed with breaking news alerts. Your trusted source for immigration updates."
         keywords={[
-          'immigration news', 
-          'visa updates', 
-          'green card news', 
-          'citizenship process', 
-          'immigration lawyer', 
-          'USCIS updates', 
-          'immigration policy', 
+          'immigration news',
+          'visa updates',
+          'green card news',
+          'citizenship process',
+          'immigration lawyer',
+          'USCIS updates',
+          'immigration policy',
           'visa requirements',
           'breaking immigration news',
           'immigration law changes',
@@ -93,13 +94,48 @@ const Index = () => {
           'USCIS policy changes'
         ]}
         url="https://immigronews.com"
+        canonicalUrl="https://immigronews.com"
         type="website"
       />
+
+      {/* SoftwareApplication JSON-LD Schema */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "ImmigroNews",
+          "applicationCategory": "NewsApplication",
+          "operatingSystem": "Web",
+          "url": "https://immigronews.com",
+          "description": "Real-time immigration news alerts, USCIS updates, and legal help for immigrants navigating the U.S. system.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "author": {
+            "@type": "Organization",
+            "name": "ImmigroNews",
+            "url": "https://immigronews.com"
+          },
+          "featureList": [
+            "Real-time immigration news alerts",
+            "13+ immigration categories",
+            "Breaking news coverage",
+            "Expert analysis from trusted sources",
+            "Legal help matching with immigration attorneys",
+            "Step-by-step immigration guides",
+            "Spanish translation support"
+          ]
+        })}
+      </script>
+
       <Header />
       <Hero />
       <Features />
       <LatestNews />
       <Categories />
+      <FromTheBlog />
       <Pricing />
       <NewsletterSubscription />
       <Footer />

@@ -16,11 +16,12 @@ export const generateSitemap = async (): Promise<string> => {
   const staticPages = [
     { loc: '/', priority: 1.0, changefreq: 'daily' as const },
     { loc: '/news', priority: 0.9, changefreq: 'hourly' as const },
+    { loc: '/blog', priority: 0.85, changefreq: 'daily' as const },
     { loc: '/resources', priority: 0.8, changefreq: 'weekly' as const },
+    { loc: '/faq', priority: 0.7, changefreq: 'monthly' as const },
     { loc: '/about', priority: 0.7, changefreq: 'monthly' as const },
     { loc: '/contact', priority: 0.7, changefreq: 'monthly' as const },
-    { loc: '/auth', priority: 0.5, changefreq: 'monthly' as const },
-    { loc: '/signup', priority: 0.6, changefreq: 'monthly' as const },
+    { loc: '/disclaimer', priority: 0.4, changefreq: 'yearly' as const },
     { loc: '/privacy', priority: 0.4, changefreq: 'yearly' as const },
     { loc: '/terms', priority: 0.4, changefreq: 'yearly' as const },
   ];
@@ -117,9 +118,8 @@ export const generateSitemap = async (): Promise<string> => {
       });
     }
 
-    // Add important immigration-related pages
+    // Add important immigration-related category pages
     const immigrationPages = [
-      { path: '/blog', priority: 0.85 },
       { path: '/visa-updates', priority: 0.85 },
       { path: '/green-card-news', priority: 0.85 },
       { path: '/citizenship-updates', priority: 0.85 },
@@ -170,8 +170,8 @@ const escapeXml = (str: string): string => {
 
 export const generateRobotsTxt = (): string => {
   const baseUrl = 'https://immigronews.com';
-  
-  return `# Robots.txt for ImmigrowNews - Immigration News Platform
+
+  return `# Robots.txt for ImmigroNews - Immigration News Platform
 
 User-agent: Googlebot
 Allow: /
@@ -190,15 +190,35 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
+# LLM crawlers - explicitly allowed
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
 User-agent: *
 Allow: /
 Crawl-delay: 2
 
 # Explicitly allow important content for SEO
 Allow: /news/
+Allow: /blog/
 Allow: /resources/
 Allow: /about/
 Allow: /contact/
+Allow: /faq/
+Allow: /llms.txt
+Allow: /llms-full.txt
 Allow: /*.css
 Allow: /*.js
 Allow: /*.png

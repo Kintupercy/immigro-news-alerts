@@ -205,11 +205,12 @@ const Resources = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEO 
-        title="Find Immigration Lawyers & Legal Help - Free Consultation"
-        description="Get matched with vetted immigration lawyers in your area. Free 10-minute consultations available. Anonymous requests accepted. Connect with experienced immigration attorneys for visa, green card, and citizenship help."
+      <SEO
+        title="Find Immigration Lawyers & Legal Help Near You"
+        description="Get matched with vetted immigration lawyers in your area. Free consultations available. Anonymous requests accepted. Connect with experienced immigration attorneys for visa, green card, and citizenship help."
         keywords={['immigration lawyer', 'legal help', 'immigration attorney', 'free consultation', 'immigration legal services', 'find immigration lawyer', 'visa lawyer', 'green card attorney']}
         url="https://immigronews.com/resources"
+        canonicalUrl="https://immigronews.com/resources"
         type="website"
       />
       <Header />

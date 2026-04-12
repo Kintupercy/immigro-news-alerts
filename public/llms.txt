@@ -1,0 +1,54 @@
+# ImmigroNews
+
+> Real-time immigration news alerts, USCIS updates, and legal help for immigrants navigating the U.S. system.
+
+ImmigroNews is a free immigration news platform that delivers personalized, real-time alerts on U.S. immigration law changes, visa policy updates, USCIS announcements, and citizenship processes. Founded by a former F-1 international student who navigated the path to permanent residency, ImmigroNews centralizes fragmented immigration information into one accessible platform.
+
+## Key Features
+- Real-time breaking immigration news alerts via email
+- 13+ immigration categories (H-1B, Green Card, Student Visa, Citizenship, etc.)
+- Expert analysis from trusted immigration law sources
+- Blog with step-by-step immigration guides and tutorials
+- Legal help matching with vetted immigration attorneys in local communities
+- Free forever — no paywalls, no signup required for news access
+- Spanish translation support
+- Mobile-friendly responsive design
+
+## Getting Started
+1. Visit https://immigronews.com to browse the latest immigration news
+2. Enter your email on the homepage to subscribe to breaking alerts
+3. Filter news by your immigration category (H-1B, Green Card, F-1, etc.)
+4. Read our blog at https://immigronews.com/blog for step-by-step guides
+5. Use the Resources page to get matched with immigration attorneys
+
+## Pricing
+- **Free**: All immigration news, alerts, 13+ categories, breaking news, weekly digest, Spanish translation, full archive — forever free
+- **Donations**: Optional support via Ko-fi to keep the platform running
+
+## Who It's For
+- International students on F-1/J-1 visas tracking policy changes
+- Green card applicants monitoring processing times and policy updates
+- H-1B workers following visa lottery and extension news
+- Families navigating family-based immigration processes
+- Citizenship applicants preparing for naturalization
+- Immigration attorneys staying current on law changes
+- Anyone affected by U.S. immigration policy
+
+## FAQ
+- **What is ImmigroNews?** ImmigroNews is a free immigration news platform that aggregates and curates U.S. immigration news from official government sources and trusted outlets, delivering real-time alerts on policy changes.
+- **Is ImmigroNews free?** Yes, completely free forever. No paywalls, no hidden fees. Optional donations via Ko-fi help keep the platform running.
+- **Does ImmigroNews provide legal advice?** No. ImmigroNews is a news aggregation service, not a law firm. All information is for educational purposes only. Consult a qualified immigration attorney for legal advice.
+- **How often is content updated?** Multiple times daily, with automated fetches at 6:00 AM and 2:00 PM CT, plus manual updates for breaking news.
+- **What immigration categories are covered?** H-1B, Green Card, F-1 Student Visa, Citizenship, DACA, TPS, Asylum, Family Immigration, Work Permits, Tourist Visas, and more.
+- **How do I get matched with an immigration attorney?** Visit the Resources page at https://immigronews.com/resources to submit your situation and get matched with vetted local attorneys.
+
+## Links
+- Website: https://immigronews.com
+- Blog: https://immigronews.com/blog
+- News Feed: https://immigronews.com/news
+- Legal Help: https://immigronews.com/resources
+- FAQ: https://immigronews.com/faq
+- Contact: https://immigronews.com/contact
+- X (Twitter): https://twitter.com/ImmigroNews
+- Instagram: https://instagram.com/ImmigroNews
+- TikTok: https://tiktok.com/@ImmigroNews

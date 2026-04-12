@@ -7,10 +7,12 @@ import { AlertTriangle, Shield, Globe } from "lucide-react";
 const Disclaimer = () => {
   return (
     <div className="min-h-screen">
-      <SEO 
-        title="Legal Disclaimer - ImmigrowNews"
-        description="Legal disclaimer for ImmigrowNews regarding news aggregation, information accuracy, and legal advice limitations."
+      <SEO
+        title="Legal Disclaimer - ImmigroNews"
+        description="Legal disclaimer for ImmigroNews regarding news aggregation, information accuracy, and legal advice limitations."
+        keywords={['legal disclaimer', 'immigration news disclaimer', 'ImmigroNews disclaimer']}
         url="https://immigronews.com/disclaimer"
+        canonicalUrl="https://immigronews.com/disclaimer"
       />
       <Header />
       

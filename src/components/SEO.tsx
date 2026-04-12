@@ -130,49 +130,7 @@ const SEO = ({
       <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
       <link rel="manifest" href="/site.webmanifest" />
       
-      {/* Organization Schema */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "ImmigroNews",
-          "url": "https://immigronews.com",
-          "logo": "https://immigronews.com/logo.png",
-          "description": "Expert immigration news, guides, and legal assistance for visa applications, green cards, and citizenship processes.",
-          "sameAs": [
-            "https://www.facebook.com/ImmigroNews",
-            "https://www.twitter.com/ImmigroNews",
-            "https://www.linkedin.com/company/immigronews"
-          ],
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+1-800-IMMIGRO",
-            "contactType": "customer service",
-            "areaServed": "US",
-            "availableLanguage": ["English", "Spanish"]
-          }
-        })}
-      </script>
-      
-      {/* Website Schema */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "ImmigroNews",
-          "url": "https://immigronews.com",
-          "description": enhancedDescription,
-          "publisher": {
-            "@type": "Organization",
-            "name": "ImmigroNews"
-          },
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://immigronews.com/search?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-          }
-        })}
-      </script>
+      {/* Organization and WebSite schemas are defined in index.html to avoid duplicates */}
     </Helmet>
   );
 };

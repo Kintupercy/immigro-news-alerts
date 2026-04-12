@@ -108,11 +108,12 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEO 
-        title="Contact Us - Get Immigration News Support"
+      <SEO
+        title="Contact Us - ImmigroNews Immigration Support"
         description="Have questions about immigration news or need assistance? Contact ImmigroNews support team. We're here to help with subscription questions, technical issues, and general inquiries about immigration updates."
-        keywords={['contact immigronews', 'immigration news support', 'immigration help', 'customer service', 'immigration questions']}
+        keywords={['contact ImmigroNews', 'immigration news support', 'immigration help', 'customer service', 'immigration questions']}
         url="https://immigronews.com/contact"
+        canonicalUrl="https://immigronews.com/contact"
         type="website"
       />
       <Header />

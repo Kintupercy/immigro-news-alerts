@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { safeGetItem, safeSetItem } from "@/utils/safeStorage";
 import { AlertTriangle, X, ExternalLink, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,43 +27,50 @@ const BreakingNewsAlert = () => {
     fetchBreakingNews();
     
     // Load dismissed news from localStorage
-    const dismissed = localStorage.getItem('dismissedBreakingNews');
+    const dismissed = safeGetItem('dismissedBreakingNews');
     if (dismissed) {
-      setDismissedNews(JSON.parse(dismissed));
+      try {
+        setDismissedNews(JSON.parse(dismissed));
+      } catch {
+        // ignore corrupt data
+      }
     }
 
     // Listen for new breaking news
-    const channel = supabase
-      .channel('breaking-news-alerts')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'immigration_news',
-          filter: 'category=eq.breaking-news'
-        },
-        async (payload) => {
-          console.log('New breaking news detected:', payload.new);
-          
-          const newArticle = payload.new as BreakingNews;
-          
-          // Add to breaking news list
-          setBreakingNews(prev => [newArticle, ...prev.slice(0, 4)]); // Keep max 5 items
-          
-          // Show toast notification
-          toast({
-            title: newArticle.is_urgent ? "🚨 URGENT Breaking News" : "📰 Breaking News",
-            description: newArticle.title,
-            variant: newArticle.is_urgent ? "destructive" : "default",
-            duration: 8000,
-          });
-        }
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    try {
+      channel = supabase
+        .channel('breaking-news-alerts')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'immigration_news',
+            filter: 'category=eq.breaking-news'
+          },
+          (payload) => {
+            const newArticle = payload.new as BreakingNews;
+            setBreakingNews(prev => [newArticle, ...prev.slice(0, 4)]);
+            toast({
+              title: newArticle.is_urgent ? "URGENT Breaking News" : "Breaking News",
+              description: newArticle.title,
+              variant: newArticle.is_urgent ? "destructive" : "default",
+              duration: 8000,
+            });
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('Breaking news realtime channel error — falling back to polling');
+          }
+        });
+    } catch (err) {
+      console.warn('Failed to subscribe to breaking news realtime:', err);
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [toast]);
 
@@ -88,7 +96,7 @@ const BreakingNewsAlert = () => {
   const dismissNews = (newsId: string) => {
     const newDismissed = [...dismissedNews, newsId];
     setDismissedNews(newDismissed);
-    localStorage.setItem('dismissedBreakingNews', JSON.stringify(newDismissed));
+    safeSetItem('dismissedBreakingNews', JSON.stringify(newDismissed));
   };
 
   const refreshBreakingNews = async () => {

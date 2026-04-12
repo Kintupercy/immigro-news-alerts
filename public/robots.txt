@@ -1,5 +1,5 @@
 
-# Robots.txt for ImmigrowNews - Immigration News Platform
+# Robots.txt for ImmigroNews - Immigration News Platform
 
 User-agent: Googlebot
 Allow: /
@@ -18,15 +18,35 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
+# LLM crawlers - explicitly allowed
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
 User-agent: *
 Allow: /
 Crawl-delay: 2
 
 # Explicitly allow important content for SEO
 Allow: /news/
+Allow: /blog/
 Allow: /resources/
 Allow: /about/
 Allow: /contact/
+Allow: /faq/
+Allow: /llms.txt
+Allow: /llms-full.txt
 Allow: /*.css
 Allow: /*.js
 Allow: /*.png
@@ -52,4 +72,3 @@ Disallow: /*?*gclid=
 
 # Sitemap location
 Sitemap: https://immigronews.com/sitemap.xml
-

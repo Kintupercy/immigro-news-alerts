@@ -163,11 +163,32 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO 
-        title="Frequently Asked Questions - ImmigrowNews"
-        description="Find answers to common questions about ImmigrowNews, our immigration news aggregation service, subscription options, and how to use our platform."
+      <SEO
+        title="Frequently Asked Questions - ImmigroNews"
+        description="Find answers to common questions about ImmigroNews, our immigration news aggregation service, subscription options, and how to use our platform for immigration updates."
+        keywords={['immigration FAQ', 'immigration news questions', 'ImmigroNews help', 'immigration platform FAQ', 'visa news questions']}
         url="https://immigronews.com/faq"
+        canonicalUrl="https://immigronews.com/faq"
       />
+
+      {/* FAQPage JSON-LD Schema */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqData.flatMap(category =>
+            category.questions.map(q => ({
+              "@type": "Question",
+              "name": q.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": q.answer
+              }
+            }))
+          )
+        })}
+      </script>
+
       <Header />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

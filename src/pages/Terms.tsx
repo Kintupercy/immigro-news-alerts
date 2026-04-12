@@ -7,13 +7,13 @@ import { Scale, FileText, Shield, AlertTriangle, Users, Gavel, Globe } from "luc
 const Terms = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEO 
-        title="Terms of Service - User Agreement & Legal Terms"
-        description="ImmigrowNews Terms of Service. Read our user agreement, legal disclaimers, and terms governing the use of our immigration news platform. Not a substitute for legal advice."
+      <SEO
+        title="Terms of Service - ImmigroNews User Agreement"
+        description="ImmigroNews Terms of Service. Read our user agreement, legal disclaimers, and terms governing the use of our immigration news platform. Not a substitute for legal advice."
         keywords={['terms of service', 'user agreement', 'legal terms', 'terms and conditions', 'service agreement']}
         url="https://immigronews.com/terms"
+        canonicalUrl="https://immigronews.com/terms"
         type="website"
-        noindex={false}
       />
       <Header />
       
