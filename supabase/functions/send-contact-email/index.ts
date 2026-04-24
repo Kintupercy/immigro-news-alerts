@@ -23,18 +23,16 @@ interface ContactFormRequest {
 // Rate limiting storage
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-// Enhanced CSRF token validation with timing-safe comparison
-const validateCSRFToken = (token: string, expectedToken: string): boolean => {
-  if (!token || !expectedToken || token.length !== expectedToken.length) {
-    return false;
-  }
-  
-  let result = 0;
-  for (let i = 0; i < token.length; i++) {
-    result |= token.charCodeAt(i) ^ expectedToken.charCodeAt(i);
-  }
-  return result === 0;
-};
+// Minimal HTML entity escaping for user-controlled values rendered into the
+// admin-inbox and confirmation emails. Resend delivers HTML as-is, so a
+// sender could otherwise inject arbitrary markup/links into our support inbox.
+const escapeHtml = (s: string): string =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 // Rate limiting function
 const checkRateLimit = (identifier: string, maxAttempts: number = 5, windowMs: number = 15 * 60 * 1000): boolean => {
@@ -85,24 +83,27 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
     
-    // Enhanced CSRF token validation
-    if (!csrf_token || csrf_token.length !== 64) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: "Invalid security token" 
+    // The client sends a csrf_token + timestamp pair, but without server-side
+    // token storage we can't verify the token against anything — so we don't
+    // pretend. We still enforce a plausible shape and a one-hour freshness
+    // window to deter trivial replays; real protection comes from rate limiting
+    // and the rest of this handler's validation.
+    if (!csrf_token || typeof csrf_token !== "string" || csrf_token.length !== 64) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Invalid form submission",
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-    
-    // Check token expiration (1 hour limit)
+
     if (csrf_timestamp) {
       const oneHour = 60 * 60 * 1000;
       if (Date.now() - csrf_timestamp > oneHour) {
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: "Security token expired. Please refresh the page." 
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Form expired. Please refresh the page.",
         }), {
           status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -121,32 +122,42 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
     
-    // Sanitize inputs
+    // Sanitize inputs (trim + length cap). Values are escaped at render time.
     const sanitizedData = {
       firstName: firstName.trim().slice(0, 50),
       lastName: lastName.trim().slice(0, 50),
       email: email.trim().toLowerCase().slice(0, 254),
       subject: subject.trim().slice(0, 200),
-      message: message.trim().slice(0, 5000)
+      message: message.trim().slice(0, 5000),
     };
-    
-    // Email validation
+
+    // Email validation — also rejects CR/LF to block email header injection.
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(sanitizedData.email)) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: "Invalid email address" 
+    if (!emailRegex.test(sanitizedData.email) || /[\r\n]/.test(sanitizedData.email)) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Invalid email address",
       }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
+    // Strip CR/LF from the subject portion to block email header injection
+    // and escape values for the HTML bodies below.
+    const safeSubjectForHeader = sanitizedData.subject.replace(/[\r\n]+/g, " ");
+    const eFirstName = escapeHtml(sanitizedData.firstName);
+    const eLastName = escapeHtml(sanitizedData.lastName);
+    const eEmail = escapeHtml(sanitizedData.email);
+    const eSubject = escapeHtml(sanitizedData.subject);
+    // Preserve line breaks in the message body while escaping HTML.
+    const eMessage = escapeHtml(sanitizedData.message).replace(/\n/g, "<br>");
+
     // Send email to the company
     const companyEmailResponse = await resend.emails.send({
       from: "Contact Form <contact@immigronews.com>",
       to: ["support@immigronews.com"],
-      subject: `New Contact Form Submission: ${sanitizedData.subject}`,
+      subject: `New Contact Form Submission: ${safeSubjectForHeader}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -171,22 +182,22 @@ const handler = async (req: Request): Promise<Response> => {
             <div class="content">
               <div class="field">
                 <div class="label">From:</div>
-                <div class="value">${sanitizedData.firstName} ${sanitizedData.lastName}</div>
+                <div class="value">${eFirstName} ${eLastName}</div>
               </div>
-              
+
               <div class="field">
                 <div class="label">Email:</div>
-                <div class="value">${sanitizedData.email}</div>
+                <div class="value">${eEmail}</div>
               </div>
-              
+
               <div class="field">
                 <div class="label">Subject:</div>
-                <div class="value">${sanitizedData.subject}</div>
+                <div class="value">${eSubject}</div>
               </div>
-              
+
               <div class="field">
                 <div class="label">Message:</div>
-                <div class="value">${sanitizedData.message}</div>
+                <div class="value">${eMessage}</div>
               </div>
             </div>
           </body>
@@ -221,9 +232,9 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <div class="content">
-              <p>Hi ${sanitizedData.firstName},</p>
-              
-              <p>Thank you for reaching out to us! We have successfully received your message regarding: <strong>"${sanitizedData.subject}"</strong></p>
+              <p>Hi ${eFirstName},</p>
+
+              <p>Thank you for reaching out to us! We have successfully received your message regarding: <strong>"${eSubject}"</strong></p>
               
               <p>Our team will review your inquiry and get back to you within 24 hours during business days (Monday - Friday, 9 AM - 6 PM EST).</p>
               
