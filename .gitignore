@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment files — never commit these. Use .env.example for shared defaults.
+.env
+.env.*
+!.env.example
+
+# Supabase CLI scratch
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
