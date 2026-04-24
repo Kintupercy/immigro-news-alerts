@@ -16,9 +16,31 @@ interface EmailRequest {
   content: any;
 }
 
+// Constant-time string comparison to avoid leaking the service role key via timing.
+const safeEqual = (a: string, b: string): boolean => {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Only internal callers (other edge functions) presenting the service role key
+  // are allowed to invoke this function. The anon key is rejected.
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const authHeader = req.headers.get("authorization") ?? "";
+  const presented = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  if (!serviceKey || !presented || !safeEqual(presented, serviceKey)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
   try {
@@ -124,7 +146,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-email-notification function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to send email." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
