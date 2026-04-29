@@ -1,0 +1,5 @@
+# Agent runtime state — never commit. Memory and life are local to the host.
+*/memory/*
+*/life/*
+!*/memory/.gitkeep
+!*/life/.gitkeep
