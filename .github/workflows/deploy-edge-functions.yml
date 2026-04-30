@@ -66,12 +66,14 @@ jobs:
             exit 0
           fi
 
-          # Diff vs. previous commit on main; collect unique function dirs touched
+          # Diff vs. previous commit on main; collect unique function dirs touched.
+          # awk's filter (NF>=3) already drops empty lines, so a redundant grep
+          # would break under `pipefail` when the diff is empty (grep returns 1
+          # on no-match). Keep the pipeline minimal.
           changed=$(
             git diff --name-only HEAD~1 HEAD -- 'supabase/functions/' \
               | awk -F/ '/^supabase\/functions\// && NF>=3 {print $3}' \
               | sort -u \
-              | grep -v '^$' \
               | tr '\n' ' '
           )
           echo "Changed functions: ${changed:-(none)}"
