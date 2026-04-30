@@ -117,8 +117,13 @@ In the service → **"Variables"** tab, add only these:
 | Variable | Value |
 |---|---|
 | `BETTER_AUTH_SECRET` | (paste the 64-char hex from Phase 1) |
+| `BETTER_AUTH_BASE_URL` | `https://paperclip.immigronews.com` (set after Phase 4 tunnel exists) |
 | `PAPERCLIP_TELEMETRY_DISABLED` | `1` |
 | `DO_NOT_TRACK` | `1` |
+
+**Port note**: despite the Dockerfile's `EXPOSE 3100`, Paperclip's
+server actually listens on **`:8080`** at runtime. The Cloudflare
+Tunnel public hostname must target port `8080`, not 3100.
 
 Mark `BETTER_AUTH_SECRET` as a sealed secret if Railway gives that
 option (it'll then never display the value again, only update or
@@ -209,7 +214,7 @@ status should now show **"HEALTHY"** with 2-4 active connections.
 2. Subdomain: `paperclip`
 3. Domain: `immigronews.com`
 4. Type: `HTTP`
-5. URL: `paperclip.railway.internal:3100`
+5. URL: `paperclip.railway.internal:8080`
    *(this is Railway's internal DNS — works because cloudflared is in
    the same Railway project as paperclip; if Railway's internal DNS
    schema differs, it may be `paperclip-immigro.railway.internal:3100`
