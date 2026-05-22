@@ -117,26 +117,28 @@ async function snapshotRoute(browser, route) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
   try {
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 });
+    // domcontentloaded is enough to get React booting; networkidle can hang
+    // on long-lived connections (analytics keep-alives, websockets).
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // Wait for React to mount and helmet to apply per-page metadata.
-    // We accept either: title changed away from initial, an <h1> exists,
-    // or the #root has actual content. Whichever happens first.
-    await page.waitForFunction(
-      (initialTitle) => {
-        const root = document.getElementById('root');
-        const hasContent = root && root.innerHTML.trim().length > 0;
-        const titleChanged =
-          document.title && document.title.trim() !== initialTitle;
-        const hasH1 = !!document.querySelector('h1');
-        return hasContent && (titleChanged || hasH1);
-      },
-      { timeout: 30000 },
-      INITIAL_TITLE
-    );
+    // Wait up to 15s for #root to gain any content (React mounted).
+    // Pages that never paint (broken routes) just fall through to the
+    // fixed settle below and still emit *some* HTML — better than nothing.
+    try {
+      await page.waitForFunction(
+        () => {
+          const root = document.getElementById('root');
+          return root && root.innerHTML.trim().length > 0;
+        },
+        { timeout: 15000 }
+      );
+    } catch {
+      console.warn(`[prerender] WARN ${route} — #root still empty after 15s; snapshotting anyway.`);
+    }
 
-    // Small settle so any async-loaded JSON-LD/meta is flushed by helmet.
-    await new Promise((r) => setTimeout(r, 500));
+    // Settle: lets helmet apply per-page <title>/JSON-LD and async
+    // data (blog content, news) finish painting before we snapshot.
+    await new Promise((r) => setTimeout(r, 3000));
 
     const html = await page.evaluate(
       () => '<!doctype html>\n' + document.documentElement.outerHTML
