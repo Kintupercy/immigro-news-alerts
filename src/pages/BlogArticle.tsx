@@ -8,6 +8,7 @@ import { Clock, User, ArrowLeft, Calendar } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import RelatedPosts from "@/components/blog/RelatedPosts";
 import { SafeContent } from "@/utils/contentSecurity";
 
 interface BlogArticle {
@@ -313,6 +314,8 @@ const BlogArticle = () => {
           </div>
         </footer>
       </article>
+
+      <RelatedPosts currentSlug={article.slug} category={article.category} />
 
       <Footer />
     </div>
