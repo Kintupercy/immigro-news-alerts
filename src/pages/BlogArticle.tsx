@@ -23,6 +23,7 @@ interface BlogArticle {
   featured: boolean;
   meta_description: string;
   keywords: string[];
+  featured_image?: string;
 }
 
 const BlogArticle = () => {
@@ -158,7 +159,7 @@ const BlogArticle = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO 
+      <SEO
         title={seoData.title}
         description={seoData.description}
         keywords={seoData.keywords}
@@ -169,6 +170,7 @@ const BlogArticle = () => {
         section={seoData.section}
         tags={seoData.tags}
         canonicalUrl={`https://immigronews.com/blog/${article.slug}`}
+        image={article.featured_image || 'https://immigronews.com/og-image.jpg'}
       />
       <Header />
       
@@ -208,7 +210,7 @@ const BlogArticle = () => {
             "@type": "Article",
             "headline": article.title,
             "description": article.excerpt,
-            "image": "https://immigronews.com/og-image.jpg",
+            "image": article.featured_image || "https://immigronews.com/og-image.jpg",
             "url": `https://immigronews.com/blog/${article.slug}`,
             "datePublished": article.published_at,
             "dateModified": article.published_at,

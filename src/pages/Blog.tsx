@@ -126,7 +126,7 @@ const Blog = () => {
       <div className="min-h-screen">
         <SEO 
           title="Immigration Blog - Expert Guides | ImmigroNews"
-          description="Comprehensive immigration guides and expert advice. Learn about visa applications, green card processes, citizenship requirements, and immigration law updates from trusted professionals."
+          description="Expert immigration guides on visa applications, green cards, citizenship, and USCIS policy updates — written by trusted immigration professionals."
           keywords={[
             'immigration blog', 'immigration guides', 'visa help', 'green card advice', 
             'citizenship tips', 'immigration law', 'USCIS guides', 'immigration attorney advice',
@@ -171,7 +171,7 @@ const Blog = () => {
     <div className="min-h-screen">
       <SEO 
         title="Immigration Blog - Expert Guides | ImmigroNews"
-        description="Access comprehensive immigration guides, expert advice, and step-by-step instructions for visa applications, green card processes, citizenship requirements, and immigration law updates. Trusted by thousands of immigrants worldwide."
+        description="Step-by-step immigration guides for visa applications, green card processes, citizenship, and USCIS policy updates from trusted immigration experts."
         keywords={[
           'immigration blog', 'immigration guides', 'visa application help', 'green card advice', 
           'citizenship tips', 'immigration law updates', 'USCIS guides', 'immigration attorney advice',

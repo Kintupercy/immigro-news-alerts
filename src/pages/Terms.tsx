@@ -15,6 +15,15 @@ const Terms = () => {
         canonicalUrl="https://immigronews.com/terms"
         type="website"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Terms of Service",
+          "description": "ImmigroNews Terms of Service. User agreement, legal disclaimers, and terms governing use of our immigration news platform.",
+          "url": "https://immigronews.com/terms"
+        })}
+      </script>
       <Header />
       
       <div className="pt-24 pb-16">

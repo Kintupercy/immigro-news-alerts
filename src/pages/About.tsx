@@ -15,6 +15,15 @@ const About = () => {
         canonicalUrl="https://immigronews.com/about"
         type="website"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "About ImmigroNews",
+          "description": "ImmigroNews was founded by a former F-1 international student who navigated the path to permanent residency. Our mission is to provide personalized, accurate immigration news and connect immigrants with trusted legal experts.",
+          "url": "https://immigronews.com/about"
+        })}
+      </script>
       <Header />
       
       <div className="pt-24 pb-16">
@@ -22,7 +31,7 @@ const About = () => {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              About ImmigrowNews
+              About ImmigroNews
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Born from personal experience, built with passion for helping fellow immigrants navigate their journey to the American Dream.
@@ -38,7 +47,7 @@ const About = () => {
             
             <div className="prose prose-lg text-gray-700">
               <p className="mb-6">
-                ImmigrowNews was founded by someone who has walked the same path as millions of international students and immigrants seeking to build their lives in the United States. As a former F1 student who successfully navigated the complex journey from international student to lawful permanent resident, I understand firsthand the challenges, uncertainties, and dreams that define the immigrant experience.
+                ImmigroNews was founded by someone who has walked the same path as millions of international students and immigrants seeking to build their lives in the United States. As a former F1 student who successfully navigated the complex journey from international student to lawful permanent resident, I understand firsthand the challenges, uncertainties, and dreams that define the immigrant experience.
               </p>
               
               <p className="mb-6">
@@ -50,7 +59,7 @@ const About = () => {
               </p>
               
               <p>
-                That's why I created ImmigrowNews - to be the centralized, reliable source of immigration news and updates that I wish I had during my own journey. Every feature, every update, and every piece of content is designed with the immigrant experience in mind, because I've lived it too.
+                That's why I created ImmigroNews - to be the centralized, reliable source of immigration news and updates that I wish I had during my own journey. Every feature, every update, and every piece of content is designed with the immigrant experience in mind, because I've lived it too.
               </p>
             </div>
           </div>

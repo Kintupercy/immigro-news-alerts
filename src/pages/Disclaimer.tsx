@@ -14,6 +14,15 @@ const Disclaimer = () => {
         url="https://immigronews.com/disclaimer"
         canonicalUrl="https://immigronews.com/disclaimer"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Legal Disclaimer",
+          "description": "Legal disclaimer for ImmigroNews on news aggregation, content attribution, and the limits of educational immigration information.",
+          "url": "https://immigronews.com/disclaimer"
+        })}
+      </script>
       <Header />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

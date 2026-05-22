@@ -15,6 +15,15 @@ const Privacy = () => {
         canonicalUrl="https://immigronews.com/privacy"
         type="website"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Privacy Policy",
+          "description": "ImmigroNews privacy policy. How we collect, use, and protect your personal data in compliance with GDPR and CCPA.",
+          "url": "https://immigronews.com/privacy"
+        })}
+      </script>
       <Header />
       
       <div className="pt-24 pb-16">
