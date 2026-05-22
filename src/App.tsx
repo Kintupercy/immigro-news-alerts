@@ -16,6 +16,7 @@ import News from "./pages/News";
 import Resources from "./pages/Resources";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
+import Signup from "./pages/Signup";
 
 import NotFound from "./pages/NotFound";
 
@@ -40,7 +41,8 @@ const App = () => (
             <Route path="/resources" element={<Resources />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
-            
+            <Route path="/signup" element={<Signup />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

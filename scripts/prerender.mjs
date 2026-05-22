@@ -27,8 +27,7 @@ if (process.env.SKIP_PRERENDER === '1') {
   process.exit(0);
 }
 
-// Static routes mirror App.tsx exactly. /signup is in src/pages but has no
-// <Route> in App.tsx (would render NotFound), so it is intentionally omitted.
+// Static routes mirror App.tsx exactly.
 const STATIC_ROUTES = [
   '/',
   '/about',
@@ -40,6 +39,7 @@ const STATIC_ROUTES = [
   '/news',
   '/resources',
   '/blog',
+  '/signup',
 ];
 
 // Pull anon Supabase credentials with multiple fallbacks. The committed
