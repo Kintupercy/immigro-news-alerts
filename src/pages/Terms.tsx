@@ -51,7 +51,7 @@ const Terms = () => {
             <div className="prose prose-lg text-gray-700">
               <p className="mb-4">
                 These Terms of Service ("Terms") constitute a legally binding agreement between you and 
-                Immigro ("Company," "we," "us," or "our") governing your use of the Immigro website and 
+                ImmigroNews ("Company," "we," "us," or "our") governing your use of the Immigro website and 
                 mobile application (collectively, the "Service").
               </p>
               <p className="mb-4">
@@ -74,7 +74,7 @@ const Terms = () => {
             </div>
             <div className="text-gray-700 space-y-4">
               <p>
-                Immigro provides a comprehensive immigration news and information aggregation platform designed 
+                ImmigroNews provides a comprehensive immigration news and information aggregation platform designed 
                 to keep users informed about immigration policies, procedures, and developments. Our Service includes:
               </p>
               <ul className="list-disc pl-6 space-y-2">
@@ -290,7 +290,7 @@ const Terms = () => {
             </div>
             <div className="text-gray-700 space-y-4">
               <p>
-                You agree to defend, indemnify, and hold harmless Immigro and its officers, directors, employees, 
+                You agree to defend, indemnify, and hold harmless ImmigroNews and its officers, directors, employees, 
                 and agents from and against any claims, damages, obligations, losses, liabilities, costs, or debt, 
                 and expenses (including attorney's fees) arising from:
               </p>
@@ -313,7 +313,7 @@ const Terms = () => {
             <div className="text-gray-700 space-y-4">
               <div>
                 <h3 className="text-lg font-semibold mb-2">Governing Law</h3>
-                <p>These Terms are governed by and construed in accordance with the laws of [Your State/Country], without regard to conflict of law principles.</p>
+                <p>These Terms are governed by and construed in accordance with the laws of the State of Delaware, United States, without regard to conflict of law principles.</p>
               </div>
               
               <div>
@@ -322,7 +322,7 @@ const Terms = () => {
                 <ol className="list-decimal pl-6 space-y-2">
                   <li>Good faith negotiation between the parties</li>
                   <li>Binding arbitration if negotiation fails</li>
-                  <li>Jurisdiction in the courts of [Your Jurisdiction] for non-arbitrable matters</li>
+                  <li>Jurisdiction in the courts of Delaware for non-arbitrable matters</li>
                 </ol>
               </div>
             </div>
