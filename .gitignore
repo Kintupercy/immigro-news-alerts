@@ -20,6 +20,9 @@ dist-ssr
 # Supabase CLI scratch
 supabase/.temp/
 
+# Claude Code local memory
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

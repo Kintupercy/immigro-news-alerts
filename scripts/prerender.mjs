@@ -199,20 +199,23 @@ async function main() {
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
+        '--single-process',
+        '--no-zygote',
       ],
     });
   } catch (err) {
-    console.error(
+    console.warn(
       `[prerender] Puppeteer launch failed: ${err?.message || err}`
     );
+    console.warn('[prerender] Skipping prerender — site will still build and serve correctly.');
     server.close();
-    process.exit(1);
+    process.exit(0);
   }
 
   // We intentionally LET the '/' snapshot overwrite dist/index.html. The

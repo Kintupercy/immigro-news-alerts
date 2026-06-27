@@ -91,7 +91,7 @@ Keep it professional, informative, and engaging for immigration professionals an
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar-pro',
+        model: 'sonar',
         messages: [
           {
             role: 'system',
