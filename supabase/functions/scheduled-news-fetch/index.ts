@@ -36,37 +36,22 @@ serve(async (req) => {
 
     console.log(`Scheduled news fetch triggered at ${centralTime.toLocaleString()} Central (${timeSlot} slot, priorityOnly: ${priorityOnly})`);
 
-    // Call the optimized news scheduler function with priority filter
-    const { data: newsData, error: newsError } = await supabaseClient.functions.invoke('optimized-news-scheduler', {
-      body: { 
-        scheduledRun: true,
-        timeSlot: timeSlot,
-        priorityOnly: priorityOnly,
-        centralTime: centralTime.toISOString()
-      }
+    // Morning: pull last 24 hours; evening: pull last 6 hours (just the refresh window)
+    const maxAgeHours = timeSlot === 'morning' ? 24 : 6;
+
+    const { data: newsData, error: newsError } = await supabaseClient.functions.invoke('fetch-news-rss', {
+      body: { maxAgeHours }
     });
 
     if (newsError) {
-      console.error('Error calling optimized news scheduler:', newsError);
+      console.error('Error calling fetch-news-rss:', newsError);
       throw newsError;
     }
 
-    console.log('Optimized news scheduler response:', newsData);
+    console.log('fetch-news-rss response:', newsData);
 
-    // Call breaking news fetch
-    const { data: breakingData, error: breakingError } = await supabaseClient.functions.invoke('fetch-breaking-news', {
-      body: { 
-        scheduledRun: true,
-        timeSlot: timeSlot
-      }
-    });
-
-    if (breakingError) {
-      console.error('Error calling breaking news fetch:', breakingError);
-      // Don't throw here, just log the error
-    }
-
-    console.log('Breaking news fetch response:', breakingData);
+    // Alias so the rest of the function (totalArticles, urgentCount) still works
+    const breakingData = { articlesAdded: 0, urgentNewsFound: newsData?.urgentCount || 0 };
 
     // Run automated link validation (once per day during morning slot)
     if (timeSlot === 'morning') {

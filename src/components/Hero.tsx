@@ -170,7 +170,7 @@ const Hero = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-navy-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
-            Get instant email alerts for urgent and breaking US Immigration policy and law changes
+            Real-time immigration news alerts, USCIS updates, visa policy changes, and free legal-aid matching for immigrants navigating the U.S. system.
           </p>
 
           <div className="flex flex-col items-center gap-6">

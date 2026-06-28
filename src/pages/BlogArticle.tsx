@@ -8,6 +8,7 @@ import { Clock, User, ArrowLeft, Calendar } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import RelatedPosts from "@/components/blog/RelatedPosts";
 import { SafeContent } from "@/utils/contentSecurity";
 
 interface BlogArticle {
@@ -23,6 +24,7 @@ interface BlogArticle {
   featured: boolean;
   meta_description: string;
   keywords: string[];
+  featured_image?: string;
 }
 
 const BlogArticle = () => {
@@ -158,7 +160,7 @@ const BlogArticle = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO 
+      <SEO
         title={seoData.title}
         description={seoData.description}
         keywords={seoData.keywords}
@@ -169,6 +171,7 @@ const BlogArticle = () => {
         section={seoData.section}
         tags={seoData.tags}
         canonicalUrl={`https://immigronews.com/blog/${article.slug}`}
+        image={article.featured_image || 'https://immigronews.com/og-image.jpg'}
       />
       <Header />
       
@@ -208,7 +211,7 @@ const BlogArticle = () => {
             "@type": "Article",
             "headline": article.title,
             "description": article.excerpt,
-            "image": "https://immigronews.com/og-image.jpg",
+            "image": article.featured_image || "https://immigronews.com/og-image.jpg",
             "url": `https://immigronews.com/blog/${article.slug}`,
             "datePublished": article.published_at,
             "dateModified": article.published_at,
@@ -311,6 +314,8 @@ const BlogArticle = () => {
           </div>
         </footer>
       </article>
+
+      <RelatedPosts currentSlug={article.slug} category={article.category} />
 
       <Footer />
     </div>

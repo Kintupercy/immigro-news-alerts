@@ -15,6 +15,15 @@ const Privacy = () => {
         canonicalUrl="https://immigronews.com/privacy"
         type="website"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Privacy Policy",
+          "description": "ImmigroNews privacy policy. How we collect, use, and protect your personal data in compliance with GDPR and CCPA.",
+          "url": "https://immigronews.com/privacy"
+        })}
+      </script>
       <Header />
       
       <div className="pt-24 pb-16">
@@ -41,12 +50,12 @@ const Privacy = () => {
             </div>
             <div className="prose prose-lg text-gray-700">
               <p className="mb-4">
-                At Immigro ("we," "our," or "us"), we are committed to protecting your privacy and personal information. 
+                At ImmigroNews ("we," "our," or "us"), we are committed to protecting your privacy and personal information. 
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use 
                 our immigration news service ("Service") and applies to all users worldwide.
               </p>
               <p className="mb-4">
-                <strong>Data Controller:</strong> Immigro acts as the data controller for personal information collected through our Service.
+                <strong>Data Controller:</strong> ImmigroNews acts as the data controller for personal information collected through our Service.
               </p>
               <p>
                 By using our Service, you agree to the collection and use of information in accordance with this policy. 
@@ -241,7 +250,7 @@ const Privacy = () => {
               </div>
               
               <p className="mt-4">
-                <strong>To exercise your rights:</strong> Contact us at privacy@immigro.com with your request. 
+                <strong>To exercise your rights:</strong> Contact us at support@immigronews.com with your request. 
                 We will respond within the legally required timeframe (typically 30 days for GDPR, 45 days for CCPA).
               </p>
             </div>

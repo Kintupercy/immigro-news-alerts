@@ -6,28 +6,17 @@ import SEO from "@/components/SEO";
 import { ChevronDown, ChevronUp, HelpCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-const FAQ = () => {
-  const [openQuestions, setOpenQuestions] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const toggleQuestion = (index: string) => {
-    setOpenQuestions(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    );
-  };
-
-  const faqData = [
+// Defined at module scope so the useState lazy initializer can reference it.
+const faqData = [
     {
       category: "General Information",
       questions: [
         {
-          question: "What is ImmigrowNews?",
-          answer: "ImmigrowNews is a specialized news aggregation platform focused on immigration news, policy updates, and visa information. We gather and curate immigration-related news from reliable sources to keep our users informed about changes that may affect their immigration journey."
+          question: "What is ImmigroNews?",
+          answer: "ImmigroNews is a specialized news aggregation platform focused on immigration news, policy updates, and visa information. We gather and curate immigration-related news from reliable sources to keep our users informed about changes that may affect their immigration journey."
         },
         {
-          question: "Is ImmigrowNews free to use?",
+          question: "Is ImmigroNews free to use?",
           answer: "Yes, our basic news aggregation service is completely free. We also offer premium features for subscribers who want personalized news feeds, urgent alerts, and additional resources."
         },
         {
@@ -35,7 +24,7 @@ const FAQ = () => {
           answer: "Our content is updated multiple times daily. We have automated systems that fetch the latest immigration news at 6:00 AM and 2:00 PM Central Time, plus manual updates for breaking news and urgent announcements."
         },
         {
-          question: "Can I trust the information on ImmigrowNews?",
+          question: "Can I trust the information on ImmigroNews?",
           answer: "We aggregate news from reputable sources including government websites, established news organizations, and legal publications. However, we always recommend verifying important information with official government sources or consulting with qualified immigration attorneys."
         }
       ]
@@ -45,7 +34,7 @@ const FAQ = () => {
       questions: [
         {
           question: "Do you provide legal advice?",
-          answer: "No, ImmigrowNews is NOT a law firm and does not provide legal advice. We are a news aggregation service. All information is for educational purposes only. For legal advice specific to your situation, please consult with a qualified immigration attorney."
+          answer: "No, ImmigroNews is NOT a law firm and does not provide legal advice. We are a news aggregation service. All information is for educational purposes only. For legal advice specific to your situation, please consult with a qualified immigration attorney."
         },
         {
           question: "Can I rely on this information for my immigration case?",
@@ -137,7 +126,7 @@ const FAQ = () => {
       category: "Contact and Support",
       questions: [
         {
-          question: "How can I contact ImmigrowNews?",
+          question: "How can I contact ImmigroNews?",
           answer: "You can reach us through multiple channels: email us at support@immigronews.com, use our contact form on the website, or connect with us on social media. We typically respond within 24-48 hours."
         },
         {
@@ -150,7 +139,26 @@ const FAQ = () => {
         }
       ]
     }
-  ];
+];
+
+const FAQ = () => {
+  // All items start open so prerender/crawlers see every answer in the HTML.
+  const [openQuestions, setOpenQuestions] = useState<string[]>(() => {
+    const ids: string[] = [];
+    faqData.forEach(cat =>
+      cat.questions.forEach((_, i) => ids.push(`${cat.category}-${i}`))
+    );
+    return ids;
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const toggleQuestion = (index: string) => {
+    setOpenQuestions(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
 
   const filteredFaqData = faqData.map(category => ({
     ...category,
@@ -198,7 +206,7 @@ const FAQ = () => {
             <h1 className="text-3xl font-bold text-navy-800">Frequently Asked Questions</h1>
           </div>
           <p className="text-gray-600 text-lg mb-6">
-            Find answers to the most common questions about ImmigrowNews and our services.
+            Find answers to the most common questions about ImmigroNews and our services.
           </p>
           
           {/* Search Bar */}

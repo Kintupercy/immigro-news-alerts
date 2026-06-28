@@ -14,6 +14,15 @@ const Disclaimer = () => {
         url="https://immigronews.com/disclaimer"
         canonicalUrl="https://immigronews.com/disclaimer"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Legal Disclaimer",
+          "description": "Legal disclaimer for ImmigroNews on news aggregation, content attribution, and the limits of educational immigration information.",
+          "url": "https://immigronews.com/disclaimer"
+        })}
+      </script>
       <Header />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -23,7 +32,7 @@ const Disclaimer = () => {
             <h1 className="text-3xl font-bold text-navy-800">Legal Disclaimer</h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Important legal information regarding the use of ImmigrowNews and our content aggregation services.
+            Important legal information regarding the use of ImmigroNews and our content aggregation services.
           </p>
         </div>
 
@@ -36,7 +45,7 @@ const Disclaimer = () => {
             </div>
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-700 mb-4">
-                The information provided on ImmigrowNews is for general informational purposes only. 
+                The information provided on ImmigroNews is for general informational purposes only. 
                 While we strive to keep the information up to date and accurate, we make no representations 
                 or warranties of any kind, express or implied, about the completeness, accuracy, reliability, 
                 suitability, or availability of the information, products, services, or related graphics 
@@ -56,7 +65,7 @@ const Disclaimer = () => {
             <h2 className="text-2xl font-semibold text-red-800 mb-4">Not Legal Advice</h2>
             <div className="prose prose-gray max-w-none">
               <p className="text-red-700 mb-4 font-medium">
-                <strong>IMPORTANT:</strong> ImmigrowNews is NOT a law firm and does NOT provide legal advice.
+                <strong>IMPORTANT:</strong> ImmigroNews is NOT a law firm and does NOT provide legal advice.
               </p>
               <ul className="text-red-700 space-y-2">
                 <li>• The information provided is for educational and informational purposes only</li>
@@ -77,7 +86,7 @@ const Disclaimer = () => {
             <div className="prose prose-gray max-w-none">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Content Sources & Attribution</h3>
               <p className="text-gray-700 mb-4">
-                ImmigrowNews aggregates immigration-related news from various publicly available sources under fair use principles. 
+                ImmigroNews aggregates immigration-related news from various publicly available sources under fair use principles. 
                 All content is properly attributed to its original source, including:
               </p>
               <ul className="text-gray-700 space-y-1 mb-4">
@@ -134,7 +143,7 @@ const Disclaimer = () => {
                 over the content, privacy policies, or practices of third-party sites.
               </p>
               <p className="text-gray-700">
-                The inclusion of any link does not imply endorsement by ImmigrowNews. We are not 
+                The inclusion of any link does not imply endorsement by ImmigroNews. We are not 
                 responsible for the content, accuracy, or opinions expressed on linked websites.
               </p>
             </div>
@@ -145,7 +154,7 @@ const Disclaimer = () => {
             <h2 className="text-2xl font-semibold text-navy-800 mb-4">Limitation of Liability</h2>
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-700 mb-4">
-                In no event shall ImmigrowNews, its owners, employees, or affiliates be liable for:
+                In no event shall ImmigroNews, its owners, employees, or affiliates be liable for:
               </p>
               <ul className="text-gray-700 space-y-1 mb-4">
                 <li>• Any direct, indirect, incidental, special, or consequential damages</li>

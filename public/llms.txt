@@ -1,6 +1,6 @@
 # ImmigroNews
 
-> Real-time immigration news alerts, USCIS updates, and legal help for immigrants navigating the U.S. system.
+> Real-time immigration news alerts, USCIS updates, visa policy changes, and free legal-aid matching for immigrants navigating the U.S. system.
 
 ImmigroNews is a free immigration news platform that delivers personalized, real-time alerts on U.S. immigration law changes, visa policy updates, USCIS announcements, and citizenship processes. Founded by a former F-1 international student who navigated the path to permanent residency, ImmigroNews centralizes fragmented immigration information into one accessible platform.
 

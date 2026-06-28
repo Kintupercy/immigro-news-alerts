@@ -20,6 +20,9 @@ dist-ssr
 # Supabase CLI scratch
 supabase/.temp/
 
+# Claude Code local memory
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -30,3 +33,7 @@ supabase/.temp/
 *.njsproj
 *.sln
 *.sw?
+.vercel
+
+# Generated at build time from Supabase data — never commit
+public/sitemap.xml

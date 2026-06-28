@@ -2,6 +2,10 @@
 # Normalize www to non-www (301 permanent redirect)
 https://www.immigronews.com/* https://immigronews.com/:splat 301!
 
+# Sitemap proxies to Supabase edge functions (200 rewrite, URL stays clean)
+/sitemap.xml https://xybpgorbkiaitimxiqej.supabase.co/functions/v1/sitemap-xml 200
+/sitemap-news.xml https://xybpgorbkiaitimxiqej.supabase.co/functions/v1/sitemap-news-xml 200
+
 # Remove trailing slashes (301 permanent redirect)
 /news/ /news 301
 /about/ /about 301

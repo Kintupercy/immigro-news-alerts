@@ -216,7 +216,7 @@ const LatestNews = () => {
                       )}
                     </div>
                     <div className="flex flex-wrap gap-1 mt-3">
-                      {item.tags.slice(0, 2).map((tag) => (
+                      {(item.tags || []).slice(0, 2).map((tag) => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>

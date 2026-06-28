@@ -207,12 +207,27 @@ const Resources = () => {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title="Find Immigration Lawyers & Legal Help Near You"
-        description="Get matched with vetted immigration lawyers in your area. Free consultations available. Anonymous requests accepted. Connect with experienced immigration attorneys for visa, green card, and citizenship help."
+        description="Get matched with vetted immigration lawyers in your area. Free consultations and anonymous requests for visa, green card, and citizenship legal help."
         keywords={['immigration lawyer', 'legal help', 'immigration attorney', 'free consultation', 'immigration legal services', 'find immigration lawyer', 'visa lawyer', 'green card attorney']}
         url="https://immigronews.com/resources"
         canonicalUrl="https://immigronews.com/resources"
         type="website"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Immigration Attorney Matching & Legal Resources",
+          "description": "Get matched with vetted immigration attorneys in your area. Free consultations, anonymous requests, and legal help for visa, green card, and citizenship cases.",
+          "url": "https://immigronews.com/resources",
+          "about": "Free immigration attorney matching service for U.S. immigrants",
+          "provider": {
+            "@type": "Organization",
+            "name": "ImmigroNews",
+            "url": "https://immigronews.com"
+          }
+        })}
+      </script>
       <Header />
       
       <div className="pt-16 sm:pt-24 pb-8 sm:pb-16 px-4 sm:px-0">

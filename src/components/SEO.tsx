@@ -45,7 +45,10 @@ const SEO = ({
 
   const canonical = normalizeUrl(canonicalUrl || url);
   const normalizedUrl = normalizeUrl(url);
-  const fullImageUrl = image.startsWith('http') ? image : `${normalizedUrl}${image}`;
+  // Always resolve relative image paths against the root domain, never the page URL,
+  // so og:image doesn't include the page slug (e.g. /contact/lovable-uploads/...).
+  const IMAGE_BASE = 'https://immigronews.com';
+  const fullImageUrl = image.startsWith('http') ? image : `${IMAGE_BASE}${image}`;
 
   // Enhanced description for SEO
   const enhancedDescription = type === 'article' 
@@ -84,7 +87,7 @@ const SEO = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={`${fullTitle} - Immigration News & Legal Help`} />
-      <meta property="og:url" content={normalizedUrl} />
+      <meta property="og:url" content={canonical} />
       <meta property="og:site_name" content={siteTitle} />
       <meta property="og:locale" content="en_US" />
       

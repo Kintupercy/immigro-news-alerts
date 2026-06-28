@@ -76,7 +76,7 @@ const Index = () => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="ImmigroNews - Breaking Immigration News & Updates"
-        description="Get real-time immigration news, policy updates, visa requirements, and green card information. Connect with trusted immigration lawyers and stay informed with breaking news alerts. Your trusted source for immigration updates."
+        description="Real-time immigration news alerts, USCIS updates, visa policy changes, and free legal-aid matching for immigrants navigating the U.S. system."
         keywords={[
           'immigration news',
           'visa updates',

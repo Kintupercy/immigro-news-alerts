@@ -110,12 +110,32 @@ const Contact = () => {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title="Contact Us - ImmigroNews Immigration Support"
-        description="Have questions about immigration news or need assistance? Contact ImmigroNews support team. We're here to help with subscription questions, technical issues, and general inquiries about immigration updates."
+        description="Contact the ImmigroNews team for help with subscriptions, technical issues, and questions about immigration news, USCIS updates, and visa policy changes."
         keywords={['contact ImmigroNews', 'immigration news support', 'immigration help', 'customer service', 'immigration questions']}
         url="https://immigronews.com/contact"
         canonicalUrl="https://immigronews.com/contact"
         type="website"
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          "name": "Contact ImmigroNews",
+          "description": "Contact ImmigroNews support for questions about immigration news, subscriptions, USCIS updates, and visa policy changes.",
+          "url": "https://immigronews.com/contact",
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "ImmigroNews",
+            "url": "https://immigronews.com",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer service",
+              "email": "support@immigronews.com",
+              "availableLanguage": ["English", "Spanish"]
+            }
+          }
+        })}
+      </script>
       <Header />
       
       <div className="pt-24 pb-16">

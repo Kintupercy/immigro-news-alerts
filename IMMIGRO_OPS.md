@@ -195,6 +195,8 @@ in `social_posts`, weekly newsletter draft.
 - `send-contact-email` — handles contact form submissions.
 - `blog-post-automation` — fires on `blog_articles.status='published'`; updates sitemap, pings Google.
 - `send-email-notification`, `send-urgent-alert-email` — internal email senders, service-role-gated.
+- `sitemap-xml` — serves `/sitemap.xml` from static routes + published blog/news rows (verify_jwt=false, proxied via Cloudflare Pages).
+- `sitemap-news-xml` — serves `/sitemap-news.xml` (Google News schema) for `immigration_news` published in the last 2 days (verify_jwt=false).
 
 **Cron jobs (all run via `public.invoke_edge_function` reading `service_role_key` from Vault):**
 - `weekly-newsletter-roundup` — Sundays 14:00 UTC.
