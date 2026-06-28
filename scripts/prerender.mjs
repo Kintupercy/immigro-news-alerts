@@ -165,12 +165,17 @@ async function snapshotRoute(browser, route) {
 }
 
 function routeToOutputPath(route) {
-  // '/'           -> dist/index.html (skip — already present, but rewrite to capture helmet output)
-  // '/about'      -> dist/about/index.html
-  // '/blog/foo'   -> dist/blog/foo/index.html
+  // '/'             -> dist/index.html
+  // '/about'        -> dist/about.html   (NOT dist/about/index.html)
+  // '/blog/foo'     -> dist/blog/foo.html
+  //
+  // Using .html extension instead of /index.html so CF Pages and Vercel serve
+  // the file directly at the clean URL without a trailing-slash redirect.
   const cleaned = route.replace(/^\/+/, '').replace(/\/+$/, '');
   if (cleaned === '') return join(DIST, 'index.html');
-  return join(DIST, ...cleaned.split('/'), 'index.html');
+  const parts = cleaned.split('/');
+  const last = parts.pop();
+  return join(DIST, ...parts, last + '.html');
 }
 
 async function writeSnapshot(route, html) {

@@ -1,21 +1,9 @@
-# Cloudflare Pages Redirects for SEO
+# Cloudflare Pages Redirects
+
 # Normalize www to non-www (301 permanent redirect)
 https://www.immigronews.com/* https://immigronews.com/:splat 301!
 
-# Sitemap proxies to Supabase edge functions (200 rewrite, URL stays clean)
-/sitemap.xml https://xybpgorbkiaitimxiqej.supabase.co/functions/v1/sitemap-xml 200
-/sitemap-news.xml https://xybpgorbkiaitimxiqej.supabase.co/functions/v1/sitemap-news-xml 200
-
-# Remove trailing slashes (301 permanent redirect)
-/news/ /news 301
-/about/ /about 301
-/contact/ /contact 301
-/privacy/ /privacy 301
-/terms/ /terms 301
-/disclaimer/ /disclaimer 301
-/faq/ /faq 301
-/resources/ /resources 301
-/blog/ /blog 301
-
-# SPA fallback - serve index.html for client-side routing
+# SPA fallback — serve index.html for any route that doesn't match a static file.
+# Prerendered pages are written as dist/route.html (not dist/route/index.html)
+# so CF Pages and Vercel serve them directly at the clean URL without redirect.
 /* /index.html 200
