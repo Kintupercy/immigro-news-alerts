@@ -9,7 +9,7 @@
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { mkdir, writeFile, access } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, access } from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import sirv from 'sirv';
 import puppeteer from 'puppeteer';
@@ -96,16 +96,30 @@ async function fetchBlogSlugs() {
   }
 }
 
+// spaShell is set in main() before the server starts so it never mutates.
+let spaShell = '';
+
 function startStaticServer() {
-  const serve = sirv(DIST, {
-    dev: false,
-    etag: true,
-    single: true, // SPA fallback so unknown routes still load index.html
+  // Serve JS/CSS/image assets from dist/, but ALWAYS serve the original SPA
+  // shell HTML for every route (never a prerendered file). This prevents the
+  // homepage snapshot from being fed to subsequent routes and causing React
+  // error #299 (rendering on top of pre-filled content).
+  const serve = sirv(DIST, { dev: false, etag: true, single: false });
+  const server = createServer((req, res) => {
+    const url = new URL(req.url || '/', `http://127.0.0.1:${PORT}`);
+    const path = url.pathname;
+    // Serve real static assets (JS, CSS, images, fonts, manifest…).
+    if (path.match(/\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff2?|ttf|eot|map|json|xml|txt)$/)) {
+      serve(req, res, () => {
+        res.statusCode = 404;
+        res.end('Not found');
+      });
+    } else {
+      // All HTML routes get the original SPA shell so React always mounts clean.
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(spaShell);
+    }
   });
-  const server = createServer((req, res) => serve(req, res, () => {
-    res.statusCode = 404;
-    res.end('Not found');
-  }));
   return new Promise((resolvePromise, rejectPromise) => {
     server.once('error', rejectPromise);
     server.listen(PORT, '127.0.0.1', () => resolvePromise(server));
@@ -177,6 +191,11 @@ async function main() {
     process.exit(1);
   }
 
+  // Save the original SPA shell BEFORE any snapshotting. After route '/' is
+  // snapshotted it overwrites dist/index.html; subsequent routes must still
+  // receive the original shell so React mounts from a clean state.
+  spaShell = await readFile(join(DIST, 'index.html'), 'utf8');
+
   console.log('[prerender] Starting local static server on port', PORT);
   let server;
   try {
@@ -196,19 +215,20 @@ async function main() {
   const allRoutes = [...STATIC_ROUTES, ...blogRoutes];
   console.log(`[prerender] Total routes to prerender: ${allRoutes.length}`);
 
+  // --single-process / --no-zygote help in Linux containers (Vercel, CF Pages)
+  // but crash Chrome on Windows. Only enable them in CI environments.
+  const isCI = !!(process.env.CI || process.env.VERCEL || process.env.CF_PAGES);
+  const args = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    ...(isCI ? ['--single-process', '--no-zygote'] : []),
+  ];
+
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--single-process',
-        '--no-zygote',
-      ],
-    });
+    browser = await puppeteer.launch({ headless: true, args });
   } catch (err) {
     console.warn(
       `[prerender] Puppeteer launch failed: ${err?.message || err}`
