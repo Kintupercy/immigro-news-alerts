@@ -151,9 +151,17 @@ async function snapshotRoute(browser, route) {
       console.warn(`[prerender] WARN ${route} — #root still empty after 15s; snapshotting anyway.`);
     }
 
-    // Settle: lets helmet apply per-page <title>/JSON-LD and async
-    // data (blog content, news) finish painting before we snapshot.
-    await new Promise((r) => setTimeout(r, 3000));
+    // Wait for network to go quiet — catches async Supabase fetches (e.g.
+    // /news loading articles) that fire after React mounts. Falls back after
+    // 10s so a keep-alive or analytics ping doesn't stall the snapshot.
+    try {
+      await page.waitForNetworkIdle({ idleTime: 500, timeout: 10000 });
+    } catch {
+      // Not fully idle — proceed; better a partial snapshot than none.
+    }
+
+    // Short final settle: lets Helmet flush <title>/JSON-LD after data paints.
+    await new Promise((r) => setTimeout(r, 1000));
 
     const html = await page.evaluate(
       () => '<!doctype html>\n' + document.documentElement.outerHTML
