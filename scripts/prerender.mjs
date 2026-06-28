@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { mkdir, writeFile, readFile, access } from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
+import { execSync } from 'node:child_process';
 import sirv from 'sirv';
 import puppeteer from 'puppeteer';
 import { createClient } from '@supabase/supabase-js';
@@ -229,13 +230,21 @@ async function main() {
   let browser;
   try {
     browser = await puppeteer.launch({ headless: true, args });
-  } catch (err) {
-    console.warn(
-      `[prerender] Puppeteer launch failed: ${err?.message || err}`
-    );
-    console.warn('[prerender] Skipping prerender — site will still build and serve correctly.');
-    server.close();
-    process.exit(0);
+  } catch (firstErr) {
+    // Chrome not found — try installing it (happens on first Vercel/CI build
+    // when the node_modules cache doesn't yet contain the Chrome binary).
+    console.warn(`[prerender] Chrome launch failed (${firstErr?.message?.split('\n')[0]})`);
+    console.log('[prerender] Attempting Chrome install via puppeteer browsers install...');
+    try {
+      execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
+      browser = await puppeteer.launch({ headless: true, args });
+      console.log('[prerender] Chrome installed and launched successfully.');
+    } catch (installErr) {
+      console.warn(`[prerender] Chrome install/launch failed: ${installErr?.message || installErr}`);
+      console.warn('[prerender] Skipping prerender — site will still build and serve correctly.');
+      server.close();
+      process.exit(0);
+    }
   }
 
   // We intentionally LET the '/' snapshot overwrite dist/index.html. The
