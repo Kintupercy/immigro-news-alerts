@@ -216,15 +216,17 @@ async function main() {
   const allRoutes = [...STATIC_ROUTES, ...blogRoutes];
   console.log(`[prerender] Total routes to prerender: ${allRoutes.length}`);
 
-  // --single-process / --no-zygote help in Linux containers (Vercel, CF Pages)
-  // but crash Chrome on Windows. Only enable them in CI environments.
-  const isCI = !!(process.env.CI || process.env.VERCEL || process.env.CF_PAGES);
+  // --single-process / --no-zygote help Chrome in Linux CI containers but
+  // crash it on Windows (even when VERCEL=1 is injected by `vercel build`).
+  const isLinuxCI =
+    process.platform === 'linux' &&
+    !!(process.env.CI || process.env.VERCEL || process.env.CF_PAGES);
   const args = [
     '--no-sandbox',
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
     '--disable-gpu',
-    ...(isCI ? ['--single-process', '--no-zygote'] : []),
+    ...(isLinuxCI ? ['--single-process', '--no-zygote'] : []),
   ];
 
   let browser;

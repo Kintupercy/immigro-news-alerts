@@ -33,3 +33,7 @@ supabase/.temp/
 *.njsproj
 *.sln
 *.sw?
+.vercel
+
+# Generated at build time from Supabase data — never commit
+public/sitemap.xml
