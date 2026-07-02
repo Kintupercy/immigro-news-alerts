@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import AutoScroll from 'embla-carousel-auto-scroll';
 import {
   Carousel,
   CarouselContent,
@@ -172,6 +173,15 @@ const LatestNews = () => {
             align: "start",
             loop: true,
           }}
+          plugins={[
+            AutoScroll({
+              speed: 0.6,
+              startDelay: 1000,
+              stopOnInteraction: false,
+              stopOnMouseEnter: true,
+              stopOnFocusIn: true,
+            }),
+          ]}
           setApi={setApi}
           className="w-full"
         >

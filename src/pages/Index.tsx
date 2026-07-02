@@ -132,8 +132,8 @@ const Index = () => {
 
       <Header />
       <Hero />
-      <Features />
       <LatestNews />
+      <Features />
       <Categories />
       <FromTheBlog />
       <Pricing />
