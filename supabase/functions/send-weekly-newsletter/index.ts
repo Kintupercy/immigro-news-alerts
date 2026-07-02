@@ -15,7 +15,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const perplexityApiKey = Deno.env.get("PERPLEXITY_API_KEY")!;
+    const geminiApiKey = Deno.env.get("GEMINI_API_KEY")!;
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -64,8 +64,8 @@ const handler = async (req: Request): Promise<Response> => {
       `Title: ${article.title}\nCategory: ${article.category}\nSummary: ${article.summary || article.content.substring(0, 200)}\nUrgent: ${article.is_urgent ? 'Yes' : 'No'}\nArticle Link: ${article.articleUrl}\nSource: ${article.sourceUrl || 'N/A'}\n---`
     ).join('\n');
 
-    // Use Perplexity to create newsletter content
-    const perplexityPrompt = `Create a professional weekly immigration news newsletter based on these articles from the past week. 
+    // Use Gemini Flash 2.0 to create newsletter content
+    const newsletterPrompt = `Create a professional weekly immigration news newsletter based on these articles from the past week.
 
 Articles:
 ${articlesContent}
@@ -82,47 +82,42 @@ Format the response as JSON with these fields:
 - important_developments (array of objects with title, summary, and link fields)
 - looking_ahead
 
-Keep it professional, informative, and engaging for immigration professionals and those seeking immigration services. Make sure to include the article links so readers can access the full articles.`;
+Keep it professional, informative, and engaging for immigration professionals and those seeking immigration services. Make sure to include the article links so readers can access the full articles. Return only valid JSON, no markdown code fences.`;
 
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${perplexityApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'sonar',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert immigration law newsletter writer. Create professional, informative content with proper links.'
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: 'You are an expert immigration law newsletter writer. Create professional, informative content with proper links. Always return valid JSON only.' }]
           },
-          {
-            role: 'user',
-            content: perplexityPrompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-      }),
-    });
-
-    const perplexityData = await perplexityResponse.json();
-    let newsletterContent;
-    
-    try {
-      // Check if API response has expected structure
-      if (!perplexityData.choices || perplexityData.choices.length === 0) {
-        throw new Error("No choices in AI response");
+          contents: [{ parts: [{ text: newsletterPrompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 2000,
+          },
+        }),
       }
-      
-      const aiResponse = perplexityData.choices[0].message.content;
-      // Try to extract JSON from the response
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    );
+
+    const geminiData = await geminiResponse.json();
+    let newsletterContent;
+
+    try {
+      if (!geminiData.candidates || geminiData.candidates.length === 0) {
+        throw new Error("No candidates in Gemini response");
+      }
+
+      const aiResponse = geminiData.candidates[0].content.parts[0].text;
+      // Strip any accidental markdown code fences before parsing
+      const cleaned = aiResponse.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         newsletterContent = JSON.parse(jsonMatch[0]);
       } else {
-        throw new Error("No JSON found in AI response");
+        throw new Error("No JSON found in Gemini response");
       }
     } catch (parseError) {
       console.error("Error parsing AI response, using fallback structure");
