@@ -68,12 +68,25 @@ function stripCdata(s: string): string {
   return s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim();
 }
 
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  rsquo: '’', lsquo: '‘', ldquo: '“', rdquo: '”',
+  ndash: '–', mdash: '—', hellip: '…', copy: '©',
+};
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
+    .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m);
+}
+
 function stripHtml(s: string): string {
   // 1. Unwrap CDATA
   let t = s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
-  // 2. Decode HTML entities FIRST so escaped tags become real tags
-  t = t.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
-       .replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+  // 2. Decode HTML entities FIRST so escaped tags become real tags.
+  //    Run twice: feeds often double-encode (&amp;apos; -> &apos; -> ')
+  t = decodeEntities(decodeEntities(t));
   // 3. Strip all HTML tags (now catches both real and previously-escaped ones)
   t = t.replace(/<[^>]+>/g, ' ');
   // 4. Collapse whitespace
