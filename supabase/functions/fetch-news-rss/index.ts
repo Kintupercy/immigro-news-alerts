@@ -7,8 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// All 10 feeds verified returning HTTP 200 (tested 2026-06-27)
-const RSS_FEEDS = [
+// All feeds verified returning HTTP 200 with items (gov feeds tested 2026-07-14)
+// alwaysRelevant: skip the immigration-keyword filter — everything from this
+// source is immigration news by definition (still date-filtered and deduped).
+const RSS_FEEDS: Array<{ url: string; name: string; alwaysRelevant?: boolean }> = [
+  // Official government sources
+  { url: "https://news.google.com/rss/search?q=site:uscis.gov&hl=en-US&gl=US&ceid=US:en", name: "USCIS", alwaysRelevant: true },
+  { url: "https://news.google.com/rss/search?q=site:ice.gov+OR+site:cbp.gov+OR+site:dhs.gov+OR+site:justice.gov+immigration&hl=en-US&gl=US&ceid=US:en", name: "DHS Enforcement", alwaysRelevant: true },
+  { url: "https://www.whitehouse.gov/presidential-actions/feed/", name: "White House" },
+  { url: "https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bterm%5D=immigration", name: "Federal Register" },
   // Google News RSS — keyword-targeted, always fresh, works great
   { url: "https://news.google.com/rss/search?q=US+immigration+visa+USCIS+policy&hl=en-US&gl=US&ceid=US:en", name: "Google News Immigration" },
   { url: "https://news.google.com/rss/search?q=immigration+deportation+border+ICE+enforcement&hl=en-US&gl=US&ceid=US:en", name: "Google News Enforcement" },
@@ -23,6 +30,8 @@ const RSS_FEEDS = [
   { url: "https://feeds.nbcnews.com/nbcnews/public/news", name: "NBC News" },
 ];
 
+const ALWAYS_RELEVANT_SOURCES = new Set(RSS_FEEDS.filter(f => f.alwaysRelevant).map(f => f.name));
+
 const IMMIGRATION_KEYWORDS = [
   'immigration', 'immigrant', 'visa', 'green card', 'deportation', 'asylum', 'refugee',
   'border', 'citizenship', 'naturalization', ' ice ', 'cbp', 'uscis', ' dhs ',
@@ -36,6 +45,8 @@ const IMMIGRATION_KEYWORDS = [
   'priority date', 'immigration reform', 'merit-based',
   'ice raid', 'ice arrests', 'ice enforcement',
   'sanctuary city', 'sanctuary state',
+  'ice agent', 'ice officer', 'border patrol', 'illegal alien', 'illegal immigrant',
+  'immigration detention', 'detention center', 'criminal alien',
 ];
 
 const CATEGORY_RULES: Array<{ slug: string; keywords: string[] }> = [
@@ -48,7 +59,7 @@ const CATEGORY_RULES: Array<{ slug: string; keywords: string[] }> = [
   { slug: 'investors', keywords: ['eb-5', 'e-1 visa', 'e-2 visa', 'investor visa', 'entrepreneur visa', 'investment immigration', 'regional center'] },
   { slug: 'exchange-visitors', keywords: ['j-1 ', 'j1 visa', 'exchange visitor', 'au pair', 'cultural exchange program'] },
   { slug: 'temporary-visitors', keywords: ['b-1', 'b-2', 'b1/b2', 'tourist visa', 'visitor visa', 'esta ', 'visa waiver program'] },
-  { slug: 'undocumented', keywords: ['undocumented', 'unauthorized immigrant', 'illegal alien', 'mixed-status', 'ice raid', 'ice arrests', 'ice enforcement'] },
+  { slug: 'undocumented', keywords: ['undocumented', 'unauthorized immigrant', 'illegal alien', 'illegal immigrant', 'criminal alien', 'mixed-status', 'ice raid', 'ice arrests', 'ice enforcement', 'ice agent', 'ice officer', 'ice shooting', 'ice custody', 'ice detention', 'shot by ice', 'killed by ice', 'immigration raid', 'immigration enforcement', 'border patrol', 'deportation', 'deported', 'detention center', 'removal order', 'expedited removal'] },
 ];
 
 const URGENT_INDICATORS = [
@@ -159,9 +170,17 @@ function parseFeed(xml: string, sourceName: string): RssItem[] {
 
 // ── Filters ─────────────────────────────────────────────────────────────────
 
+// A keyword in the title is a strong signal; a single incidental mention in the
+// summary is not (killed false positives like generic "Evening News" roundups).
 function isImmigrationRelated(title: string, summary: string): boolean {
-  const text = ` ${title} ${summary} `.toLowerCase();
-  return IMMIGRATION_KEYWORDS.some(kw => text.includes(kw));
+  const t = ` ${title} `.toLowerCase();
+  if (IMMIGRATION_KEYWORDS.some(kw => t.includes(kw))) return true;
+  const s = ` ${summary} `.toLowerCase();
+  let hits = 0;
+  for (const kw of IMMIGRATION_KEYWORDS) {
+    if (s.includes(kw) && ++hits >= 2) return true;
+  }
+  return false;
 }
 
 function isOpinion(url: string, title: string): boolean {
@@ -231,7 +250,7 @@ serve(async (req) => {
       const pub = item.publishedAt;
       if (isNaN(pub.getTime())) return false;
       if (pub < cutoff) return false;
-      if (!isImmigrationRelated(item.title, item.summary)) return false;
+      if (!ALWAYS_RELEVANT_SOURCES.has(item.source) && !isImmigrationRelated(item.title, item.summary)) return false;
       if (isOpinion(item.url, item.title)) return false;
       return true;
     });
