@@ -2,6 +2,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/blog/green-card-processing-times-2024",
+      "destination": "/blog/green-card-processing-times-2026",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!.+\\..+).*)",

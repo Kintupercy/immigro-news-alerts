@@ -98,6 +98,26 @@ const BlogArticle = () => {
       .join('\n');
   };
 
+  // Extract Q&A pairs (standalone question line followed by an answer paragraph)
+  // to emit FAQPage JSON-LD for rich-result eligibility.
+  const extractFaqPairs = (content: string): Array<{ q: string; a: string }> => {
+    const blocks = content.split('\n\n').map(b => b.trim()).filter(Boolean);
+    const pairs: Array<{ q: string; a: string }> = [];
+    for (let i = 0; i < blocks.length - 1; i++) {
+      const block = blocks[i];
+      const next = blocks[i + 1];
+      const isQuestion = /^[^#\-*\n][^\n?]{10,120}\?$/.test(block);
+      const isAnswerParagraph = next && !next.startsWith('#') && !next.startsWith('-') && !next.endsWith('?');
+      if (isQuestion && isAnswerParagraph) {
+        pairs.push({
+          q: block,
+          a: next.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/\*\*/g, '').substring(0, 500),
+        });
+      }
+    }
+    return pairs;
+  };
+
   // Generate enhanced SEO data
   const generateSEOData = (article: BlogArticle) => {
     const baseKeywords = [
@@ -159,6 +179,7 @@ const BlogArticle = () => {
   }
 
   const seoData = generateSEOData(article);
+  const faqPairs = extractFaqPairs(article.content);
 
   return (
     <div className="min-h-screen">
@@ -241,6 +262,21 @@ const BlogArticle = () => {
             "inLanguage": "en-US"
           })}
         </script>
+
+        {/* FAQPage Schema — only when the post has real Q&A sections */}
+        {faqPairs.length >= 2 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": faqPairs.map(({ q, a }) => ({
+                "@type": "Question",
+                "name": q,
+                "acceptedAnswer": { "@type": "Answer", "text": a }
+              }))
+            })}
+          </script>
+        )}
 
         {/* Back to Blog Button */}
         <div className="mb-4 lg:mb-6">
