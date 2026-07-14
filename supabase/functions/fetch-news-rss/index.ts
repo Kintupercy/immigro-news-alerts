@@ -170,17 +170,34 @@ function parseFeed(xml: string, sourceName: string): RssItem[] {
 
 // ── Filters ─────────────────────────────────────────────────────────────────
 
-// A keyword in the title is a strong signal; a single incidental mention in the
-// summary is not (killed false positives like generic "Evening News" roundups).
+// Longest-first so counting consumes 'border patrol' before 'border' can
+// double-count the same phrase.
+const KEYWORDS_LONGEST_FIRST = [...IMMIGRATION_KEYWORDS].sort((a, b) => b.length - a.length);
+
+// A keyword in the title is a strong signal; a single incidental mention in
+// the summary is not. Summary hits must be 2+ NON-OVERLAPPING keywords —
+// matched text is consumed so substring keywords can't count the same phrase
+// twice ("National Border Patrol Council" is 1 hit, not 2).
 function isImmigrationRelated(title: string, summary: string): boolean {
   const t = ` ${title} `.toLowerCase();
   if (IMMIGRATION_KEYWORDS.some(kw => t.includes(kw))) return true;
-  const s = ` ${summary} `.toLowerCase();
+  let s = ` ${summary} `.toLowerCase();
   let hits = 0;
-  for (const kw of IMMIGRATION_KEYWORDS) {
-    if (s.includes(kw) && ++hits >= 2) return true;
+  for (const kw of KEYWORDS_LONGEST_FIRST) {
+    if (s.includes(kw)) {
+      hits++;
+      if (hits >= 2) return true;
+      s = s.split(kw).join('•');
+    }
   }
   return false;
+}
+
+// TV-show recap items ("7/13: CBS Evening News") list many stories in one
+// summary and always leak through keyword counting — exclude by format.
+function isShowRoundup(title: string): boolean {
+  if (/^\d{1,2}\/\d{1,2}:/.test(title.trim())) return true;
+  return /\b(cbs evening news|face the nation|meet the press|nbc nightly news|pbs newshour|good morning america)\b/i.test(title);
 }
 
 function isOpinion(url: string, title: string): boolean {
@@ -250,6 +267,7 @@ serve(async (req) => {
       const pub = item.publishedAt;
       if (isNaN(pub.getTime())) return false;
       if (pub < cutoff) return false;
+      if (isShowRoundup(item.title)) return false;
       if (!ALWAYS_RELEVANT_SOURCES.has(item.source) && !isImmigrationRelated(item.title, item.summary)) return false;
       if (isOpinion(item.url, item.title)) return false;
       return true;
