@@ -3,6 +3,9 @@
 # Normalize www to non-www (301 permanent redirect)
 https://www.immigronews.com/* https://immigronews.com/:splat 301!
 
+# Renamed blog slugs (301 preserves link equity)
+/blog/green-card-processing-times-2024 /blog/green-card-processing-times-2026 301
+
 # SPA fallback — serve index.html for any route that doesn't match a static file.
 # Prerendered pages are written as dist/route.html (not dist/route/index.html)
 # so CF Pages and Vercel serve them directly at the clean URL without redirect.
