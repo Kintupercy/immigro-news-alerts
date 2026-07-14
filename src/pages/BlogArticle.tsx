@@ -69,6 +69,8 @@ const BlogArticle = () => {
       .replace(/^([A-Z][^:\n]*:)\s*$/gm, '<h4 class="text-lg lg:text-xl font-semibold mt-6 lg:mt-8 mb-3 lg:mb-4 text-gray-800">$1</h4>')
       // Handle bold text
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+      // Handle markdown links — internal (/path) and absolute URLs
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|\/[^)\s]*)\)/g, '<a href="$2" class="text-emerald-700 font-medium underline hover:text-emerald-900">$1</a>')
       // Handle numbered lists
       .replace(/^\d+\.\s+(.+)$/gm, '<li class="mb-3 lg:mb-4 text-gray-700 leading-relaxed">$1</li>')
       .replace(/(<li class="mb-3 lg:mb-4 text-gray-700 leading-relaxed">.*?<\/li>\s*)+/gs, '<ol class="list-decimal pl-6 lg:pl-8 mb-8 lg:mb-10 space-y-3 lg:space-y-4 bg-blue-50 p-4 lg:p-6 rounded-lg">$&</ol>')
