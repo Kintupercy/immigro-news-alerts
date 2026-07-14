@@ -53,15 +53,32 @@ const handler = async (req: Request): Promise<Response> => {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Create content for AI summary with proper article links
-    const articlesWithLinks = articles.map(article => ({
-      ...article,
-      articleUrl: `https://immigronews.com/news?article=${article.id}`,
-      sourceUrl: article.source_url
-    }));
+    // Official government source detection — same definition as the site's
+    // Breaking tab (gov ingest feed tags or .gov domains).
+    const GOV_TAGS = ['uscis', 'dhs-enforcement', 'white-house', 'federal-register'];
+    const GOV_DOMAINS = ['uscis.gov', 'dhs.gov', 'ice.gov', 'cbp.gov', 'state.gov', 'justice.gov', 'whitehouse.gov', 'federalregister.gov'];
+    const isOfficial = (a: any) =>
+      (a.tags ?? []).some((t: string) => GOV_TAGS.includes(t)) ||
+      (a.source_url && GOV_DOMAINS.some((d: string) => a.source_url.includes(d)));
 
-    const articlesContent = articlesWithLinks.map(article => 
-      `Title: ${article.title}\nCategory: ${article.category}\nSummary: ${article.summary || article.content.substring(0, 200)}\nUrgent: ${article.is_urgent ? 'Yes' : 'No'}\nArticle Link: ${article.articleUrl}\nSource: ${article.sourceUrl || 'N/A'}\n---`
+    // Create content for AI summary with proper article links.
+    // Priority order: urgent policy changes first, then official gov
+    // announcements, then everything else by recency.
+    const articlesWithLinks = articles
+      .map(article => ({
+        ...article,
+        articleUrl: `https://immigronews.com/news?article=${article.id}`,
+        sourceUrl: article.source_url,
+        isOfficialSource: isOfficial(article),
+      }))
+      .sort((a, b) =>
+        (Number(b.is_urgent) - Number(a.is_urgent)) ||
+        (Number(b.isOfficialSource) - Number(a.isOfficialSource)) ||
+        (new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+      );
+
+    const articlesContent = articlesWithLinks.map(article =>
+      `Title: ${article.title}\nCategory: ${article.category}\nSummary: ${article.summary || article.content.substring(0, 200)}\nUrgent: ${article.is_urgent ? 'Yes' : 'No'}\nOfficial Government Source: ${article.isOfficialSource ? 'Yes' : 'No'}\nArticle Link: ${article.articleUrl}\nSource: ${article.sourceUrl || 'N/A'}\n---`
     ).join('\n');
 
     // Use Gemini Flash 2.0 to create newsletter content
@@ -75,6 +92,8 @@ Please create:
 2. An executive summary (2-3 sentences)
 3. Most important developments section (include article links for readers to read full articles)
 4. Looking ahead section
+
+Prioritization rules: lead with urgent policy changes, then official government announcements (marked "Official Government Source: Yes" — USCIS, DHS/ICE, White House, Federal Register), then notable coverage from major outlets. Official announcements are the most authoritative items — never omit them from the important developments section.
 
 Format the response as JSON with these fields:
 - subject_line
