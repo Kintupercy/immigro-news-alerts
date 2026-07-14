@@ -69,6 +69,11 @@ const URGENT_INDICATORS = [
   'emergency enforcement', 'court blocks', 'injunction issued',
   'temporary restraining order', 'immediate halt', 'program terminated',
   'immediately suspended', 'ends immediately',
+  // Same-day policy / rule changes (urgent = new rule with immediate impact)
+  'final rule', 'interim final rule', 'new rule', 'rule change',
+  'suspension of entry', 'suspends entry', 'visa ban', 'green card ban',
+  'termination of tps', 'terminates tps', 'halts processing',
+  'stops issuing', 'no longer accepting', 'pauses processing',
 ];
 
 interface RssItem { title: string; summary: string; url: string; publishedAt: Date; source: string; }
@@ -219,7 +224,7 @@ function classifyCategory(title: string, summary: string): string {
 function classifyUrgency(title: string, summary: string): boolean {
   const text = `${title} ${summary}`.toLowerCase();
   const hasUrgent = URGENT_INDICATORS.some(i => text.includes(i));
-  const hasImmediate = ['immediately', 'effective today', 'starts today', 'begins today', 'effective now'].some(s => text.includes(s));
+  const hasImmediate = ['immediately', 'effective today', 'starts today', 'begins today', 'effective now', 'takes effect', 'until further notice'].some(s => text.includes(s));
   return hasUrgent && hasImmediate;
 }
 

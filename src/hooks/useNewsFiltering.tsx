@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { isOfficialGovArticle } from '@/utils/officialSources';
 
 interface NewsArticle {
   id: string;
@@ -23,7 +24,7 @@ export const useNewsFiltering = (
     // Filter by category
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'breaking-news') {
-        filtered = filtered.filter(article => article.category === 'breaking-news');
+        filtered = filtered.filter(article => isOfficialGovArticle(article));
       } else {
         // Enhanced filtering for all categories
         filtered = filtered.filter(article => {
@@ -108,19 +109,22 @@ export const useNewsFiltering = (
     return allForTab.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
   }, [allArticles, searchTerm]);
 
-  // Mutually exclusive tab filtering
-  const urgentArticles = useMemo(() => 
-    filteredArticles.filter(article => article.is_urgent), 
+  // Mutually exclusive tab filtering:
+  // Urgent = immediate-impact policy changes (is_urgent flag from the pipeline)
+  // Breaking = official government sources (USCIS, DHS/ICE, White House, Federal Register)
+  // Regular = everything else
+  const urgentArticles = useMemo(() =>
+    filteredArticles.filter(article => article.is_urgent),
     [filteredArticles]
   );
-  
-  const breakingNewsArticles = useMemo(() => 
-    filteredArticles.filter(article => article.category === 'breaking-news' && !article.is_urgent), 
+
+  const breakingNewsArticles = useMemo(() =>
+    filteredArticles.filter(article => isOfficialGovArticle(article) && !article.is_urgent),
     [filteredArticles]
   );
-  
-  const regularArticles = useMemo(() => 
-    filteredArticles.filter(article => !article.is_urgent && article.category !== 'breaking-news'), 
+
+  const regularArticles = useMemo(() =>
+    filteredArticles.filter(article => !article.is_urgent && !isOfficialGovArticle(article)),
     [filteredArticles]
   );
 

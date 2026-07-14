@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { safeGetItem, safeSetItem } from "@/utils/safeStorage";
+import { GOV_SOURCE_TAGS, isOfficialGovArticle } from "@/utils/officialSources";
 import { AlertTriangle, X, ExternalLink, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,6 +16,7 @@ interface BreakingNews {
   source_url: string | null;
   published_at: string;
   is_urgent: boolean;
+  tags: string[] | null;
 }
 
 const BreakingNewsAlert = () => {
@@ -46,11 +48,13 @@ const BreakingNewsAlert = () => {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'immigration_news',
-            filter: 'category=eq.breaking-news'
+            table: 'immigration_news'
           },
           (payload) => {
             const newArticle = payload.new as BreakingNews;
+            // Breaking = official government sources; realtime filters can't
+            // match array columns, so check client-side.
+            if (!isOfficialGovArticle(newArticle)) return;
             setBreakingNews(prev => [newArticle, ...prev.slice(0, 4)]);
             toast({
               title: newArticle.is_urgent ? "URGENT Breaking News" : "Breaking News",
@@ -76,11 +80,15 @@ const BreakingNewsAlert = () => {
 
   const fetchBreakingNews = async () => {
     try {
+      // Breaking = official government sources from the last 72 hours —
+      // an announcement banner should never show stale items.
+      const since = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('immigration_news')
-        .select('id, title, summary, source_url, published_at, is_urgent')
+        .select('id, title, summary, source_url, published_at, is_urgent, tags')
         .eq('status', 'published')
-        .eq('category', 'breaking-news')
+        .overlaps('tags', GOV_SOURCE_TAGS)
+        .gte('published_at', since)
         .order('published_at', { ascending: false })
         .limit(5);
 
@@ -102,10 +110,10 @@ const BreakingNewsAlert = () => {
   const refreshBreakingNews = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-breaking-news');
-      
+      const { data, error } = await supabase.functions.invoke('fetch-news-rss', { body: { maxAgeHours: 24 } });
+
       if (error) throw error;
-      
+
       if (data.articlesAdded > 0) {
         toast({
           title: "Breaking News Updated!",

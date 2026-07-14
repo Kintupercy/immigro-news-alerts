@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Clock, ExternalLink, Shield, X } from "lucide-react";
 import { format } from "date-fns";
 import { translateCategory } from "@/utils/translation";
+import { isOfficialGovArticle } from "@/utils/officialSources";
 import SocialShareButton from "./SocialShareButton";
 import RelatedResources from "./news/RelatedResources";
 
@@ -71,7 +72,7 @@ const ArticleModal = ({
 
   const sourceDomain = getSourceDomain(article.source_url);
   const isOfficial = isOfficialSource(article.source_url);
-  const isBreakingNews = article.category === 'breaking-news';
+  const isBreakingNews = isOfficialGovArticle(article);
   const articleUrl = `https://immigronews.com/news?article=${article.id}`;
   const categoryName = categories.find(cat => cat.slug === article.category)?.name || article.category;
 

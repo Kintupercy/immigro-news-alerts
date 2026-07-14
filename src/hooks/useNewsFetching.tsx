@@ -101,19 +101,15 @@ export const useNewsFetching = () => {
         description: "Getting verified immigration updates and breaking news from major outlets.",
       });
 
-      // Fetch both regular immigration news and breaking news
-      const [regularNewsResponse, breakingNewsResponse] = await Promise.all([
-        supabase.functions.invoke('fetch-immigration-news', {
-          body: { 
-            category: 'all',
-            forceRefresh: forceRefresh
-          }
-        }),
-        supabase.functions.invoke('fetch-breaking-news')
-      ]);
+      // Single current pipeline: fetch-news-rss covers mainstream outlets AND
+      // official gov sources (the old fetch-immigration-news/fetch-breaking-news
+      // functions are retired).
+      const { data: fetchData } = await supabase.functions.invoke('fetch-news-rss', {
+        body: { maxAgeHours: 24 }
+      });
 
-      const totalArticlesAdded = (regularNewsResponse.data?.articlesAdded || 0) + (breakingNewsResponse.data?.articlesAdded || 0);
-      const urgentNewsFound = (breakingNewsResponse.data?.urgentNewsFound || 0);
+      const totalArticlesAdded = fetchData?.articlesAdded || 0;
+      const urgentNewsFound = fetchData?.urgentCount || 0;
 
       if (totalArticlesAdded > 0) {
         toast({
