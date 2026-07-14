@@ -17,6 +17,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { NewsLoadingState } from "./LoadingStates";
 import KofiDonateButton from "./KofiDonateButton";
 import { translateText } from "@/utils/translation";
+import { isOfficialGovArticle } from "@/utils/officialSources";
 import NewsHeader from "./news/NewsHeader";
 import NewsFilters from "./news/NewsFilters";
 import NewsTabs from "./news/NewsTabs";
@@ -100,7 +101,7 @@ const NewsFeed = () => {
     // Filter by category
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'breaking-news') {
-        filtered = filtered.filter(article => article.category === 'breaking-news');
+        filtered = filtered.filter(article => isOfficialGovArticle(article));
       } else {
         // Enhanced filtering for all categories
         filtered = filtered.filter(article => {
@@ -199,10 +200,11 @@ const NewsFeed = () => {
   const paginatedArticles = getPaginatedArticles();
   const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
 
-  // Mutually exclusive tab filtering
+  // Mutually exclusive tab filtering:
+  // Urgent = immediate-impact policy changes; Breaking = official gov sources
   const urgentArticles = filteredArticles.filter(article => article.is_urgent);
-  const breakingNewsArticles = filteredArticles.filter(article => article.category === 'breaking-news' && !article.is_urgent);
-  const regularArticles = filteredArticles.filter(article => !article.is_urgent && article.category !== 'breaking-news');
+  const breakingNewsArticles = filteredArticles.filter(article => isOfficialGovArticle(article) && !article.is_urgent);
+  const regularArticles = filteredArticles.filter(article => !article.is_urgent && !isOfficialGovArticle(article));
 
   // Simplified language change handler
   const handleLanguageChange = async (language: 'en' | 'es') => {
@@ -356,19 +358,14 @@ const NewsFeed = () => {
         description: "Getting verified immigration updates and breaking news from major outlets.",
       });
 
-      // Fetch both regular immigration news and breaking news
-      const [regularNewsResponse, breakingNewsResponse] = await Promise.all([
-        supabase.functions.invoke('fetch-immigration-news', {
-          body: { 
-            category: 'all',
-            forceRefresh: forceRefresh
-          }
-        }),
-        supabase.functions.invoke('fetch-breaking-news')
-      ]);
+      // Single current pipeline: fetch-news-rss covers mainstream outlets AND
+      // official gov sources (fetch-immigration-news / fetch-breaking-news are retired).
+      const { data: fetchData } = await supabase.functions.invoke('fetch-news-rss', {
+        body: { maxAgeHours: 24 }
+      });
 
-      const totalArticlesAdded = (regularNewsResponse.data?.articlesAdded || 0) + (breakingNewsResponse.data?.articlesAdded || 0);
-      const urgentNewsFound = (breakingNewsResponse.data?.urgentNewsFound || 0);
+      const totalArticlesAdded = fetchData?.articlesAdded || 0;
+      const urgentNewsFound = fetchData?.urgentCount || 0;
 
       if (totalArticlesAdded > 0) {
         toast({
