@@ -1,4 +1,4 @@
-
+﻿
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SitemapUrl {
@@ -276,7 +276,7 @@ ${recentArticles.map(article => `  <url>
     <loc>${baseUrl}/news/${article.id}</loc>
     <news:news>
       <news:publication>
-        <news:name>ImmigrowNews</news:name>
+        <news:name>ImmigroNews</news:name>
         <news:language>en</news:language>
       </news:publication>
       <news:publication_date>${new Date(article.created_at).toISOString()}</news:publication_date>

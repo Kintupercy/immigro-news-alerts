@@ -1,4 +1,4 @@
-
+﻿
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +24,7 @@ const KofiDonateButton = ({ className = '', variant = 'fixed' }: KofiDonateButto
                 <div>
                   <h3 className="font-semibold text-emerald-800 text-sm">Support Our Mission</h3>
                   <p className="text-xs text-emerald-700">
-                    Help us keep ImmigrowNews free for everyone
+                    Help us keep ImmigroNews free for everyone
                   </p>
                 </div>
               </div>
@@ -53,7 +53,7 @@ const KofiDonateButton = ({ className = '', variant = 'fixed' }: KofiDonateButto
             <h3 className="font-semibold text-emerald-800 text-sm">Support Our Mission</h3>
           </div>
           <p className="text-xs text-emerald-700 mb-3 leading-relaxed">
-            Donate to keep ImmigrowNews free
+            Donate to keep ImmigroNews free
           </p>
           <Button 
             onClick={handleDonate}

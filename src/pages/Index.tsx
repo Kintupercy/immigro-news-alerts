@@ -75,21 +75,22 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title="ImmigroNews - Breaking Immigration News & Updates"
-        description="Real-time immigration news alerts, USCIS updates, visa policy changes, and free legal-aid matching for immigrants navigating the U.S. system."
+        title="Latest US Immigration News & Daily Updates | ImmigroNews"
+        description="Latest US immigration news updated twice daily from USCIS, DHS & major outlets. Breaking policy changes, visa updates, urgent alerts & free legal-aid matching."
         keywords={[
+          'latest immigration news',
+          'immigration updates today',
+          'immigration law updates',
+          'us immigration news',
           'immigration news',
           'visa updates',
           'green card news',
           'citizenship process',
-          'immigration lawyer',
           'USCIS updates',
           'immigration policy',
-          'visa requirements',
           'breaking immigration news',
+          'official immigration announcements',
           'immigration law changes',
-          'green card application',
-          'visa processing times',
           'immigration attorney',
           'USCIS policy changes'
         ]}
