@@ -163,14 +163,14 @@ const Hero = () => {
       {/* Main Content */}
       <div className="relative z-10 flex-1 flex items-center justify-center pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-medium text-navy-900 mb-8 leading-tight">
+          <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-medium text-navy-900 mb-8 leading-tight">
             <span className="font-bold">Latest US Immigration News</span>
             <br />
             <span className="text-navy-800 font-bold">& Law Updates, Daily</span>
           </h1>
 
           <p className="text-lg md:text-xl text-navy-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
-            Immigration updates today from official sources — USCIS, DHS, the White House, and the Federal Register — plus visa policy changes, urgent alerts, and free legal-aid matching.
+            Immigration updates today from official sources including USCIS, DHS, the White House, and the Federal Register, plus visa policy changes, urgent alerts, and free legal aid matching.
           </p>
 
           <div className="flex flex-col items-center gap-6">
