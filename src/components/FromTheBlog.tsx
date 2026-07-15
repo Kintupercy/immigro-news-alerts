@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, ArrowRight, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import Reveal from "@/components/Reveal";
 
 interface BlogArticle {
   id: string;
@@ -66,15 +67,16 @@ const FromTheBlog = () => {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-12">
           <h2 className="font-playfair text-4xl font-bold text-gray-900 mb-4">
             From the Immigration Blog
           </h2>
+          <span className="reveal-underline block h-1 w-16 mx-auto mb-5 rounded-full bg-cream-500" aria-hidden="true" />
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Expert guides, step-by-step instructions, and the latest analysis
             to help you navigate your immigration journey.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {articles.map((article) => (

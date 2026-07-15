@@ -164,16 +164,16 @@ const Hero = () => {
       <div className="relative z-10 flex-1 flex items-center justify-center pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-medium text-navy-900 mb-8 leading-tight">
-            <span className="font-bold">Latest US Immigration News</span>
+            <span className="inline-block font-bold animate-fade-up">Latest US Immigration News</span>
             <br />
-            <span className="text-navy-800 font-bold">& Law Updates, Daily</span>
+            <span className="inline-block text-navy-800 font-bold animate-fade-up fade-delay-1">& Law Updates, Daily</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-navy-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-lg md:text-xl text-navy-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light animate-fade-up fade-delay-2">
             Immigration updates today from official sources including USCIS, DHS, the White House, and the Federal Register, plus visa policy changes, urgent alerts, and free legal aid matching.
           </p>
 
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-6 animate-fade-up fade-delay-3">
             {/* Email subscription form */}
             <SecureForm onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
               <HoneypotField value={honeypotValue} onChange={setHoneypotValue} />
@@ -208,7 +208,7 @@ const Hero = () => {
             </Button>
           </div>
 
-          <p className="text-sm text-navy-500 mt-6">
+          <p className="text-sm text-navy-500 mt-6 animate-fade-up fade-delay-4">
             Join 3,000+ getting urgent immigration law alerts in their inbox
           </p>
         </div>

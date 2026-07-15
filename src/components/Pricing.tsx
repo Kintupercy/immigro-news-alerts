@@ -3,15 +3,17 @@ import { Check, Heart, Zap, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import Reveal from "@/components/Reveal";
 
 const Pricing = () => {
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16 animate-fade-in">
+        <Reveal className="text-center mb-16">
           <h2 className="font-playfair text-4xl font-bold text-gray-900 mb-4">
             Free for Everyone
           </h2>
+          <span className="reveal-underline block h-1 w-16 mx-auto mb-5 rounded-full bg-cream-500" aria-hidden="true" />
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
             All immigration news features are completely free and accessible to everyone.
           </p>
@@ -19,7 +21,7 @@ const Pricing = () => {
             <Heart className="w-5 h-5 text-red-500" />
             <span className="text-gray-700 font-medium">Made with love by a former international student</span>
           </div>
-        </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Free Access */}

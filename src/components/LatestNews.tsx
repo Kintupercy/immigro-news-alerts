@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AutoScroll from 'embla-carousel-auto-scroll';
+import Reveal from "@/components/Reveal";
 import {
   Carousel,
   CarouselContent,
@@ -159,14 +160,15 @@ const LatestNews = () => {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-12">
           <h2 className="font-playfair text-3xl font-bold text-gray-900 mb-4">
             Latest Immigration News
           </h2>
+          <span className="reveal-underline block h-1 w-16 mx-auto mb-5 rounded-full bg-cream-500" aria-hidden="true" />
           <p className="text-xl text-gray-600">
             Stay updated with today's most important immigration developments
           </p>
-        </div>
+        </Reveal>
 
         <Carousel
           opts={{

@@ -1,5 +1,6 @@
 
 import { Bell, Users, BookOpen, Shield } from "lucide-react";
+import Reveal from "@/components/Reveal";
 
 const Features = () => {
   const features = [
@@ -28,15 +29,16 @@ const Features = () => {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <Reveal className="text-center mb-16">
           <h2 className="font-playfair text-4xl font-bold text-gray-900 mb-4">
             Stay Ahead of Immigration Changes
           </h2>
+          <span className="reveal-underline block h-1 w-16 mx-auto mb-5 rounded-full bg-cream-500" aria-hidden="true" />
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our platform delivers personalized, real-time immigration law updates 
+            Our platform delivers personalized, real-time immigration law updates
             to help you navigate the complex U.S. immigration system with confidence.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature) => (

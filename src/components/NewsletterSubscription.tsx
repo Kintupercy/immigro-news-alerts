@@ -9,6 +9,7 @@ import { SecureForm } from "@/components/SecureForm";
 import { HoneypotField } from "@/components/HoneypotField";
 import { enhancedRateLimiter } from "@/utils/enhancedRateLimiter";
 import { securityMonitor, generateClientFingerprint } from "@/utils/securityMonitoring";
+import Reveal from "@/components/Reveal";
 
 const NewsletterSubscription = () => {
   const [email, setEmail] = useState("");
@@ -146,13 +147,15 @@ const NewsletterSubscription = () => {
   return (
     <section className="bg-navy-800 py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="font-playfair text-3xl md:text-4xl font-bold text-cream-50 mb-4">
-          Stay Updated with Immigration News
-        </h2>
-        
-        <p className="text-lg text-cream-200 mb-8 max-w-2xl mx-auto">
-          Get the latest US immigration law changes and policy updates delivered straight to your inbox
-        </p>
+        <Reveal>
+          <h2 className="font-playfair text-3xl md:text-4xl font-bold text-cream-50 mb-4">
+            Stay Updated with Immigration News
+          </h2>
+          <span className="reveal-underline block h-1 w-16 mx-auto mb-5 rounded-full bg-cream-400" aria-hidden="true" />
+          <p className="text-lg text-cream-200 mb-8 max-w-2xl mx-auto">
+            Get the latest US immigration law changes and policy updates delivered straight to your inbox
+          </p>
+        </Reveal>
 
         {/* Email subscription form */}
         <SecureForm onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
