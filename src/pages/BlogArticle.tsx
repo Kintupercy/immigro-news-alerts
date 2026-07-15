@@ -82,13 +82,14 @@ const BlogArticle = () => {
       .map(paragraph => {
         paragraph = paragraph.trim();
         if (!paragraph) return '';
-        // Skip already formatted elements
-        if (paragraph.startsWith('<h2') || 
-            paragraph.startsWith('<h3') || 
-            paragraph.startsWith('<h4') || 
-            paragraph.startsWith('<ul') || 
-            paragraph.startsWith('<ol') ||
-            paragraph.startsWith('<strong')) {
+        // Skip already formatted block elements. Paragraphs that merely START
+        // with inline bold (e.g. "**1. Interviews are mandatory.** ...") must
+        // still get a <p> wrapper, or consecutive items fuse into one block.
+        if (paragraph.startsWith('<h2') ||
+            paragraph.startsWith('<h3') ||
+            paragraph.startsWith('<h4') ||
+            paragraph.startsWith('<ul') ||
+            paragraph.startsWith('<ol')) {
           return paragraph;
         }
         // Format regular paragraphs with government-style spacing and readability
