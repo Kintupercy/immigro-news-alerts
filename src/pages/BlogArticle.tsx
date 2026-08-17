@@ -11,6 +11,8 @@ import SEO from "@/components/SEO";
 import RelatedPosts from "@/components/blog/RelatedPosts";
 import { SafeContent } from "@/utils/contentSecurity";
 
+// Rebuild trigger: 2026-08-17 — ensure latest blog articles are prerendered
+
 interface BlogArticle {
   id: string;
   title: string;
