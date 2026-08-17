@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>https://immigronews.com/news/196ffe9c-c253-43f0-86f2-2f6d10b04343</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-08-17T04:00:00.000Z</news:publication_date>
+      <news:title>Agency Information Collection Activities; Proposed eCollection eComments Requested; New Collection: Title-Requests for DOJ Certification Letters for T Visa Holders</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/4399e48b-e57b-4c7c-a974-78f3224c587f</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-08-15T20:30:00.000Z</news:publication_date>
+      <news:title>DNC Votes to Back Eliminating ICE as Trump Expands Deportations - Newsweek</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/fed07b1f-5bcd-4a6d-a5c3-c9d0067dbf47</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-08-15T09:43:12.000Z</news:publication_date>
+      <news:title>Trump scores major immigration victory as judge clears way to end TPS protections for thousands of Somalis</news:title>
+    </news:news>
+  </url>
+</urlset>

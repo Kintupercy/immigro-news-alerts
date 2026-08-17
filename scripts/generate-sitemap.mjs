@@ -44,6 +44,28 @@ const STATIC_PAGES = [
   { loc: '/disclaimer', priority: '0.3', changefreq: 'yearly'  },
 ];
 
+async function fetchNewsPosts() {
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+    const { data, error } = await supabase
+      .from('immigration_news')
+      .select('id, updated_at, published_at')
+      .eq('status', 'published')
+      .not('source_url', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(1000);
+    if (error) {
+      console.warn(`[sitemap] Could not fetch immigration_news: ${error.message}`);
+      return [];
+    }
+    console.log(`[sitemap] Found ${(data || []).length} published news post(s).`);
+    return data || [];
+  } catch (err) {
+    console.warn(`[sitemap] Immigration news fetch error: ${err?.message || err}`);
+    return [];
+  }
+}
+
 async function fetchBlogPosts() {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -71,7 +93,7 @@ async function fetchBlogPosts() {
 async function main() {
   const today = new Date().toISOString().split('T')[0];
 
-  const blogPosts = await fetchBlogPosts();
+  const [newsPosts, blogPosts] = await Promise.all([fetchNewsPosts(), fetchBlogPosts()]);
 
   const urlEntries = [
     ...STATIC_PAGES.map(p => `  <url>
@@ -89,6 +111,15 @@ async function main() {
     <priority>0.7</priority>
   </url>`;
     }),
+    ...newsPosts.map(r => {
+      const lastmod = (r.updated_at || r.published_at || today).split('T')[0];
+      return `  <url>
+    <loc>${esc(`${BASE_URL}/news/${r.id}`)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    }),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -102,7 +133,7 @@ ${urlEntries.join('\n')}
 
   await writeFile(join(PUBLIC, 'sitemap.xml'), xml, 'utf8');
   console.log(
-    `[sitemap] Written public/sitemap.xml — ${STATIC_PAGES.length} static + ${blogPosts.length} blog routes.`
+    `[sitemap] Written public/sitemap.xml — ${STATIC_PAGES.length} static + ${newsPosts.length} news + ${blogPosts.length} blog routes.`
   );
 }
 

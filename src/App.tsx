@@ -13,6 +13,7 @@ import Terms from "./pages/Terms";
 import Disclaimer from "./pages/Disclaimer";
 import FAQ from "./pages/FAQ";
 import News from "./pages/News";
+import NewsArticle from "./pages/NewsArticle";
 import Resources from "./pages/Resources";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/news" element={<News />} />
+            <Route path="/news/:id" element={<NewsArticle />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />

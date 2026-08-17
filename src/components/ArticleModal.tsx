@@ -73,7 +73,7 @@ const ArticleModal = ({
   const sourceDomain = getSourceDomain(article.source_url);
   const isOfficial = isOfficialSource(article.source_url);
   const isBreakingNews = isOfficialGovArticle(article);
-  const articleUrl = `https://immigronews.com/news?article=${article.id}`;
+  const articleUrl = `https://immigronews.com/news/${article.id}`;
   const categoryName = categories.find(cat => cat.slug === article.category)?.name || article.category;
 
   // NewsArticle structured data for Google News eligibility

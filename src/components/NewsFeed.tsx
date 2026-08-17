@@ -65,18 +65,12 @@ const NewsFeed = () => {
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
 
-  // Check for article parameter in URL on component mount
+  // Keep legacy shared links working, but canonical article links now use /news/:id.
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const articleId = urlParams.get('article');
-    
+    const articleId = new URLSearchParams(window.location.search).get('article');
     if (articleId && allArticles.length > 0) {
       const article = allArticles.find(a => a.id === articleId);
-      if (article) {
-        setSelectedArticle(article);
-        // Update URL to include article parameter for proper linking
-        window.history.replaceState({}, '', `${window.location.pathname}?article=${articleId}`);
-      }
+      if (article) setSelectedArticle(article);
     }
   }, [allArticles]);
 
@@ -84,14 +78,14 @@ const NewsFeed = () => {
   const handleArticleClick = (article: NewsArticle) => {
     setSelectedArticle(article);
     // Update URL for proper linking
-    window.history.pushState({}, '', `${window.location.pathname}?article=${article.id}`);
+    window.history.pushState({}, '', `/news/${article.id}`);
   };
 
   // Handle closing article modal
   const handleCloseArticle = () => {
     setSelectedArticle(null);
     // Remove article parameter from URL
-    window.history.pushState({}, '', window.location.pathname);
+    window.history.pushState({}, '', '/news');
   };
 
   // Filter articles based on selected category and search term

@@ -58,7 +58,7 @@ async function fetchNews() {
   });
   const { data, error } = await supabase
     .from('immigration_news')
-    .select('id, title, summary, content, category, source_url, published_at, is_urgent')
+    .select('id, title, summary, content, category, source_url, published_at, updated_at, is_urgent, source_verified')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(100);
@@ -78,7 +78,7 @@ async function main() {
     const description = esc(stripHtml(a.summary || a.content || a.title).slice(0, 500));
     return `    <item>
       <title>${esc(a.title)}</title>
-      <link>${esc(`${BASE_URL}/news?article=${a.id}`)}</link>
+      <link>${esc(`${BASE_URL}/news/${a.id}`)}</link>
       <guid isPermaLink="false">${esc(a.id)}</guid>
       <pubDate>${toRfc822(a.published_at)}</pubDate>
       <category>${esc(a.category || 'immigration')}</category>
@@ -109,7 +109,7 @@ ${items.join('\n')}
       return !Number.isNaN(t) && t >= twoDaysAgo;
     })
     .map((a) => `  <url>
-    <loc>${esc(`${BASE_URL}/news?article=${a.id}`)}</loc>
+    <loc>${esc(`${BASE_URL}/news/${a.id}`)}</loc>
     <news:news>
       <news:publication>
         <news:name>${esc(SITE_TITLE)}</news:name>
