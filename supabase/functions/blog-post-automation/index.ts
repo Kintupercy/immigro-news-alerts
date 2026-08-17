@@ -26,7 +26,49 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const { post_id, title, slug, category, published_at }: BlogPost = await req.json();
+    const body = await req.json();
+
+    // --- UPDATE MODE: update an existing blog article ---
+    if (body.action === 'update') {
+      const { slug: updateSlug, ...fields } = body;
+      if (!updateSlug || typeof updateSlug !== 'string') {
+        return new Response(
+          JSON.stringify({ error: 'slug is required for update' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+      const allowed = new Set(['title','content','excerpt','meta_description','keywords','updated_at','featured','category']);
+      const updates: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(fields)) {
+        if (allowed.has(k)) updates[k] = v;
+      }
+      if (Object.keys(updates).length === 0) {
+        return new Response(
+          JSON.stringify({ error: 'no valid fields to update' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+      if (!updates.updated_at) updates.updated_at = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .update(updates)
+        .eq('slug', updateSlug)
+        .select('slug, title, updated_at')
+        .single();
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+      return new Response(
+        JSON.stringify({ success: true, data }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+    // --- END UPDATE MODE ---
+
+    const { post_id, title, slug, category, published_at }: BlogPost = body;
     console.log(`Starting automation for blog post: ${title} (${post_id})`);
 
     const baseUrl = 'https://immigronews.com';
