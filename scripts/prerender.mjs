@@ -250,7 +250,10 @@ async function main() {
   const blogRoutes = blogSlugs.map((slug) => `/blog/${slug}`);
   const newsRoutes = newsIds.map((id) => `/news/${id}`);
   const allRoutes = [...STATIC_ROUTES, ...blogRoutes, ...newsRoutes];
-  console.log(`[prerender] Total routes to prerender: ${allRoutes.length}`);
+  const routesToSnapshot = process.env.PRERENDER_ROUTE
+    ? [process.env.PRERENDER_ROUTE]
+    : allRoutes;
+  console.log(`[prerender] Total routes to prerender: ${routesToSnapshot.length}`);
 
   // --single-process / --no-zygote help Chrome in Linux CI containers but
   // crash it on Windows (even when VERCEL=1 is injected by `vercel build`).
@@ -274,6 +277,10 @@ async function main() {
     console.warn(`[prerender] Chrome launch failed (${firstErr?.message?.split('\n')[0]})`);
     console.log('[prerender] Attempting Chrome install via puppeteer browsers install...');
     try {
+      // Puppeteer v23 expects the browser name here. A partially restored CI
+      // cache can contain the archive without the executable; clear that stale
+      // folder before reinstalling so prerendering cannot silently disappear.
+      execSync("printf 'yes\\n' | npx puppeteer browsers clear", { stdio: 'inherit' });
       execSync('npx puppeteer browsers install chrome', { stdio: 'inherit' });
       browser = await puppeteer.launch({ headless: true, args });
       console.log('[prerender] Chrome installed and launched successfully.');
@@ -294,7 +301,7 @@ async function main() {
 
   let okCount = 0;
   const failed = [];
-  for (const route of allRoutes) {
+  for (const route of routesToSnapshot) {
     try {
       const html = await snapshotRoute(browser, route);
       const outPath = await writeSnapshot(route, html);
@@ -312,7 +319,7 @@ async function main() {
   server.close();
 
   console.log(
-    `[prerender] Done. ${okCount}/${allRoutes.length} routes snapshotted.`
+    `[prerender] Done. ${okCount}/${routesToSnapshot.length} routes snapshotted.`
   );
   if (failed.length > 0) {
     console.warn(`[prerender] ${failed.length} route(s) failed:`);
