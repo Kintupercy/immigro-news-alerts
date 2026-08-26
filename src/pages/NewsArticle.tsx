@@ -7,6 +7,7 @@ import SEO from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Clock, ShieldAlert } from "lucide-react";
+import type { ReactNode } from "react";
 import { format } from "date-fns";
 
 interface NewsArticleRecord {
@@ -28,8 +29,53 @@ function cleanText(value: string | null | undefined) {
   return (value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function paragraphs(value: string) {
-  return value.split(/\n\s*\n|\r\n\s*\r\n/).map((p) => cleanText(p)).filter(Boolean);
+function stripMarkdown(value: string) {
+  return value.replace(/^#{1,6}\s+/, "").replace(/^[-*]\s+/, "").replace(/\*\*/g, "").trim();
+}
+
+function renderInline(value: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const linkPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = linkPattern.exec(value)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(value.slice(lastIndex, match.index).replace(/\*\*/g, ""));
+    }
+    nodes.push(
+      <a key={`${match[2]}-${match.index}`} href={match[2]} target="_blank" rel="noopener noreferrer">
+        {match[1]}
+      </a>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < value.length) nodes.push(value.slice(lastIndex).replace(/\*\*/g, ""));
+  return nodes;
+}
+
+function renderNewsContent(value: string) {
+  const blocks = value.split(/\n\s*\n|\r\n\s*\r\n/).map((p) => p.trim()).filter(Boolean);
+  return blocks.map((block, index) => {
+    if (/^##\s+/.test(block)) {
+      return <h2 key={index}>{stripMarkdown(block)}</h2>;
+    }
+    const lines = block.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    if (lines.length > 0 && lines.every((line) => /^[-*]\s+/.test(line))) {
+      return (
+        <ul key={index}>
+          {lines.map((line, i) => <li key={i}>{renderInline(stripMarkdown(line))}</li>)}
+        </ul>
+      );
+    }
+    if (lines.length > 0 && lines.every((line) => /^\d+\.\s+/.test(line))) {
+      return (
+        <ol key={index}>
+          {lines.map((line, i) => <li key={i}>{renderInline(line.replace(/^\d+\.\s+/, "").replace(/\*\*/g, ""))}</li>)}
+        </ol>
+      );
+    }
+    return <p key={index}>{renderInline(block.replace(/\s+/g, " ").trim())}</p>;
+  });
 }
 
 const NewsArticle = () => {
@@ -57,7 +103,7 @@ const NewsArticle = () => {
 
   const url = `${SITE}/news/${article.id}`;
   const description = cleanText(article.summary || article.content).slice(0, 155);
-  const body = paragraphs(article.content);
+  const body = renderNewsContent(article.content);
   const modified = article.updated_at || article.published_at;
   const schema = {
     "@context": "https://schema.org",
@@ -101,9 +147,7 @@ const NewsArticle = () => {
           </div>
           <h1 className="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl">{article.title}</h1>
           {article.summary && <p className="mt-5 text-xl leading-relaxed text-gray-600">{cleanText(article.summary)}</p>}
-          <div className="prose prose-lg mt-8 max-w-none text-gray-700">
-            {body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-          </div>
+          <div className="prose prose-lg mt-8 max-w-none text-gray-700">{body}</div>
           {article.source_url && <div className="mt-8 border-t pt-5"><p className="text-sm text-gray-600">Source: ImmigroNews aggregates and links to the original reporting.</p><Button asChild className="mt-3"><a href={article.source_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="mr-2 h-4 w-4" /> Read original source</a></Button></div>}
           <p className="mt-8 border-t pt-5 text-sm text-gray-500">This is general immigration news, not legal advice. For advice about your situation, consult a licensed immigration attorney.</p>
         </article>

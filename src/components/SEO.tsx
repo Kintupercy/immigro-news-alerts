@@ -50,10 +50,10 @@ const SEO = ({
   const IMAGE_BASE = 'https://immigronews.com';
   const fullImageUrl = image.startsWith('http') ? image : `${IMAGE_BASE}${image}`;
 
-  // Enhanced description for SEO
-  const enhancedDescription = type === 'article' 
-    ? `${description} Expert immigration guidance, step-by-step processes, and latest updates from trusted immigration professionals.`
-    : description;
+  // Keep article descriptions factual and source-specific. Appending generic
+  // marketing copy makes news cards less trustworthy and can push the actual
+  // summary past social/search preview limits.
+  const enhancedDescription = description.replace(/\s+/g, ' ').trim().slice(0, 180);
 
   return (
     <Helmet>
