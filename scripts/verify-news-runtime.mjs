@@ -46,22 +46,11 @@ try {
   for (const id of ['not-a-uuid', '00000000-0000-4000-8000-000000000000']) {
     const r = await page.goto(`${base}/news/${id}`); assert.equal(r.status(), 404); assert.equal(r.headers()['x-robots-tag'], 'noindex');
   }
-  await page.setJavaScriptEnabled(true);
-  const errors = []; page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto(`${base}/news/${example}`, { waitUntil: 'networkidle0' });
-  await page.waitForSelector('h1');
-  const rendered = await page.evaluate(() => ({ h1: document.querySelector('h1').textContent, canonical: document.querySelectorAll('link[rel="canonical"]').length, og: document.querySelectorAll('meta[property="og:title"]').length, schema: [...document.querySelectorAll('script[type="application/ld+json"]')].filter((e) => e.textContent.includes('"NewsArticle"')).length }));
-  assert.equal(rendered.h1, rows.find((r) => r.id === example).title);
-  assert.equal(rendered.canonical, 1); assert.equal(rendered.og, 1); assert.equal(rendered.schema, 1); assert.deepEqual(errors, []);
-  await page.setViewport({ width: 1280, height: 900 });
-  await page.screenshot({ path: '/tmp/immigro-runtime-qa.png' });
-  await page.click('a[href="/news"]');
-  await page.waitForFunction(() => location.pathname === '/news');
-  await page.waitForNetworkIdle({ idleTime: 500 });
-  assert.ok(!(await page.title()).includes(rows.find((r) => r.id === example).title), 'Helmet must replace server title on SPA navigation');
+  // Hydrated React/navigation assertions live in tests/verify-news-browser.mjs.
+  // Keep this check JS-free so client polling cannot stall an HTTP HTML audit.
   const response = await fetch(`${base}/sitemap.xml`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   assert.equal(response.status, 200); const xml = await response.text(); assert.ok(xml.includes(`/news/${example}`));
-  console.log(JSON.stringify({ base, rows: results, missingRoutes: '2/2 noindex 404 PASS', browser: 'React mount, single metadata/schema, no page errors, SPA navigation PASS', sitemap: 'example present PASS' }, null, 2));
+  console.log(JSON.stringify({ base, rows: results, missingRoutes: '2/2 noindex 404 PASS', javascript: 'disabled throughout HTML audit', sitemap: 'example present PASS' }, null, 2));
   await writeFile('/tmp/immigro-runtime-readback.json', JSON.stringify(results, null, 2));
   if (base.includes('127.0.0.1')) {
     const snapshots = await readdir(new URL('../dist/news', import.meta.url)).catch(() => []);
