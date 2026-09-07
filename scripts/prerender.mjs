@@ -64,27 +64,6 @@ async function fileExists(p) {
   }
 }
 
-async function fetchNewsIds() {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return [];
-  try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
-    const { data, error } = await supabase
-      .from('immigration_news')
-      .select('id')
-      .eq('status', 'published')
-      .not('source_url', 'is', null)
-      .limit(1000);
-    if (error) {
-      console.warn(`[prerender] Could not fetch immigration_news ids: ${error.message}`);
-      return [];
-    }
-    return (data || []).map((row) => row?.id).filter((id) => typeof id === 'string' && id.length > 0);
-  } catch (err) {
-    console.warn(`[prerender] Unexpected error fetching news ids: ${err?.message || err}`);
-    return [];
-  }
-}
-
 async function fetchBlogSlugs() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.warn(
@@ -244,12 +223,12 @@ async function main() {
 
   console.log('[prerender] Fetching dynamic blog slugs from Supabase...');
   const blogSlugs = await fetchBlogSlugs();
-  const newsIds = await fetchNewsIds();
-  console.log(`[prerender] Found ${blogSlugs.length} published blog slug(s) and ${newsIds.length} published news article id(s).`);
+  // News detail HTML is served by functions/news/[id].js at request time.
+  // Only static pages and blog slugs remain build-time snapshots.
+  console.log(`[prerender] Found ${blogSlugs.length} published blog slug(s); news details use runtime rendering.`);
 
   const blogRoutes = blogSlugs.map((slug) => `/blog/${slug}`);
-  const newsRoutes = newsIds.map((id) => `/news/${id}`);
-  const allRoutes = [...STATIC_ROUTES, ...blogRoutes, ...newsRoutes];
+  const allRoutes = [...STATIC_ROUTES, ...blogRoutes];
   const routesToSnapshot = process.env.PRERENDER_ROUTE
     ? [process.env.PRERENDER_ROUTE]
     : allRoutes;
