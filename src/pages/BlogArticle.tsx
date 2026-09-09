@@ -234,7 +234,7 @@ const BlogArticle = () => {
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Article",
+            "@type": "BlogPosting",
             "headline": article.title,
             "description": article.excerpt,
             "image": article.featured_image || "https://immigronews.com/og-image.jpg",
@@ -339,17 +339,20 @@ const BlogArticle = () => {
         </div>
 
         {/* Article Footer */}
-        <footer className="mt-8 lg:mt-12 pt-6 lg:pt-8 border-t border-gray-200">
+        <footer className="mt-8 lg:mt-12 pt-6 lg:pt-8 border-t border-gray-200 space-y-4">
+          <p className="text-sm text-gray-500">
+            This is general immigration information, not legal advice. For advice about your situation, consult a licensed immigration attorney or DOJ-accredited representative.
+          </p>
           <div className="bg-gray-50 rounded-lg p-4 lg:p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Need Help With Your Immigration Case?
+              Need Help Understanding the Next Step?
             </h3>
             <p className="text-gray-600 mb-4 text-sm lg:text-base">
-              Get expert guidance and personalized assistance with your immigration journey.
+              Use ImmigroNews to track official updates and know what to check before you act.
             </p>
             <Button asChild className="w-full sm:w-auto">
               <Link to="/contact">
-                Contact an Immigration Expert
+                Contact ImmigroNews
               </Link>
             </Button>
           </div>

@@ -5,69 +5,75 @@
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
     <loc>https://immigronews.com/</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://immigronews.com/news</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://immigronews.com/blog</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://immigronews.com/faq</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://immigronews.com/signup</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://immigronews.com/resources</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://immigronews.com/about</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://immigronews.com/contact</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://immigronews.com/privacy</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://immigronews.com/terms</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://immigronews.com/disclaimer</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/blog/f1-duration-of-status-ends-2026-what-to-know</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://immigronews.com/blog/can-tps-holders-apply-for-green-card</loc>
@@ -100,7 +106,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://immigronews.com/blog/why-google-news-doesnt-work-for-immigration-changes</loc>
+    <loc>https://immigronews.com/blog/immigronews-immigration-news-for-international-students</loc>
     <lastmod>2026-04-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -124,7 +130,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://immigronews.com/blog/immigronews-immigration-news-for-international-students</loc>
+    <loc>https://immigronews.com/blog/why-google-news-doesnt-work-for-immigration-changes</loc>
     <lastmod>2026-04-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -215,24 +221,12 @@
   </url>
   <url>
     <loc>https://immigronews.com/blog/options-after-opt-expires</loc>
-    <lastmod>2025-06-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://immigronews.com/blog/marriage-green-card-interview-guide</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://immigronews.com/blog/us-citizenship-application-guide</loc>
-    <lastmod>2026-07-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://immigronews.com/blog/green-card-processing-times-2026</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -250,8 +244,8 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://immigronews.com/blog/check-uscis-case-status-online</loc>
-    <lastmod>2026-08-01</lastmod>
+    <loc>https://immigronews.com/blog/green-card-processing-times-2026</loc>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -262,8 +256,494 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://immigronews.com/blog/marriage-green-card-interview-guide</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/blog/check-uscis-case-status-online</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/d275c130-d89e-40ae-98bf-418c1ce75a38</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/4573936d-1b07-4288-aa2e-98e4bb845a2d</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/d33a4658-9a56-4cd2-94d9-aa943f10c682</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/657f81de-dd0f-4561-8a52-f36b46b16eec</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/1e4f97e9-67a5-4815-b45d-e5b1e4a505ad</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/e1af1212-b306-4d58-a7d5-6c8bd94ca75e</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/95b0f065-9a49-4fb9-b7c0-7f67057675d8</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/cfdcf323-b634-4e59-8ba4-811e9ec5fc14</loc>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/00beced9-d327-41c9-99ea-dd5a1620b386</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/b7ffc78c-61a6-4c2e-a270-24a0fb193d3b</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/614cfc0b-d5dd-4ae1-b65b-0c89887e2f41</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/b111ea4a-b2a4-41e8-b26f-2c847ba7b686</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/cbd6b62c-8e43-4dcb-b1c4-07df46c6956a</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/f888684d-8945-4027-8e59-50d80dcb863b</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/26e46b75-57ba-413f-ba67-93ef4ad8d033</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/87949cea-d001-41e3-a08d-f0eb24457fa6</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/8584ef3f-3cdb-4924-9141-bebf39eb7238</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/f20e046c-a082-4176-b234-4bb5b348f897</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/a75bd2dd-b903-425f-92b6-2ee22c19501a</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/4236ebff-bf8d-48b4-9575-8a4f3b2228c3</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/209445f0-f449-4446-9de8-36cf8eaba0d3</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/c0dabbba-3dfe-4b49-9df5-01fb17dc80a0</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/02890f42-7e97-4d9b-b74e-50b10ce57274</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/a68ff78a-d252-4b69-ad9b-c07b8752f31e</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/22da47d6-9b1d-4f51-96b5-658075753c49</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/082f3ca7-eff9-4059-9ab1-adc4230927ca</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/ea8ab943-5ea0-4e9f-9acd-5e0cfec66b25</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/cd8842c2-d2db-4682-ba77-279851044165</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/edd98e7f-9817-42e8-a26a-014b39a9b012</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/1957b425-70a8-46eb-8ee0-994976010699</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/d50d2521-6713-46ff-8f46-e3a67dcd2a86</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/b6558b4a-d3be-4a8b-82db-2a37eebd7187</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/cda8acaf-52dd-4fb1-a098-c28ffa5f292e</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/ba6bc407-6445-482b-b96b-be6f6a02ea71</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/8e00ba63-e51f-4498-9b9e-39e4fbfbffda</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/02ad7d97-f9d0-465f-bc15-8231a1e09840</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/f0f25ccb-7ff7-4010-b523-de57fb0690f0</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/572dcbf0-4d7d-4912-801f-359a5232f1af</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/9016bebc-280b-42be-a1ff-3b2a08e20ef6</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/87cea8e6-4374-44a9-8000-e360a4c37e87</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/3e2f1e25-886d-46cf-b36e-67bccbeb85d3</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/e5b920e7-1071-4609-b554-7e7d1607cae9</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/4fbb8e95-a006-44ec-be0c-6c6003f573d5</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/a9d144da-6d37-4d31-b667-8160d00bcd5b</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/482a51f6-9d1f-4ece-8dba-4f38ec177a1a</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/613a5a8e-a1c4-414d-8191-ed3ca9843af7</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/576a9aa1-4763-487b-a1ef-65439b36098e</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/8aa4cb4b-14ce-4837-b828-f6699fdbabc9</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/ec30ba57-42f9-4453-a89f-f4beb8fb6880</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/a14e6227-5618-4b98-9387-6ce8e4afc156</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/a2ff03a4-acb6-4cb3-9a78-611ecc2c9a8e</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/c2719d03-2fc1-4845-a494-ef9a3aed0629</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/a8196aa4-cecb-40d3-ab32-3e7b0cadb797</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/229050c9-055a-43db-ad6d-33940a741211</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/8eace824-1e43-423c-a9f3-737486f624aa</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/2f645903-7388-49aa-b167-9d3dd6cfa636</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/aa160e88-6f19-485b-a65c-535a965b97a7</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/3e4b43fa-4fa9-4b6f-a61c-99c7744cb45c</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/54a27820-3ba9-4844-a8fe-56ee91fcd4cc</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/6fc7f4ec-ecec-41b7-85c5-a9776571e461</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/8316cab5-6185-4ec4-bea3-eb733065a017</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/d2c25993-087a-4ef2-b6bf-44b294bdc592</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/c01b9804-1b49-4a3b-a530-8bb016fbde4b</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/e2553207-a6d6-4411-9987-8c1c36659781</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/2694bffa-3502-4b8e-bcd7-149577ce0596</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/69832014-cbf1-42d9-86fb-2364cdb84ebc</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/83fe83b1-5a28-4f7d-95e3-ca76492ad8eb</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/7495d855-223f-47da-9850-bf948d46dad1</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/051081e5-6488-4c0c-a5ca-b80c8c02dd34</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/9383af26-2d4e-43d1-99a1-f624c278e4bf</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/450e3370-3ee4-4e3c-b380-86223cccdb24</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/78a1082b-cd89-4935-9e0e-8875bb8b2ec0</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/2a730dfb-7884-4a8d-855b-f0f9c370ef61</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/2b3ff636-79be-4d16-878a-da8285a12be7</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/ccc24aa4-a1f4-494b-aff4-1c68c3646628</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/57d9c9eb-172f-4545-9072-411896b5b6a6</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/8b98d7cc-c30e-4786-93b8-97ebf6d830ed</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/bbc41ee1-1536-43ba-a939-3cab2a163d72</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://immigronews.com/news/cb675888-cddb-4299-bedd-fb67fa4e48d9</loc>
     <lastmod>2026-08-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/e95c0c76-658b-43b5-8f9e-b36a53a213c4</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -280,14 +760,26 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://immigronews.com/news/1da8e3c1-97f9-4073-9e94-eb374e5eb84e</loc>
+    <loc>https://immigronews.com/news/45a88edf-64fc-4059-8dc2-15c89e834684</loc>
     <lastmod>2026-08-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://immigronews.com/news/45a88edf-64fc-4059-8dc2-15c89e834684</loc>
-    <lastmod>2026-08-25</lastmod>
+    <loc>https://immigronews.com/news/69618a5d-bde4-4a6c-b05b-8e7530596422</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/6aa2941c-6cd4-436d-8e08-61088c816e08</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/d207ee65-0b98-4b10-a95a-72f5c4cdc1b9</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -635,7 +1127,7 @@
   </url>
   <url>
     <loc>https://immigronews.com/news/187097e7-2c3f-4bd2-91b2-141ae5f732be</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2610,18 +3102,6 @@
   <url>
     <loc>https://immigronews.com/news/ec31e7d7-a870-4874-8980-156da42c9c5d</loc>
     <lastmod>2026-03-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://immigronews.com/news/0731f6c2-8379-43c8-89d2-b0614b81fcf4</loc>
-    <lastmod>2026-03-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://immigronews.com/news/eff61c1b-1032-4fe6-b959-44e37b27018f</loc>
-    <lastmod>2026-03-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
