@@ -2,36 +2,190 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
-    <loc>https://immigronews.com/news/d275c130-d89e-40ae-98bf-418c1ce75a38</loc>
+    <loc>https://immigronews.com/news/897e8ff6-671b-4541-99d7-d64fcfce06d8</loc>
     <news:news>
       <news:publication>
         <news:name>ImmigroNews</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>2026-09-08T17:58:55.000Z</news:publication_date>
-      <news:title>Trump administration asks Supreme Court to allow use of citizenship database</news:title>
+      <news:publication_date>2026-10-01T19:53:34.000Z</news:publication_date>
+      <news:title>Renee Good’s Family Sues ICE Agent and Trump Officials Over Minnesota Killing</news:title>
     </news:news>
   </url>
   <url>
-    <loc>https://immigronews.com/news/4573936d-1b07-4288-aa2e-98e4bb845a2d</loc>
+    <loc>https://immigronews.com/news/db2fc452-fa35-4398-9270-7e15d9781dd9</loc>
     <news:news>
       <news:publication>
         <news:name>ImmigroNews</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>2026-09-07T13:27:00.000Z</news:publication_date>
-      <news:title>Drone activity at border drops 75% after U.S. uses laser weapon, military says</news:title>
+      <news:publication_date>2026-10-01T18:59:15.000Z</news:publication_date>
+      <news:title>Amber Guyger, ex-police officer, granted parole after Botham Jean murder conviction</news:title>
     </news:news>
   </url>
   <url>
-    <loc>https://immigronews.com/news/d33a4658-9a56-4cd2-94d9-aa943f10c682</loc>
+    <loc>https://immigronews.com/news/062163e2-3354-4662-8c28-732fea1dfa02</loc>
     <news:news>
       <news:publication>
         <news:name>ImmigroNews</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>2026-09-07T13:18:47.000Z</news:publication_date>
-      <news:title>Sherrill anti-ICE policy hammered after fleeing migrant driver injures Dem mayor’s wife</news:title>
+      <news:publication_date>2026-10-01T18:47:40.000Z</news:publication_date>
+      <news:title>Matter of SETHI, 30 I&amp;N Dec. 112 (BIA 2026) - Department of Justice (.gov)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/3cd67e3c-c8a6-4ae9-8893-e00f6d9c0f51</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T18:32:25.000Z</news:publication_date>
+      <news:title>Former Immigration Officer Sentenced to a Year and a Day in Prison for Accepting $6,000 Bribe - Department of Justice (.gov)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/42bc9455-1608-4741-932b-37cce0a1efae</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T11:29:01.000Z</news:publication_date>
+      <news:title>Illegal alien from Peru passes away in ICE custody in Louisiana - ICE | U.S. Immigration and Customs Enforcement (.gov)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/ac94e001-22cc-4797-8b5c-98fe6fd2181f</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T11:27:00.000Z</news:publication_date>
+      <news:title>Judge keeps DoorDash driver shot by ICE behind bars for alleged assault</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/1d9220c7-c43e-4d6e-8a90-cafe36e9886b</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T09:00:48.000Z</news:publication_date>
+      <news:title>Teen&apos;s tragic killing by illegal immigrant becomes flashpoint in battle for control of Congress</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/763e7478-283e-4613-aea5-134d6da80065</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T04:00:00.000Z</news:publication_date>
+      <news:title>Fiscal Year 2027 Inflation Adjustment to H.R. 1 Immigration Fees</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/4863b73b-268a-4c07-a0f1-76fa796f126b</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T04:00:00.000Z</news:publication_date>
+      <news:title>Certain DHS Immigration-Related Fees Required by HR-1: Fiscal Year 2027 Adjustments for Inflation</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/1f3dbadf-4431-4bee-9b9f-19a583b6d9e4</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T00:19:35.000Z</news:publication_date>
+      <news:title>ICE arrests illegal alien accused of sexually assaulting children after Fairfax County release: DHS</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/63e46c60-b885-4f5e-9444-04050ef50ac3</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T22:02:36.000Z</news:publication_date>
+      <news:title>Biden Afghan migrant program hit with 40% vetting failure rate: &apos;Alarming&apos;</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/06459d5a-6169-4fa5-b63c-e0486e947cc9</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T18:06:49.000Z</news:publication_date>
+      <news:title>Blanche announces charges against 10 permanent residents accused of Minnesota voter fraud</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/f9734f75-047d-4c3d-9220-c899580bfe9a</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T17:47:59.000Z</news:publication_date>
+      <news:title>Republican glee erupts as White House boasts sharp decline in immigration from Muslim-majority nations</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/30ea3e51-6366-465a-9dab-66362e161fe9</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T16:58:35.000Z</news:publication_date>
+      <news:title>Untitled - Department of Justice (.gov)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/63538158-efac-4fb2-bb88-3b83ef8ba217</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T15:51:27.000Z</news:publication_date>
+      <news:title>Justice Department Announces Arrest and Arraignment of Two Illegal Aliens on Federal Immigration Charges and Failure to Register as a Sex Offender - Department of Justice (.gov)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/471e43a8-6609-4adb-baa3-ab90a2683119</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T14:57:00.000Z</news:publication_date>
+      <news:title>Justice Department Files Judicial Misconduct Complaint Alleging MN Judges Made Improper and Unethical Comments to the New York Times - Department of Justice (.gov)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://immigronews.com/news/6e3dc6fa-f882-4176-9da4-3c14df5f37b9</loc>
+    <news:news>
+      <news:publication>
+        <news:name>ImmigroNews</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T13:18:11.000Z</news:publication_date>
+      <news:title>USCIS Announces FY 2027 Inflation Increase for Certain Immigration-Related Fees - USCIS (.gov)</news:title>
     </news:news>
   </url>
 </urlset>
